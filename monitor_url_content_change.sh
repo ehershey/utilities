@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 mailto=ernie.hershey@10gen.com
 
@@ -18,10 +18,10 @@ do
   tempfile=$tempfile_pattern-$safeurl
   tempfile_last=$tempfile_pattern-$safeurl.last
   curl --location --silent $url > $tempfile
-  md5="`cat $tempfile| grep -vE 'ATLassian-token|confluence-request-time' | md5`"
+  md5="`cat $tempfile| grep -vE 'atlassian-token|confluence-request-time' | md5`"
   if [ -e $tempfile_last ]
   then
-    md5_last="`cat $tempfile_last| grep -vE 'ATLassian-token|confluence-request-time' | md5`"
+    md5_last="`cat $tempfile_last| grep -vE 'atlassian-token|confluence-request-time' | md5`"
 
     if [ $md5 != $md5_last ]
     then
@@ -29,6 +29,8 @@ do
       echo $subject
       mail_tempfile=`mktemp $tempfile_patterh.XXXXX`
       echo -n > $mail_tempfile
+      echo -e "\n\n\ncontent diff:\n\n\n" >> $mail_tempfile
+      diff $tempfile_last $tempfile >> $mail_tempfile
       echo -e "\n\n\nlatest content:\n\n\n" >> $mail_tempfile
       cat $tempfile >> $mail_tempfile
       echo -e "\n\n\nprevious content:\n\n\n" >> $mail_tempfile
