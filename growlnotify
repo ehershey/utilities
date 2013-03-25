@@ -2,6 +2,12 @@
 #
 # convert growlnotify command line parameters to terminal-notifier gem options
 #
+# Real growlnotify:
+# http://growl.info/extras.php
+#
+# terminal-notifier gem:
+# https://github.com/alloy/terminal-notifier
+#
 # pre-requisites:
 # terminal-notifier gem (install with: gem install terminal-notifier --verbose --bindir=/usr/local/bin)
 #
