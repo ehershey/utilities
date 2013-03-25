@@ -43,8 +43,17 @@ do
     title="$1"
     shift
   else
-    echo "Unknown option: $1"
-    exit -2
+    # add a space if there's text in the title already 
+    #
+    if [ "$title" ]
+    then
+      title="$title "
+    fi
+
+    # add extra arguments to title
+    #
+    title="$title$1"
+    shift
   fi
 done
 if [ "$message" ]
