@@ -2,6 +2,9 @@
 #
 # convert growlnotify command line parameters to terminal-notifier gem options
 #
+# pre-requisites:
+# terminal-notifier gem (install with: gem install terminal-notifier --verbose --bindir=/usr/local/bin)
+#
 # sample growlnotify calls:
 # git/docs//build/makefile.delegated:     @-growlnotify -n "mongodb-doc-build" -a "Terminal.app" -m build complete -t master stage
 # git/docs//build/makefile.sphinx:        @-growlnotify -n "mongodb-doc-build" -a "Terminal.app" -m Sphinx -t Build in progress past critical phase.
@@ -13,5 +16,35 @@
 
 message=""
 title=""
-subtitle=""
+subtitle="" # ignored
+appname="" # ignored
+iconapp="" # ignored
 
+while [ "$1" ]
+do
+  if [ "$1" = "-n" ]
+  then
+    shift
+    appname="$1"
+    shift
+  elif [ "$1" = "-a" ]
+  then
+    shift
+    iconapp="$1"
+    shift
+  elif [ "$1" = "-m" ]
+  then
+    shift
+    message="$1"
+    shift
+  elif [ "$1" = "-t" ]
+  then
+    shift
+    title="$1"
+    shift
+  else
+    echo "Unknown option: $1"
+    exit -2
+  fi
+done
+terminal-notifier -message "$message" -title "$title" 
