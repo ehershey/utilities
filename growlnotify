@@ -47,4 +47,7 @@ do
     exit -2
   fi
 done
-terminal-notifier -message "$message" -title "$title" 
+if [ "$message" ]
+then
+    terminal-notifier -message "$message" -title "$title" 
+fi
