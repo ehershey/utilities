@@ -1,0 +1,17 @@
+#!/bin/sh
+#
+# convert growlnotify command line parameters to terminal-notifier gem options
+#
+# sample growlnotify calls:
+# git/docs//build/makefile.delegated:     @-growlnotify -n "mongodb-doc-build" -a "Terminal.app" -m build complete -t master stage
+# git/docs//build/makefile.sphinx:        @-growlnotify -n "mongodb-doc-build" -a "Terminal.app" -m Sphinx -t Build in progress past critical phase.
+# 
+# sample terminal-notifier call:
+#
+# /usr/local/Cellar/ruby/1.9.3-p385/lib/ruby/gems/1.9.1/gems/terminal-notifier-1.4.2/bin/terminal-notifier -message 'message' -title 'title' -subtitle subtitle
+#
+
+message=""
+title=""
+subtitle=""
+
