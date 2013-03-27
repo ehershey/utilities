@@ -1,6 +1,26 @@
 #!/usr/bin/python
+#
+# mapmyfitness.py
+#
+# handle oauth for mapmyfitness and call authenticated api url's such as:
+#
+# http://api.mapmyfitness.com/3.1/users/get_user
+# http://api.mapmyfitness.com/3.1/workouts/get_workouts
+#
+# usage: mapmyfitness.py <url>
+#
+# Script will try to open a web browser for authentication, storing oauth
+# tokens for re-use once retrieved in $HOME/.mapmyfitness_tokens.json
+#
+# Requires mapmyfitness_apikeys.py file in path with api keys in the form:
+#
+# consumer_key = u"xxx"
+# secret_key = u"xxx"
+#
+
 from __future__ import unicode_literals
 
+import argparse
 import io
 import json
 import urlparse
@@ -15,7 +35,12 @@ import webbrowser
 
 import mapmyfitness_apikeys
 
-tokenfilename = "mapmyfitness_tokens.json"
+
+parser = argparse.ArgumentParser()
+parser.add_argument("url", help="URL to access" )
+args = parser.parse_args()
+
+tokenfilename = os.getenv("HOME") + "/.mapmyfitness_tokens.json"
 token_credentials = None
 
 if os.path.exists(tokenfilename):
@@ -32,7 +57,7 @@ if token_credentials is None or  len(token_credentials) != 2:
 
   temporary_credentials_url = 'http://api.mapmyfitness.com/3.1/oauth/request_token'
 
-  callback_uri = 'http://127.0.0.1:12345/'
+  callback_uri = 'http://' + os.uname()[1] +':12345/'
 
   oauth = OAuth1(client_key, client_secret=client_secret, callback_uri=callback_uri, signature_type='BODY')
   
@@ -54,6 +79,7 @@ if token_credentials is None or  len(token_credentials) != 2:
       self.send_response(200, 'OK')
       self.send_header('Content-Type', 'text/html')
       self.end_headers()
+      self.wfile.write("Authorization received");
       self.server.path = self.path
   
   server_address = (urlparse.urlparse(callback_uri).hostname, urlparse.urlparse(callback_uri).port)
@@ -91,21 +117,13 @@ if token_credentials is None or  len(token_credentials) != 2:
 
 
 
-resource_url = 'http://api.mapmyfitness.com/3.1/users/get_user'
+
 
 
 
 
 oauth = OAuth1(client_key, client_secret, unicode(token_credentials['oauth_token'][0]), unicode(token_credentials['oauth_token_secret'][0]), signature_type='QUERY')
 
-r = requests.get(url=resource_url, auth=oauth)
+r = requests.get(url=args.url, auth=oauth)
 
-# user object:
-#
-print(r.content)
-
-r = requests.get(url='http://api.mapmyfitness.com/3.1/workouts/get_workouts', auth=oauth)
-
-# workouts:
-#
 print(r.content)
