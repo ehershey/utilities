@@ -1,5 +1,6 @@
 #!/bin/bash
 
+#mailto=devops@10gen.com
 mailto=ernie.hershey@10gen.com
 
 urls="
@@ -18,10 +19,10 @@ do
   tempfile=$tempfile_pattern-$safeurl
   tempfile_last=$tempfile_pattern-$safeurl.last
   curl --location --silent $url > $tempfile
-  md5="`cat $tempfile| grep -vE 'atlassian-token|confluence-request-time' | md5`"
+  md5="`cat $tempfile| grep -vE 'theme_token|build_id|dom-id|atlassian-token|confluence-request-time' | md5`"
   if [ -e $tempfile_last ]
   then
-    md5_last="`cat $tempfile_last| grep -vE 'atlassian-token|confluence-request-time' | md5`"
+    md5_last="`cat $tempfile_last| grep -vE 'theme_token|build_id|dom-id|atlassian-token|confluence-request-time' | md5`"
 
     if [ $md5 != $md5_last ]
     then
