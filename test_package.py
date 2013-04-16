@@ -40,8 +40,9 @@ timeout = 60
 
 inst = res.instances[0]
 
-timestamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
-instance_name = "package-test-%s" % timestamp;
+start_time = datetime.datetime.now()
+timestamp_string = start_time.strftime("%Y%m%d%H%M%S")
+instance_name = "package-test-%s" % timestamp_string;
 
 inst.add_tag("Name",instance_name)
 inst.update();
@@ -49,12 +50,17 @@ inst.update();
 print "instance name: %s" % instance_name
 print "instance state: %s" % inst.state
 
-while inst.state == 'pending':
+
+elapsed_seconds = (datetime.datetime.now() - start_time).seconds
+
+while inst.state == 'pending' and elapsed_seconds <= timeout:
   time.sleep(2)
   inst.update()
   print "instance state: %s" % inst.state
+  elapsed_seconds = (datetime.datetime.now() - start_time).seconds
 
+print "%d seconds elapsed" % elapsed_seconds
 if inst.state != 'running':
-  print "Unknown instance state after %d seconds elapsed: %s" % (elapsed_seconds, inst.state)
+  print "Unknown instance state: %s" % inst.state
 print "connecting..."
 
