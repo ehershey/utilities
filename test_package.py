@@ -4,8 +4,6 @@ import datetime
 import os
 import time
 
-repo_base_url = 'http:#downloads-distro.mongodb.org/repo/'
-
 # parms for ec2 instance
 #
 # debian squeeze 
