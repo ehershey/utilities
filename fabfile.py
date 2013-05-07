@@ -1,3 +1,11 @@
+# Fabric tasks for setting up a custom repo in redhat, centos, fedora, debian, or ubuntu, 
+# installing mongodb package and verifying the state of the system after installing it
+#
+# usage:
+#
+# fab setuprepo installpackage verifypackage uninstallpackage
+#
+#
 from fabric.api import env, run, sudo
 import fabric.utils
 
