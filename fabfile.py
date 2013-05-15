@@ -10,19 +10,19 @@ from fabric.api import env, run, sudo
 import fabric.utils
 
 # redhat
-env['hosts'] = [ 'ec2-23-22-42-53.compute-1.amazonaws.com' ]
+env['hosts'] = [ 'ec2-50-16-106-231.compute-1.amazonaws.com' ]
 env['user'] = 'ec2-user'
 init_script_name = "mongod"
 init_service_name = "mongod"
 pre_repo_cmd = None
 repo_string = """[10gen] 
 name=10gen Repository 
-baseurl=http://downloads-distro.mongodb.org/repo/redhat/os/x86_64 
+baseurl=http://temp-ubuntu1204-7.10gen.cc/downloads-distro.mongodb.org/repo/redhat/os/x86_64 
 gpgcheck=0 
 enabled=1"""
 repo_file = "/etc/yum.repos.d/10gen.repo"
-post_repo_cmd = None
-packages="mongo-10gen mongo-10gen-server"
+post_repo_cmd = "yum --quiet makecache"
+packages="mongo-10gen-unstable mongo-10gen-unstable-server"
 # full commands to install/uninstall packages with string replaced by packages setting above
 #
 install_cmd = "yum install --assumeyes --quiet %s"
@@ -36,7 +36,7 @@ uninstall_cmd = "yum --assumeyes --quiet remove %s"
 #init_script_name = "mongodb"
 #init_service_name = "mongodb"
 #pre_repo_cmd = "apt-key adv --keyserver keyserver.ubuntu.com --recv 7F0CEB10"
-#repo_string = "deb http://downloads-distro.mongodb.org/repo/debian-sysvinit dist 10gen"
+#repo_string = "deb http://temp-ubuntu1204-7.10gen.cc.downloads-distro.mongodb.org/repo/debian-sysvinit dist 10gen"
 #repo_file = "/etc/apt/sources.list.d/10gen.list"
 #post_repo_cmd = "apt-get --quiet --quiet --no-download update"
 #packages="mongodb-10gen"
@@ -103,3 +103,5 @@ def is_mongod_running():
       return True
     else:
       return False
+
+

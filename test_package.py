@@ -8,6 +8,7 @@ import time
 #
 # debian squeeze 
 #
+# label = 'debian squeeze'
 # ami_id = 'ami-8568efec'
 # region = 'us-east-1'
 # key_name = 'admin1'
@@ -16,6 +17,7 @@ import time
 
 # rhel 6.4
 #
+label = 'rhel 64'
 ami_id = 'ami-f6f16b9f'
 region = 'us-east-1'
 key_name = 'admin1'
@@ -48,7 +50,7 @@ inst = res.instances[0]
 
 start_time = datetime.datetime.now()
 timestamp_string = start_time.strftime("%Y%m%d%H%M%S")
-instance_name = "package-test-%s" % timestamp_string
+instance_name = "pkg-tst-%s-%s" % (label.replace(" ","_"), timestamp_string)
 
 inst.add_tag("Name",instance_name)
 inst.update()
@@ -69,5 +71,5 @@ print "%d seconds elapsed" % elapsed_seconds
 if inst.state != 'running':
   print "Unknown instance state: %s" % inst.state
 print "connecting..."
-print "dns name: " % inst.dns_name
+print "dns name: %s " % inst.dns_name
 
