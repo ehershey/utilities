@@ -1,6 +1,8 @@
 #!/usr/bin/python
 import boto.ec2
 import datetime
+from fabric.api import execute, env
+from fabfile import  setuprepo, installpackage, verifypackage, uninstallpackage
 import os
 import time
 
@@ -14,6 +16,23 @@ import time
 # key_name = 'admin1'
 # security_group = 'default'
 # instance_type = 'm1.large'
+#
+# for fab
+#env['user'] = 'admin'
+#env.init_script_name = "mongodb"
+#env.init_service_name = "mongodb"
+#env.pre_repo_cmd = "apt-key adv --keyserver keyserver.ubuntu.com --recv 7F0CEB10"
+#env.repo_String = "deb http://temp-ubuntu1204-7.10gen.cc.downloads-distro.mongodb.org/repo/debian-sysvinit dist 10gen"
+#env.repo_file = "/etc/apt/sources.list.d/10gen.list"
+#env.post_repo_cmd = "apt-get --quiet --quiet --no-download update"
+#env.packages="mongodb-10gen"
+## full commands to install/uninstall env.packages with string replaced by env.packages setting above
+##
+#env.install_cmd = "apt-get --quiet --quiet install %s"
+#env.uninstall_cmd = "apt-get --quiet --quiet purge %s"
+
+
+
 
 # rhel 6.4
 #
@@ -23,6 +42,28 @@ region = 'us-east-1'
 key_name = 'admin1'
 security_group = 'default'
 instance_type = 'm1.large'
+
+# for fab
+env['user'] = 'ec2-user'
+env.init_script_name = "mongod"
+env.init_service_name = "mongod"
+env.pre_repo_cmd = None
+env.repo_String = """[10gen] 
+name=10gen Repository 
+baseurl=http://temp-ubuntu1204-7.10gen.cc/downloads-distro.mongodb.org/repo/redhat/os/x86_64 
+gpgcheck=0 
+enabled=1"""
+env.repo_file = "/etc/yum.repos.d/10gen.repo"
+env.post_repo_cmd = "yum --quiet makecache"
+env.packages="mongo-10gen-unstable mongo-10gen-unstable-server"
+# full commands to install/uninstall env.packages with string replaced by env.packages setting above
+#
+env.install_cmd = "yum install --assumeyes --quiet %s"
+env.uninstall_cmd = "yum --assumeyes --quiet remove %s"
+
+
+
+
 
 
 AWS_ACCESS_KEY_ID = os.environ['AWS_ACCESS_KEY_ID'] 
@@ -73,3 +114,9 @@ if inst.state != 'running':
 print "connecting..."
 print "dns name: %s " % inst.dns_name
 
+env.hosts = [ inst.dns_name ]
+
+execute(setuprepo)
+execute(installpackage)
+execute(verifypackage)
+execute(uninstallpackage)
