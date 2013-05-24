@@ -6,6 +6,10 @@ from fabfile import  setuprepo, installpackage, verifypackage, uninstallpackage
 import os
 import time
 
+env.timeout = 30
+env.connection_attempts = 2
+
+
 # parms for ec2 instance
 #
 # debian squeeze 
