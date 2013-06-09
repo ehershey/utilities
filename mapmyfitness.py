@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python2.7
 #
 # mapmyfitness.py
 #
@@ -71,8 +71,13 @@ if token_credentials is None or  len(token_credentials) != 2:
   temporary_credentials = urlparse.parse_qs(r.content)
 
   authorize_url = 'https://www.mapmyfitness.com/oauth/authorize/?oauth_token=%s&oauth_callback=%s' % (temporary_credentials['oauth_token'][0], escape(callback_uri))
+
+  print "sending to url"
+  print "authorize_url: %s" % authorize_url
   
-  webbrowser.open(authorize_url)
+  if os.fork() == 0:
+    webbrowser.open(authorize_url)
+    exit()
   
   class AuthorizationHandler(BaseHTTPRequestHandler):
     def do_GET(self):
@@ -83,6 +88,8 @@ if token_credentials is None or  len(token_credentials) != 2:
       self.server.path = self.path
   
   server_address = (urlparse.urlparse(callback_uri).hostname, urlparse.urlparse(callback_uri).port)
+  print "server_address: "
+  print server_address
   httpd = HTTPServer(server_address, AuthorizationHandler)
   httpd.handle_request()
   
@@ -91,7 +98,7 @@ if token_credentials is None or  len(token_credentials) != 2:
   oauth = OAuth1(client_key, client_secret, 
       unicode(temporary_credentials['oauth_token'][0]), 
       unicode(temporary_credentials['oauth_token_secret'][0]), 
-      callback_uri='http://127.0.0.1:12345/', 
+      callback_uri=callback_uri,
       signature_type='BODY', 
       verifier=verifier_query['oauth_verifier'][0])
   token_credentials_url = 'http://api.mapmyfitness.com/3.1/oauth/access_token'
