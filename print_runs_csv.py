@@ -16,6 +16,8 @@ def print_workouts_from_json_stream(instream):
 
   for workout in workouts:
     if 'run' in workout['workout_type_name'].lower() or 'run' in workout['workout_description'].lower() :
+      # adjust date if format is weird
+      #
       print workout['workout_date'] + ',' + workout['distance']
     if 'multi' in workout['workout_type_name'].lower() or 'multi' in workout['workout_description'].lower() :
       # print 'need to get more info based on ' + workout['workout_type_name'] + ',' + workout['workout_description'] + ',' + workout['workout_id']
