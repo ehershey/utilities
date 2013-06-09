@@ -35,6 +35,23 @@ env.connection_attempts = 2
 #env.install_cmd = "apt-get --quiet --quiet install %s"
 #env.uninstall_cmd = "apt-get --quiet --quiet purge %s"
 
+# centos 5.4
+#
+label = 'centos 54'
+ami_id = 'ami-ccb35ea5'
+
+# centos 5.4 32 bit
+#
+label = 'centos 56 32'
+ami_id = 'ami-3f854656'
+
+# centos 5.4 64 bit
+#
+label = 'centos 56 64'
+ami_id = 'ami-7385461a'
+
+
+
 
 
 
