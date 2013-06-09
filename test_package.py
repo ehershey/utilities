@@ -6,8 +6,8 @@ from fabfile import  setuprepo, installpackage, verifypackage, uninstallpackage
 import os
 import time
 
-env.timeout = 30
-env.connection_attempts = 2
+env.timeout = 60
+env.connection_attempts = 5
 
 
 # parms for ec2 instance
@@ -40,15 +40,17 @@ env.connection_attempts = 2
 
 # rhel 6.4
 #
-label = 'rhel 64'
-ami_id = 'ami-f6f16b9f'
+label = 'rhel 64' ; ami_id = 'ami-f6f16b9f' ; env['user'] = 'ec2-user'
+
+# rhel 6.2
+#
+label = 'rhel 62' ; ami_id = 'ami-0f0bc866' ; env['user'] = 'root'
 region = 'us-east-1'
 key_name = 'admin1'
 security_group = 'default'
 instance_type = 'm1.large'
 
 # for fab
-env['user'] = 'ec2-user'
 env.init_script_name = "mongod"
 env.init_service_name = "mongod"
 env.pre_repo_cmd = None
