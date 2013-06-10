@@ -35,13 +35,15 @@ def installpackage():
     sudo(env.install_cmd % env.packages)
 
 def verifypackage():
-    run("ls -l /etc/init.d/%s" % env.init_script_name)
+  verifymongodrunning()
 
-    if not is_mongod_running():
-      start_mongod()
+def verifymongodnotrunning():
+  assert(False == is_mongod_running), "Mongod running";
 
-    run("ps auwx | grep -i mongo")
+def verifymongodrunning():
+  assert(True == is_mongod_running), "Mongod not running";
 
+def verifyversion():
     output = run("echo 'db.serverBuildInfo().version' | mongo --quiet")
 
     fabric.utils.puts("expected version number:")

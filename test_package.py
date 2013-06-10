@@ -2,7 +2,7 @@
 import boto.ec2
 import datetime
 from fabric.api import execute, env
-from fabfile import  setuprepo, installpackage, verifypackage, uninstallpackage
+from fabfile import  setuprepo, installpackage, verifypackage, uninstallpackage, start_mongod, stop_mongod, verifymongodrunning, verifymongodnotrunning
 import os
 import time
 
@@ -21,19 +21,6 @@ env.connection_attempts = 5
 # security_group = 'default'
 # instance_type = 'm1.large'
 #
-# for fab
-#env['user'] = 'admin'
-#env.init_script_name = "mongodb"
-#env.init_service_name = "mongodb"
-#env.pre_repo_cmd = "apt-key adv --keyserver keyserver.ubuntu.com --recv 7F0CEB10"
-#env.repo_String = "deb http://temp-ubuntu1204-7.10gen.cc.downloads-distro.mongodb.org/repo/debian-sysvinit dist 10gen"
-#env.repo_file = "/etc/apt/sources.list.d/10gen.list"
-#env.post_repo_cmd = "apt-get --quiet --quiet --no-download update"
-#env.packages="mongodb-10gen"
-## full commands to install/uninstall env.packages with string replaced by env.packages setting above
-##
-#env.install_cmd = "apt-get --quiet --quiet install %s"
-#env.uninstall_cmd = "apt-get --quiet --quiet purge %s"
 
 # centos 5.4
 #
@@ -57,23 +44,37 @@ ami_id = 'ami-7385461a'
 
 # rhel 6.4
 #
-label = 'rhel 64' ; ami_id = 'ami-f6f16b9f' ; env['user'] = 'ec2-user'
+label = 'rhel 64' 
+ami_id = 'ami-f6f16b9f' 
+env['user'] = 'ec2-user'
 
 # rhel 6.2
 #
-label = 'rhel 62' ; ami_id = 'ami-0f0bc866' ; env['user'] = 'root'
+label = 'rhel 62' 
+ami_id = 'ami-0f0bc866' 
+env['user'] = 'root'
+
+# debain squeeze
+#
+label = 'debian squeeze' 
+ami_id = 'ami-8568efec' 
+env['user'] = 'admin'
+
+
 region = 'us-east-1'
 key_name = 'admin1'
 security_group = 'default'
 instance_type = 'm1.large'
 
-# for fab
+# start redhat config
+#
 env.init_script_name = "mongod"
 env.init_service_name = "mongod"
 env.pre_repo_cmd = None
 env.repo_String = """[10gen] 
 name=10gen Repository 
-baseurl=http://temp-ubuntu1204-7.10gen.cc/downloads-distro.mongodb.org/repo/redhat/os/x86_64 
+#baseurl=http://temp-ubuntu1204-7.10gen.cc/downloads-distro.mongodb.org/repo/redhat/os/x86_64 
+baseurl=http://downloads-distro.mongodb.org/repo/redhat/os/x86_64 
 gpgcheck=0 
 enabled=1"""
 env.repo_file = "/etc/yum.repos.d/10gen.repo"
@@ -83,6 +84,26 @@ env.packages="mongo-10gen-unstable mongo-10gen-unstable-server"
 #
 env.install_cmd = "yum install --assumeyes --quiet %s"
 env.uninstall_cmd = "yum --assumeyes --quiet remove %s"
+
+# end redhat config
+
+# start debian config
+#
+env['user'] = 'admin'
+env.init_script_name = "mongodb"
+env.init_service_name = "mongodb"
+env.pre_repo_cmd = "apt-key adv --keyserver keyserver.ubuntu.com --recv 7F0CEB10"
+#env.repo_String = "deb http://temp-ubuntu1204-7.10gen.cc/downloads-distro.mongodb.org/repo/debian-sysvinit dist 10gen"
+env.repo_String = "deb http://downloads-distro.mongodb.org/repo/debian-sysvinit dist 10gen"
+env.repo_file = "/etc/apt/sources.list.d/10gen.list"
+env.post_repo_cmd = "apt-get --yes --quiet update"
+env.packages="mongodb-10gen-unstable"
+# full commands to install/uninstall env.packages with string replaced by env.packages setting above
+#
+env.install_cmd = "apt-get --yes --quiet install %s"
+env.uninstall_cmd = "apt-get --yes --quiet purge %s"
+
+# end debian config
 
 
 
@@ -139,7 +160,13 @@ print "dns name: %s " % inst.dns_name
 
 env.hosts = [ inst.dns_name ]
 
+execute(verifymongodnotrunning)
 execute(setuprepo)
 execute(installpackage)
-execute(verifypackage)
-execute(uninstallpackage)
+execute(verifymongodrunning)
+env.packages = "numactl"
+execute(installpackage)
+execute(stop_mongod)
+execute(verifymongodnotrunning)
+execute(start_mongod)
+execute(verifymongodrunning)
