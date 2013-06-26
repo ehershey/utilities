@@ -48,17 +48,33 @@ label = 'rhel 64'
 ami_id = 'ami-f6f16b9f' 
 env['user'] = 'ec2-user'
 
-# rhel 6.2
+# rhel 5.7
 #
-label = 'rhel 62' 
+label = 'rhel 57' 
 ami_id = 'ami-0f0bc866' 
 env['user'] = 'root'
 
-# debain squeeze
+# rhel 6.2
 #
-label = 'debian squeeze' 
-ami_id = 'ami-8568efec' 
-env['user'] = 'admin'
+label = 'rhel 62' 
+ami_id = 'ami-876c05ee' 
+env['user'] = 'root'
+
+
+
+
+# debian squeeze
+#
+#label = 'debian squeeze' 
+#ami_id = 'ami-8568efec' 
+#env['user'] = 'admin'
+
+# ubuntu 12.04
+#
+#label = 'ubuntu 12.04' 
+#ami_id = 'ami-3fec7956'
+#env['user'] = 'ec2-user'
+
 
 
 region = 'us-east-1'
