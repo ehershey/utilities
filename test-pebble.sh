@@ -4,7 +4,7 @@ if [ "$1" ]
 then
   export recip="$1"
 else
-  export recip=ernie.hershey@10gen.com
+  export recip=pebble@ernie.org
 fi
 while true 
 do 
