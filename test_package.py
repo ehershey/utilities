@@ -41,6 +41,7 @@ ami_id = 'ami-7385461a'
 
 
 
+#http://aws.amazon.com/solutions/global-solution-providers/redhat/
 
 # rhel 6.4
 #
@@ -51,7 +52,17 @@ env['user'] = 'ec2-user'
 # rhel 5.7
 #
 label = 'rhel 57' 
-ami_id = 'ami-0f0bc866' 
+ami_id = 'ami-83573eea'
+env['user'] = 'root'
+
+# rhel 5.8 
+label = 'rhel 58'
+ami_id = 'ami-a3563fca'
+env['user'] = 'root'
+
+# rhel 5.9 
+label = 'rhel 59'
+ami_id = 'ami-cf5b32a6'
 env['user'] = 'root'
 
 # rhel 6.2
