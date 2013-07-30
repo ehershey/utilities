@@ -80,11 +80,6 @@ FLOW = flow_from_clientsecrets(CLIENT_SECRETS,
 
 
 parser = argparse.ArgumentParser(description='List calendars')
-# parser.add_argument('--min-time', type=int, required=True, help='Minimum timestamp for history in seconds since the epoch')
-# parser.add_argument('--max-time', type=int, required=True, help='Maximum timestamp for history in seconds since the epoch')
-# parser.add_argument('--max-results', type=int, required=False, help='Maximum number of results to return', default=100)
-# parser.add_argument('--include-delta', action='store_true', required=False, help='Whether to include distance and speed relative to previous point', default=True)
-# parser.add_argument('--verbose-timestamps', action='store_true', help='Whether to include an extra column with human readable timestamps')
 args = parser.parse_args()
 
 
