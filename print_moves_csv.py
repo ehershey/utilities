@@ -37,7 +37,7 @@ def print_workouts_from_json_stream(instream):
     for activity_name in verbose_activity_names:
       sys.stdout.write(",")
       if activity_name in activities_by_name:
-        sys.stdout.write(str(activity['distance']))
+        sys.stdout.write(str(activities_by_name[activity_name]['distance']))
     sys.stdout.write("\n")
 
 #  if output.has_key('workouts'):
