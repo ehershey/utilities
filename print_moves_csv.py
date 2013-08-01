@@ -1,4 +1,9 @@
 #!/usr/bin/python2.7
+# print_moves_csv.py
+#
+# Format moves json (from https://api.moves-app.com/) into csv
+#
+# 
 import datetime
 import json
 import os.path
