@@ -13,26 +13,26 @@ verbose_activity_names = {
     "cyc": "Cycling"
     }
 
+sys.stdout.write("Date")
+for activity_name,verbose_activity_name in verbose_activity_names.items():
+  sys.stdout.write(",")
+  sys.stdout.write(verbose_activity_name)
+sys.stdout.write("\n")
+
 def print_workouts_from_json_stream(instream):
   output = json.load(instream)
 
   for index, summary in enumerate(output):
     activities = summary['summary']
-    if index == 0:
-      sys.stdout.write("Date,")
-      for activity_index, activity in enumerate(activities):
-        sys.stdout.write(verbose_activity_names[activity['activity']])
-        if activity_index+1 < len(activities):
-          sys.stdout.write(",")
-      sys.stdout.write("\n")
     sys.stdout.write(str(datetime.datetime.strptime(summary['date'],'%Y%m%d')))
-    sys.stdout.write(",")
-    for activity_index, activity in enumerate(activities):
-      sys.stdout.write(str(activity['distance']))
-      #print("activity_index: " +  str(int(activity_index )))
-      #print("len(activities): " +  str(len(activities) ))
-      if int(activity_index)+1 < len(activities):
-        sys.stdout.write(",")
+    activities_by_name = {}
+    if activities:
+      for activity in activities:
+        activities_by_name[activity['activity']] = activity
+    for activity_name in verbose_activity_names:
+      sys.stdout.write(",")
+      if activity_name in activities_by_name:
+        sys.stdout.write(str(activity['distance']))
     sys.stdout.write("\n")
 
 #  if output.has_key('workouts'):
