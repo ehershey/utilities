@@ -19,10 +19,10 @@ verbose_activity_names = {
     }
 
 sys.stdout.write("Date")
-for activity_name,verbose_activity_name in verbose_activity_names.items():
+for activity_name,verbose_activity_name in sorted(verbose_activity_names.items()):
   sys.stdout.write(",")
   sys.stdout.write(verbose_activity_name)
-sys.stdout.write("\n")
+sys.stdout.write(",Calories\n")
 
 def print_workouts_from_json_stream(instream):
   output = json.load(instream)
@@ -31,13 +31,16 @@ def print_workouts_from_json_stream(instream):
     activities = summary['summary']
     sys.stdout.write(str(datetime.datetime.strptime(summary['date'],'%Y%m%d')))
     activities_by_name = {}
+    calories = 0
     if activities:
       for activity in activities:
         activities_by_name[activity['activity']] = activity
-    for activity_name in verbose_activity_names:
+        calories += activity['calories']
+    for activity_name in sorted(verbose_activity_names):
       sys.stdout.write(",")
       if activity_name in activities_by_name:
         sys.stdout.write(str(activities_by_name[activity_name]['distance']))
+    sys.stdout.write(",%d" % calories)
     sys.stdout.write("\n")
 
 #  if output.has_key('workouts'):
