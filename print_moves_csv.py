@@ -3,6 +3,10 @@
 #
 # Format moves json (from https://api.moves-app.com/) into csv
 #
+# Example usage:
+# */2 * * * * curl "https://api.moves-app.com/api/v1/user/summary/daily?pastDays=10&access_token=$MOVES_ACCESS_TOKEN" | /home/ernie/git/utilities/print_moves_csv.py > /tmp/moves-new.csv ; touch /home/ernie/Dropbox/Web/moves.csv ; cat /home/ernie/Dropbox/Web/moves.csv >> /tmp/moves-new.csv ; cat /tmp/moves-new.csv   | sort  --reverse  | sort --key=1,1 --field-separator=, --reverse --unique > /home/ernie/Dropbox/Web/moves.csv
+#
+#
 # 
 import datetime
 import json
