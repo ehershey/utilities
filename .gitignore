@@ -16,3 +16,4 @@ npm-debug.log
 mapmyfitness_apikeys.py
 mapmyfitness_apikeys.pyc
 mapmyfitness_tokens.json
+moves.env
