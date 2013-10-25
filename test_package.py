@@ -12,7 +12,7 @@ env.connection_attempts = 5
 
 # parms for ec2 instance
 #
-# debian squeeze 
+# debian squeeze
 #
 # label = 'debian squeeze'
 # ami_id = 'ami-8568efec'
@@ -45,30 +45,30 @@ ami_id = 'ami-7385461a'
 
 # rhel 6.4
 #
-label = 'rhel 64' 
-ami_id = 'ami-f6f16b9f' 
+label = 'rhel 64'
+ami_id = 'ami-f6f16b9f'
 env['user'] = 'ec2-user'
 
 # rhel 5.7
 #
-label = 'rhel 57' 
+label = 'rhel 57'
 ami_id = 'ami-83573eea'
 env['user'] = 'root'
 
-# rhel 5.8 
+# rhel 5.8
 label = 'rhel 58'
 ami_id = 'ami-a3563fca'
 env['user'] = 'root'
 
-# rhel 5.9 
+# rhel 5.9
 label = 'rhel 59'
 ami_id = 'ami-cf5b32a6'
 env['user'] = 'root'
 
 # rhel 6.2
 #
-label = 'rhel 62' 
-ami_id = 'ami-876c05ee' 
+label = 'rhel 62'
+ami_id = 'ami-876c05ee'
 env['user'] = 'root'
 
 
@@ -76,13 +76,13 @@ env['user'] = 'root'
 
 # debian squeeze
 #
-#label = 'debian squeeze' 
-#ami_id = 'ami-8568efec' 
+#label = 'debian squeeze'
+#ami_id = 'ami-8568efec'
 #env['user'] = 'admin'
 
 # ubuntu 12.04
 #
-#label = 'ubuntu 12.04' 
+#label = 'ubuntu 12.04'
 #ami_id = 'ami-3fec7956'
 #env['user'] = 'ec2-user'
 
@@ -98,15 +98,15 @@ instance_type = 'm1.large'
 env.init_script_name = "mongod"
 env.init_service_name = "mongod"
 env.pre_repo_cmd = None
-env.repo_String = """[10gen] 
-name=10gen Repository 
-#baseurl=http://temp-ubuntu1204-7.10gen.cc/downloads-distro.mongodb.org/repo/redhat/os/x86_64 
-baseurl=http://downloads-distro.mongodb.org/repo/redhat/os/x86_64 
-gpgcheck=0 
+env.repo_String = """[10gen]
+name=10gen Repository
+#baseurl=http://temp-ubuntu1204-7.10gen.cc/downloads-distro.mongodb.org/repo/redhat/os/x86_64
+baseurl=http://downloads-distro.mongodb.org/repo/redhat/os/x86_64
+gpgcheck=0
 enabled=1"""
 env.repo_file = "/etc/yum.repos.d/10gen.repo"
 env.post_repo_cmd = "yum --quiet makecache"
-env.packages="mongo-10gen-unstable mongo-10gen-unstable-server"
+env.packages = "mongo-10gen-unstable mongo-10gen-unstable-server"
 # full commands to install/uninstall env.packages with string replaced by env.packages setting above
 #
 env.install_cmd = "yum install --assumeyes --quiet %s"
@@ -124,7 +124,7 @@ env.pre_repo_cmd = "apt-key adv --keyserver keyserver.ubuntu.com --recv 7F0CEB10
 env.repo_String = "deb http://downloads-distro.mongodb.org/repo/debian-sysvinit dist 10gen"
 env.repo_file = "/etc/apt/sources.list.d/10gen.list"
 env.post_repo_cmd = "apt-get --yes --quiet update"
-env.packages="mongodb-10gen-unstable"
+env.packages = "mongodb-10gen-unstable"
 # full commands to install/uninstall env.packages with string replaced by env.packages setting above
 #
 env.install_cmd = "apt-get --yes --quiet install %s"
@@ -137,12 +137,12 @@ env.uninstall_cmd = "apt-get --yes --quiet purge %s"
 
 
 
-AWS_ACCESS_KEY_ID = os.environ['AWS_ACCESS_KEY_ID'] 
+AWS_ACCESS_KEY_ID = os.environ['AWS_ACCESS_KEY_ID']
 if not AWS_ACCESS_KEY_ID:
   print "required environment variable missing: AWS_ACCESS_KEY_ID:"
   exit(2)
 
-AWS_SECRET_ACCESS_KEY = os.environ['AWS_SECRET_ACCESS_KEY'] 
+AWS_SECRET_ACCESS_KEY = os.environ['AWS_SECRET_ACCESS_KEY']
 if not AWS_SECRET_ACCESS_KEY:
   print "required environment variable missing: AWS_SECRET_ACCESS_KEY:"
   exit(2)
@@ -162,9 +162,9 @@ inst = res.instances[0]
 
 start_time = datetime.datetime.now()
 timestamp_string = start_time.strftime("%Y%m%d%H%M%S")
-instance_name = "pkg-tst-%s-%s" % (label.replace(" ","_"), timestamp_string)
+instance_name = "pkg-tst-%s-%s" % (label.replace(" ", "_"), timestamp_string)
 
-inst.add_tag("Name",instance_name)
+inst.add_tag("Name", instance_name)
 inst.update()
 
 print "instance name: %s" % instance_name
@@ -185,7 +185,7 @@ if inst.state != 'running':
 print "connecting..."
 print "dns name: %s " % inst.dns_name
 
-env.hosts = [ inst.dns_name ]
+env.hosts = [inst.dns_name]
 
 execute(verifymongodnotrunning)
 execute(setuprepo)

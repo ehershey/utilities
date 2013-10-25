@@ -1,4 +1,4 @@
-# Fabric tasks for setting up a custom repo in redhat, centos, fedora, debian, or ubuntu, 
+# Fabric tasks for setting up a custom repo in redhat, centos, fedora, debian, or ubuntu,
 # installing mongodb package and verifying the state of the system after installing it
 #
 # usage:
@@ -49,7 +49,7 @@ def verifyversion():
     fabric.utils.puts("expected version number:")
     fabric.utils.puts(expected_version)
 
-    assert (output == expected_version),"Returned version not equal to expected version"
+    assert (output == expected_version), "Returned version not equal to expected version"
 
 def uninstallpackage():
     sudo(env.uninstall_cmd % env.packages)

@@ -7,7 +7,7 @@
 # */2 * * * * curl "https://api.moves-app.com/api/v1/user/summary/daily?pastDays=10&access_token=$MOVES_ACCESS_TOKEN" | /home/ernie/git/utilities/print_moves_csv.py > /tmp/moves-new.csv ; touch /home/ernie/Dropbox/Web/moves.csv ; cat /home/ernie/Dropbox/Web/moves.csv >> /tmp/moves-new.csv ; cat /tmp/moves-new.csv   | sort  --reverse  | sort --key=1,1 --field-separator=, --reverse --unique > /home/ernie/Dropbox/Web/moves.csv
 #
 #
-# 
+#
 import datetime
 import json
 import os.path
@@ -23,7 +23,7 @@ verbose_activity_names = {
     }
 
 sys.stdout.write("Date")
-for activity_name,verbose_activity_name in sorted(verbose_activity_names.items()):
+for activity_name, verbose_activity_name in sorted(verbose_activity_names.items()):
   sys.stdout.write(",")
   sys.stdout.write(verbose_activity_name)
 sys.stdout.write(",Calories\n")
@@ -33,7 +33,7 @@ def print_workouts_from_json_stream(instream):
 
   for index, summary in enumerate(output):
     activities = summary['summary']
-    sys.stdout.write(str(datetime.datetime.strptime(summary['date'],'%Y%m%d')))
+    sys.stdout.write(str(datetime.datetime.strptime(summary['date'], '%Y%m%d')))
     activities_by_name = {}
     calories = 0
     if activities:
@@ -74,7 +74,7 @@ print_workouts_from_json_stream(sys.stdin)
 #Out[24]: '2013-07-29 00:00:00'
 #
 #In [25]: summs
-#Out[25]: 
+#Out[25]:
 #[{u'caloriesIdle': 1773,
 #  u'date': u'20130729',
 #  u'summary': [{u'activity': u'wlk',

@@ -118,7 +118,7 @@ def main(argv):
       'alt': 'json',
     }
 
-    resp, content = http.request("https://www.googleapis.com/latitude/v1/location?" + urllib.urlencode(params),"GET")
+    resp, content = http.request("https://www.googleapis.com/latitude/v1/location?" + urllib.urlencode(params), "GET")
     if resp['status'] != '200':
         raise Exception("Invalid response %s. (Content follows)\n%s" % (resp['status'], content))
     json_list = json.loads(content)
@@ -135,13 +135,13 @@ def main(argv):
         loc['loc'] = [longitude, latitude];
         del loc['kind']
         loc['source'] = 'latitude'
-        loc['timestamp'] = { "$date": loc['timestampMs'] };
+        loc['timestamp'] = {"$date": loc['timestampMs']};
         del loc['timestampMs']
 
         if args.include_delta and last_longitude and last_latitude:
           loc['distance_traveled'] = distance_on_unit_sphere(latitude, longitude, last_latitude, last_longitude)
           loc['distance_traveled_units'] = 'mph'
-        
+
         last_longitude = longitude
         last_latitude = latitude
         print loc
@@ -151,11 +151,11 @@ def main(argv):
         #print "latitude, longitude, timestamp, accuracy, verbose timestamp"
         #for loc in reversed(json_list['data']['items']):
           ##print loc
-          #print "%s, %s, %s, %s, %s" % (loc['latitude'], loc['longitude'], loc['timestampMs'], loc.get('accuracy',-1), datetime.datetime.fromtimestamp(float(loc['timestampMs'])/1000))
+          #print "%s, %s, %s, %s, %s" % (loc['latitude'], loc['longitude'], loc['timestampMs'], loc.get('accuracy', -1), datetime.datetime.fromtimestamp(float(loc['timestampMs'])/1000))
       #else:
         #print "latitude, longitude, timestamp, accuracy"
         #for loc in reversed(json_list['data']['items']):
-          #print "%s, %s, %s, %s" % (loc['latitude'], loc['longitude'], loc['timestampMs'], loc.get('accuracy',-1))
+          #print "%s, %s, %s, %s" % (loc['latitude'], loc['longitude'], loc['timestampMs'], loc.get('accuracy', -1))
 
 
 
@@ -167,31 +167,31 @@ import math
 
 def distance_on_unit_sphere(lat1, long1, lat2, long2):
 
-    # Convert latitude and longitude to 
+    # Convert latitude and longitude to
     # spherical coordinates in radians.
     degrees_to_radians = math.pi/180.0
-        
+
     # phi = 90 - latitude
     phi1 = (90.0 - lat1)*degrees_to_radians
     phi2 = (90.0 - lat2)*degrees_to_radians
-        
+
     # theta = longitude
     theta1 = long1*degrees_to_radians
     theta2 = long2*degrees_to_radians
-        
+
     # Compute spherical distance from spherical coordinates.
-        
-    # For two locations in spherical coordinates 
+
+    # For two locations in spherical coordinates
     # (1, theta, phi) and (1, theta, phi)
-    # cosine( arc length ) = 
+    # cosine( arc length ) =
     #    sin phi sin phi' cos(theta-theta') + cos phi cos phi'
     # distance = rho * arc length
-    
-    cos = (math.sin(phi1)*math.sin(phi2)*math.cos(theta1 - theta2) + 
-           math.cos(phi1)*math.cos(phi2))
-    arc = math.acos( cos )
 
-    # Remember to multiply arc by the radius of the earth 
+    cos = (math.sin(phi1)*math.sin(phi2)*math.cos(theta1 - theta2) +
+           math.cos(phi1)*math.cos(phi2))
+    arc = math.acos(cos)
+
+    # Remember to multiply arc by the radius of the earth
     # in your favorite set of units to get length.
     return arc * EARTH_RADIUS_MILES
 

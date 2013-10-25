@@ -5,7 +5,7 @@
 
 import json
 
-filename="/tmp/trans.json"
+filename = "/tmp/trans.json"
 
 trans = json.load(open(filename))
 
