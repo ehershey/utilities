@@ -15,6 +15,7 @@ import re
 import sys
 import subprocess
 
+METERS_IN_ONE_MILE = 1609.34
 
 verbose_activity_names = {
     "wlk": "Walking",
@@ -43,7 +44,9 @@ def print_workouts_from_json_stream(instream):
     for activity_name in sorted(verbose_activity_names):
       sys.stdout.write(",")
       if activity_name in activities_by_name:
-        sys.stdout.write(str(activities_by_name[activity_name]['distance']))
+        distance_meters = activities_by_name[activity_name]['distance']
+        distance_miles = distance_meters / METERS_IN_ONE_MILE
+        sys.stdout.write("%.2fmi" % distance_miles)
     sys.stdout.write(",%d" % calories)
     sys.stdout.write("\n")
 
