@@ -82,9 +82,9 @@ env['user'] = 'root'
 
 # ubuntu 12.04
 #
-#label = 'ubuntu 12.04'
-#ami_id = 'ami-3fec7956'
-#env['user'] = 'ec2-user'
+label = 'ubuntu 12.04' 
+ami_id = 'ami-3fec7956'
+env['user'] = 'ec2-user'
 
 
 
