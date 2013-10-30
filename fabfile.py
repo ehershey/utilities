@@ -38,10 +38,10 @@ def verifypackage():
   verifymongodrunning()
 
 def verifymongodnotrunning():
-  assert(False == is_mongod_running), "Mongod running";
+  assert(False == is_mongod_running()), "Mongod running";
 
 def verifymongodrunning():
-  assert(True == is_mongod_running), "Mongod not running";
+  assert(True == is_mongod_running()), "Mongod not running";
 
 def verifyversion():
     output = run("echo 'db.serverBuildInfo().version' | mongo --quiet")
