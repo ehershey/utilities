@@ -70,6 +70,8 @@ var wrote_entry_count = 0;
 var total_entry_count = 0;
 var wrote_segment_count = 0;
 var total_segment_count = 0;
+var wrote_activity_count = 0;
+var total_activity_count = 0;
 var incoming_json;
 
 process.stdin.on('end', function() {
@@ -98,8 +100,20 @@ process.stdin.on('end', function() {
       for(var j = 0 ; j < segments.length ; j++) 
       {
         total_segment_count++;
-        var segment = segments[i];
+        var segment = segments[j];
         save_segment(db, segment);
+
+        var activities = segment.activities;
+
+        for(var k = 0 ; k < activities.length ; k++) 
+        {
+          total_activity_count++;
+          var activity = activities[k];
+          save_activity(db, activity);
+        }
+
+
+
       }
     }
   });
@@ -165,10 +179,9 @@ function save_day_entry(db,entry)
         if (err) throw err;
         // collection.insert(entry, {upsert:true, w: 1}, function(err, result) {
 
-        console.log("result: " + result);
-        console.log("entry: " + entry);
+        console.log("saved entry");
         wrote_entry_count++;
-        if(wrote_segment_count === total_segment_count && wrote_entry_count === total_entry_count) 
+        if(wrote_activity_count === total_activity_count && wrote_entry_count === total_entry_count && wrote_segment_count === total_segment_count) 
         {
           db.close();
         }
@@ -234,10 +247,76 @@ function save_segment(db,segment)
         if (err) throw err;
         // collection.insert(segment, {upsert:true, w: 1}, function(err, result) {
 
-        console.log("result: " + result);
-        console.log("segment: " + segment);
+        console.log("saved segment");
         wrote_segment_count++;
-        if(wrote_segment_count === total_segment_count && wrote_entry_count === total_entry_count) 
+        if(wrote_activity_count === total_activity_count && wrote_entry_count === total_entry_count && wrote_segment_count === total_segment_count) 
+        {
+          db.close();
+        }
+      });
+    });
+  });
+}
+
+function save_activity(db,activity) 
+{
+
+  var collection = db.collection("moves_activity_activities");
+
+  collection.find({ startTime: activity.startTime}, function(err, cursor) 
+  {
+    if (err) throw err;
+
+    console.log("activity.startTime: " + activity.startTime);
+
+    console.log('calling find() on moves_activity_activities');
+
+    var first_seen;
+    var seen_count;
+
+    cursor.toArray(function(err, result)
+    {
+      if (err) throw err;
+
+      console.log('result.length: ' + result.length);
+
+      if(result.length === 0)
+      {
+        first_seen = now;
+        seen_count = 1;
+      }
+      else if(result.length === 1)
+      {
+        console.log("result[0].application_metadata: ");
+        console.log(result[0].application_metadata);
+        first_seen = result[0].application_metadata.first_seen;
+        seen_count = result[0].application_metadata.seen_count + 1;
+      }
+      else
+      {
+        throw("too many results!");
+        console.log("result[0].application_metadata: ");
+        console.log(result[0].application_metadata);
+        first_seen = result[0].application_metadata.first_seen;
+        seen_count = result[0].application_metadata.seen_count + 1;
+      } 
+
+      console.log('first_seen: ' + first_seen);
+      console.log('last_seen: ' + last_seen);
+      console.log('seen_count: ' + seen_count);
+
+      activity.application_metadata = { first_seen: first_seen, last_seen: last_seen, seen_count: seen_count };
+
+      console.log('attempting to save activity: ' + activity);
+
+      collection.update({startTime: activity.startTime}, activity, {upsert:true, w: 1}, function(err, result) 
+      {
+        if (err) throw err;
+        // collection.insert(activity, {upsert:true, w: 1}, function(err, result) {
+
+        console.log("saved activity");
+        wrote_activity_count++;
+        if(wrote_activity_count === total_activity_count && wrote_entry_count === total_entry_count && wrote_segment_count === total_segment_count) 
         {
           db.close();
         }
