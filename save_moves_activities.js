@@ -12,6 +12,12 @@
 //
 // For each entity, add fields:
 // 1) application_metadata: { first_seen: <timestamp>, last_seen: <timestamp>, seen_count: <count> }
+//
+//
+//
+// Example usage in crontab: 
+// */5 * * * * curl --silent "https://api.moves-app.com/api/v1/user/activities/daily?pastDays=7&access_token=$MOVES_ACCESS_TOKEN"  | /home/ernie/git/utilities/save_moves_activities.js > /tmp/save_moves_activities.log 2>&1
+
 
 
 // set database options
