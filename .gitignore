@@ -18,3 +18,5 @@ mapmyfitness_apikeys.pyc
 mapmyfitness_tokens.json
 moves.env
 client_secrets.json
+
+node_modules
