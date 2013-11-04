@@ -20,3 +20,4 @@ moves.env
 client_secrets.json
 
 node_modules
+authdata.js
