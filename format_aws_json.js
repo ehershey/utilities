@@ -24,12 +24,16 @@ process.stdin.on('end', function() {
       reservation.Instances.forEach(function(instance) { 
 
         var instance_name = '';
-        instance.Tags.forEach(function(tag) { 
-          if(tag.Key === "Name")
-          {
-            instance_name = tag.Value;
-          }
-        });
+        if(instance.Tags) {
+          instance.Tags.forEach(function(tag) { 
+            if(tag.Key === "Name")
+            {
+              instance_name = tag.Value;
+            }
+          });
+        } else { 
+          instance_name = '';
+        }
         process.stdout.write(instance_name);
         process.stdout.write(",");
         process.stdout.write(instance.PublicDnsName);
