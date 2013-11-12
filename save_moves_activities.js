@@ -4,10 +4,13 @@
 //
 // Entities: 
 // 1) A day worth of activity
-//    Collection: moves_activity_dates
+//    Collection: dates
 //    Key: date
 // 2) Segments
-//    Collection: moves_activity_segments
+//    Collection: segments
+//    Key: startTime
+// 3) Activities
+//    Collection: activities
 //    Key: startTime
 //
 // For each entity, add fields:
@@ -130,7 +133,7 @@ process.stdin.on('end', function() {
 function save_day_entry(db,entry) 
 {
 
-  var collection = db.collection("moves_activity_dates");
+  var collection = db.collection("dates");
 
   collection.find({ date: entry.date}, function(err, cursor) 
   {
@@ -139,7 +142,7 @@ function save_day_entry(db,entry)
 
     console.log("entry.date: " + entry.date);
 
-    console.log('calling find() on moves_activity_dates');
+    console.log('calling find() on dates');
 
     var first_seen;
     var seen_count;
@@ -202,7 +205,7 @@ function save_day_entry(db,entry)
 function save_segment(db,segment) 
 {
 
-  var collection = db.collection("moves_activity_segments");
+  var collection = db.collection("segments");
 
   collection.find({ startTime: segment.startTime}, function(err, cursor) 
   {
@@ -210,7 +213,7 @@ function save_segment(db,segment)
 
     console.log("segment.startTime: " + segment.startTime);
 
-    console.log('calling find() on moves_activity_segments');
+    console.log('calling find() on segments');
 
     var first_seen;
     var seen_count;
@@ -269,7 +272,7 @@ function save_segment(db,segment)
 function save_activity(db,activity) 
 {
 
-  var collection = db.collection("moves_activity_activities");
+  var collection = db.collection("activities");
 
   collection.find({ startTime: activity.startTime}, function(err, cursor) 
   {
@@ -277,7 +280,7 @@ function save_activity(db,activity)
 
     console.log("activity.startTime: " + activity.startTime);
 
-    console.log('calling find() on moves_activity_activities');
+    console.log('calling find() on activities');
 
     var first_seen;
     var seen_count;
