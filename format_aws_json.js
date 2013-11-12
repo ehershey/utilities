@@ -16,6 +16,10 @@ process.stdin.on('data', function(chunk) {
   stdin_chunks.push(chunk);
 });
 
+// tags to include in output
+//
+var output_tags = [ "Name", "Username" ];
+
 process.stdin.on('end', function() {
   var incoming_string = stdin_chunks.join("");
   var incoming_json = JSON.parse(incoming_string);
@@ -23,19 +27,23 @@ process.stdin.on('end', function() {
   incoming_json.Reservations.forEach(function(reservation) { 
       reservation.Instances.forEach(function(instance) { 
 
-        var instance_name = '';
-        if(instance.Tags) {
-          instance.Tags.forEach(function(tag) { 
-            if(tag.Key === "Name")
-            {
-              instance_name = tag.Value;
+        var instance_tags = {};
+        if(!instance.Tags) { instance.Tags = [] }
+
+        instance.Tags.forEach(function(tag) { 
+          output_tags.forEach(function(output_tag) { 
+            if(tag.Key === output_tag) {
+              instance_tags[output_tag] = tag.Value;
             }
           });
-        } else { 
-          instance_name = '';
-        }
-        process.stdout.write(instance_name);
-        process.stdout.write(",");
+        });
+
+        output_tags.forEach(function(output_tag) { 
+          if(!instance_tags[output_tag]) { instance_tags[output_tag] = ''; }
+          process.stdout.write(instance_tags[output_tag]);
+          process.stdout.write(",");
+        });
+        if(!instance.PublicDnsName) { instance.PublicDnsName = ''; } 
         process.stdout.write(instance.PublicDnsName);
         process.stdout.write("\n");
       });
