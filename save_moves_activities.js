@@ -103,6 +103,8 @@ process.stdin.on('end', function() {
 
       var segments = entry.segments;
 
+      if(!segments) { segments = [] }
+
       for(var j = 0 ; j < segments.length ; j++) 
       {
         total_segment_count++;
