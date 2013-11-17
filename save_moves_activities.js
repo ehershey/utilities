@@ -1,4 +1,4 @@
-#!/usr/bin/node
+#!/usr/bin/env node
 'use strict';
 // Save moves json on stdin to mongodb
 //
@@ -19,9 +19,11 @@
 //
 //
 // Example usage in crontab: 
-// */5 * * * * curl --silent "https://api.moves-app.com/api/v1/user/activities/daily?pastDays=7&access_token=$MOVES_ACCESS_TOKEN"  | /home/ernie/git/utilities/save_moves_activities.js > /tmp/save_moves_activities.log 2>&1
+// */5 * * * * curl --silent "https://api.moves-app.com/api/v1/user/activities/daily?pastDays=7&access_token=$MOVES_ACCESS_TOKEN"  | ~ernie/git/utilities/save_moves_activities.js > /tmp/save_moves_activities.log 2>&1
 
 
+var mongodb = require('mongodb');
+var request = require('request');
 
 // set database options
 //
@@ -53,8 +55,8 @@ var dburl = 'mongodb://' + dbuserpass + dbserver + ':' + dbport + '/' + dbname +
 
 console.log('dburl: ' + dburl);
 
-var MongoClient = require('mongodb').MongoClient
-  , Server = require('mongodb').Server;
+var MongoClient = mongodb.MongoClient
+  , Server = mongodb.Server;
 
 // var mongoClient = new MongoClient(new Server(dbserver, dbport));
 
