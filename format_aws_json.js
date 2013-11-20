@@ -38,6 +38,8 @@ process.stdin.on('end', function() {
           });
         });
 
+        process.stdout.write(instance.State.Name);
+        process.stdout.write(",");
         output_tags.forEach(function(output_tag) { 
           if(!instance_tags[output_tag]) { instance_tags[output_tag] = ''; }
           process.stdout.write(instance_tags[output_tag]);
