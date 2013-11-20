@@ -3,6 +3,8 @@
 //
 // Example usage:
 // aws ec2 describe-instances --filters '[{"name":"tag:Name","values":["*test_rhel*"]}, { "name": "tag:username", "values": ["Ernie Hershey"]}]'    | ./format_aws_json.js 
+//
+// aws ec2 describe-instances --filters "Name=instance-state-name,Values=running" | ~/git/utilities/format_aws_json.js  
 
 // read json on stdin into memory
 //
@@ -19,6 +21,14 @@ process.stdin.on('data', function(chunk) {
 // tags to include in output
 //
 var output_tags = [ "Name", "Username" ];
+
+process.stdout.write("State,");
+
+output_tags.forEach(function(output_tag) { 
+  process.stdout.write(output_tag);
+  process.stdout.write(",");
+});
+process.stdout.write("Dns");
 
 process.stdin.on('end', function() {
   var incoming_string = stdin_chunks.join("");
