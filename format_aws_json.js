@@ -1,4 +1,4 @@
-#!/usr/bin/node
+#!/usr/bin/env node
 // Format aws ec2 describe-instances output into csv data - instance_name, dns_name
 //
 // Example usage:
