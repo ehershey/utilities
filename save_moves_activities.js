@@ -25,6 +25,16 @@
 var mongodb = require('mongodb');
 var request = require('request');
 
+var moves_access_token = process.env.MOVES_ACCESS_TOKEN; 
+
+if(!moves_access_token) { 
+  console.error("Environment variable not set: MOVES_ACCESS_TOKEN");
+  process.exit(2);
+}
+
+
+
+
 // set database options
 //
 var dbname = "moves";
@@ -106,29 +116,36 @@ process.stdin.on('end', function() {
       save_day_entry(db,entry);
       total_entry_count++;
 
-      var segments = entry.segments;
 
-      if(!segments) { segments = [] }
+      request('https://api.moves-app.com/api/v1/user/storyline/daily/' + entry.date + '?trackPoints=true&access_token=' + moves_access_token, 
+        function (error, response, body) {
+          if (!error && response.statusCode == 200) {
+            var storyline = JSON.parse(body)[0];
 
-      for(var j = 0 ; j < segments.length ; j++) 
-      {
-        total_segment_count++;
-        var segment = segments[j];
-        save_segment(db, segment);
+            var segments = storyline.segments;
+            console.log('segments.length: ' + segments.length);
 
-        var activities = segment.activities;
+            if(!segments) { segments = [] }
 
-        for(var k = 0 ; k < activities.length ; k++) 
-        {
-          total_activity_count++;
-          var activity = activities[k];
-          save_activity(db, activity);
-        }
-
-
-
+              for(var j = 0 ; j < segments.length ; j++) 
+              {
+                total_segment_count++;
+                var segment = segments[j];
+                save_segment(db, segment);
+        
+                var activities = segment.activities;
+        
+                for(var k = 0 ; k < activities.length ; k++) 
+                {
+                  total_activity_count++;
+                  var activity = activities[k];
+                  save_activity(db, activity);
+                }
+               }
+          }
+        });
+      
       }
-    }
   });
 });
 
@@ -331,6 +348,7 @@ function save_activity(db,activity)
         wrote_activity_count++;
         if(wrote_activity_count === total_activity_count && wrote_entry_count === total_entry_count && wrote_segment_count === total_segment_count) 
         {
+          console.log('calling db.close()');
           db.close();
         }
       });
