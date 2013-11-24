@@ -6,8 +6,9 @@ then
   exit 2
 fi
 
-if [ ! "`echo $id | grep ^i=`" ]
+if [ ! "`echo $id | grep ^i-`" ]
 then
   id="i-$id"
 fi
+echo "Searching for id: $id"
 aws ec2 describe-instances --filters '[{"Name":"instance-id","Values":["'$id'"]}]' | `dirname $0`/format_aws_json.js
