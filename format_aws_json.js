@@ -18,17 +18,19 @@ process.stdin.on('data', function(chunk) {
   stdin_chunks.push(chunk);
 });
 
-// tags to include in output
+// tags to include in output (case insensitive) (actual ec2 tags)
 //
-var output_tags = [ "Name", "Username" ];
+var output_tags = [ "Name", "Username", "Hostname", "started_by" ];
 
 process.stdout.write("State,");
+process.stdout.write("InstanceId,");
 
 output_tags.forEach(function(output_tag) { 
   process.stdout.write(output_tag);
   process.stdout.write(",");
 });
 process.stdout.write("Dns");
+process.stdout.write("\n");
 
 process.stdin.on('end', function() {
   var incoming_string = stdin_chunks.join("");
@@ -42,7 +44,8 @@ process.stdin.on('end', function() {
 
         instance.Tags.forEach(function(tag) { 
           output_tags.forEach(function(output_tag) { 
-            if(tag.Key === output_tag) {
+            output_tag = output_tag.toLowerCase();
+            if(tag.Key.toLowerCase() === output_tag) {
               instance_tags[output_tag] = tag.Value;
             }
           });
@@ -50,7 +53,12 @@ process.stdin.on('end', function() {
 
         process.stdout.write(instance.State.Name);
         process.stdout.write(",");
+
+        process.stdout.write(instance.InstanceId);
+        process.stdout.write(",");
+
         output_tags.forEach(function(output_tag) { 
+          output_tag = output_tag.toLowerCase();
           if(!instance_tags[output_tag]) { instance_tags[output_tag] = ''; }
           process.stdout.write(instance_tags[output_tag]);
           process.stdout.write(",");
