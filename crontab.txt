@@ -34,3 +34,5 @@
 */5 * * * * curl "https://api.moves-app.com/api/v1/user/summary/daily?pastDays=10&access_token=$MOVES_ACCESS_TOKEN" | /home/ernie/git/utilities/print_moves_csv.py > /tmp/moves-new.csv ; touch /home/ernie/Dropbox/Web/moves.csv ; cat /home/ernie/Dropbox/Web/moves.csv >> /tmp/moves-new.csv ; cat /tmp/moves-new.csv   | sort  --reverse  | sort --key=1,1 --field-separator=, --reverse --unique > /home/ernie/Dropbox/Web/moves.csv
 
 */5 * * * * curl --silent "https://api.moves-app.com/api/v1/user/activities/daily?pastDays=7&access_token=$MOVES_ACCESS_TOKEN"  | /home/ernie/git/utilities/save_moves_activities.js >> /tmp/save_moves_activities.log 2>&1
+
+*/5 * * * * ~/git/utilities/simple_monitor.js >> /tmp/simple_monitor.log 2>&1
