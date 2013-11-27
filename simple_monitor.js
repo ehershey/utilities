@@ -13,7 +13,7 @@ require('date-utils');
 
 var MAILTO = 'Ernie Hershey <ernie@mongodb.com>'
 var MAILFROM = 'Simple Monitor <ernie@mongodb.com>'
-var SUBJECT = 'simple_monitor alert!'
+var SUBJECT = 'Simple_monitor alert!'
 
 var nodemailer_transport = nodemailer.createTransport();
 
