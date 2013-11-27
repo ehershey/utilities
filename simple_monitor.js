@@ -26,16 +26,23 @@ var nodemailer_transport = nodemailer.createTransport();
 
 var url_configs = [ 
   { 
+    url: 'http://mci.10gen.com/ui/',
+    badcell_selector: "body",
+    text_finder_from_badcell_jqobj: function(jqobj) { return "Unused"; },
+    ignore_text: '',
+    negated: true
+  },
+  { 
     url: 'http://buildbot.mongodb.org/buildslaves',
     badcell_selector: ".offline",
-    text_finder_from_badcell_jqobj: function(jqobj) { return jqobj.parent().children().first().text() },
+    text_finder_from_badcell_jqobj: function(jqobj) { return jqobj.parent().children().first().text(); },
     ignore_text: 'bs-win-64-3',
     negated: false
   },
   { 
     url: 'http://buildbot-special.10gen.com/buildslaves',
     badcell_selector: ".offline",
-    text_finder_from_badcell_jqobj: function(jqobj) { return jqobj.parent().children().first().text() },
+    text_finder_from_badcell_jqobj: function(jqobj) { return jqobj.parent().children().first().text(); },
     ignore_text: '',
     negated: false
   },
@@ -47,7 +54,7 @@ var url_configs = [
     // trigger anyways
     badcell_selector: 'div.contrib-streak-current:contains(' + (new Date((new Date()) - 23 * 60 * 60 * 1000)).toFormat("MMMM DD") + '), ' +
                       'div.contrib-streak-current:contains(' + (new Date()).toFormat("MMMM DD") + ')',
-    text_finder_from_badcell_jqobj: function(jqobj) { return "Date not found in page! (" + (new Date((new Date()) - 23 * 60 * 60 * 1000)).toFormat("MMMM DD") + ')'},
+    text_finder_from_badcell_jqobj: function(jqobj) { return "Date not found in page! (" + (new Date((new Date()) - 23 * 60 * 60 * 1000)).toFormat("MMMM DD") + ')'; },
     ignore_text: '',
     negated: true
   }
@@ -65,31 +72,43 @@ url_configs.forEach( function(url_config) {
   console.log('checking url: ' + url);
 
   jsdom.env ( url, ["http://code.jquery.com/jquery.js"], function(errors, window) {
+    if(errors) {
+      console.log('errors loading url: ' + errors);
+      console.log('sending mail');
+      nodemailer_transport.sendMail({
+          from: MAILFROM,
+          to: MAILTO,
+          subject: SUBJECT,
+          text: 'Error checking URL: ' + url + "\nError detail text: " + errors,
+          html: '<b>Error checking URL: <a href="' + url + '">' + url + '</a></b><br/>Error detail text: ' + errors
+      });
+ 
+    }
+    else {
 
-    console.log("looking for bad cells with selector: " + badcell_selector);
-    var badcells = window.$(badcell_selector);
-    var detail_text;
+      console.log("looking for bad cells with selector: " + badcell_selector);
+      var badcells = window.$(badcell_selector);
+      var detail_text;
 
-    console.log('found badcells: ' + badcells.length);
+      console.log('found badcells: ' + badcells.length);
 
-    if(badcells.length) { 
+      if( ( badcells.length && !negated ) || ( !badcells.length && negated ) ) { 
 
-      detail_text = text_finder_from_badcell_jqobj(badcells);
+        detail_text = text_finder_from_badcell_jqobj(badcells);
 
-      if(ignore_text && detail_text === ignore_text) {
-        console.log('detail_text === ignore_text; ignoring error (' + detail_text + ')');
-      } else if(negated) {
-        console.log('negated is true, skipping');
-      } else {
-        console.log('detail_text: ' + detail_text);
-        console.log('sending mail');
-        nodemailer_transport.sendMail({
-            from: MAILFROM,
-            to: MAILTO,
-            subject: SUBJECT,
-            text: 'Error checking URL: ' + url + "\nError detail text: " + detail_text,
-            html: '<b>Error checking URL: <a href="' + url + '">' + url + '</a></b><br/>Error detail text: ' + detail_text
-        });
+        if(ignore_text && detail_text === ignore_text) {
+          console.log('detail_text === ignore_text; ignoring error (' + detail_text + ')');
+        } else {
+          console.log('detail_text: ' + detail_text);
+          console.log('sending mail');
+          nodemailer_transport.sendMail({
+              from: MAILFROM,
+              to: MAILTO,
+              subject: SUBJECT,
+              text: 'Error checking URL: ' + url + "\nError detail text: " + detail_text,
+              html: '<b>Error checking URL: <a href="' + url + '">' + url + '</a></b><br/>Error detail text: ' + detail_text
+          });
+        }
       }
     }
   });
