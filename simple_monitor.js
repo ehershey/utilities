@@ -15,7 +15,7 @@ var MAILTO = 'Ernie Hershey <ernie@mongodb.com>'
 var MAILFROM = 'Simple Monitor <ernie@mongodb.com>'
 var SUBJECT = 'simple_monitor alert!'
 
-var transport = nodemailer.createTransport();
+var nodemailer_transport = nodemailer.createTransport();
 
 // For each object in url_configs, hit "url" and run the "badcell_selector" through jquery. 
 // if anything is matched and "negated" is not true (or if nothing matches and "negated" is true), 
@@ -83,7 +83,7 @@ url_configs.forEach( function(url_config) {
       } else {
         console.log('detail_text: ' + detail_text);
         console.log('sending mail');
-        transport.sendMail({
+        nodemailer_transport.sendMail({
             from: MAILFROM,
             to: MAILTO,
             subject: SUBJECT,
