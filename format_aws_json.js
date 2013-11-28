@@ -24,6 +24,7 @@ var output_tags = [ "Name", "Username", "Hostname", "started_by" ];
 
 process.stdout.write("State,");
 process.stdout.write("InstanceId,");
+process.stdout.write("InstanceType,");
 
 output_tags.forEach(function(output_tag) { 
   process.stdout.write(output_tag);
@@ -55,6 +56,9 @@ process.stdin.on('end', function() {
         process.stdout.write(",");
 
         process.stdout.write(instance.InstanceId);
+        process.stdout.write(",");
+
+        process.stdout.write(instance.InstanceType);
         process.stdout.write(",");
 
         output_tags.forEach(function(output_tag) { 
