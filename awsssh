@@ -39,4 +39,9 @@ key="`echo \"$data\" | cut -f$key_column -d,`"
 
 user=`getuserbydistro "$distro"`
 
+if [ ! "$user" ] 
+then
+  user=root
+fi
+
 ssh -i ~/.ssh/$key.pem $user@$dns
