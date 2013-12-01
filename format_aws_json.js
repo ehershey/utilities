@@ -20,7 +20,7 @@ process.stdin.on('data', function(chunk) {
 
 // tags to include in output (case insensitive) (actual ec2 tags)
 //
-var output_tags = [ "Name", "Username", "Hostname", "started_by" ];
+var output_tags = [ "Name", "Username", "Hostname", "started_by", "distro" ];
 
 process.stdout.write("State,");
 process.stdout.write("InstanceId,");
