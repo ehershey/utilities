@@ -25,8 +25,22 @@ then
   exit 2
 fi
 
+if [ ! "$AWS_SECRET_ACCESS_KEY" -o ! "$AWS_ACCESS_KEY_ID" ]
+then
+  . ~/amazon-build.sh
+fi
+
 header=`cache_run $CACHE_SECONDS "instance_info_by_name.sh $instance_name" | head -1`
 data=`cache_run $CACHE_SECONDS "instance_info_by_name.sh $instance_name" | tail -1`
+
+# account for weird lost data
+#
+if [ \( ! "$data" \) -o "`echo \"$data\" | grep running,\*$`" ]
+then
+  echo "retrying to poll aws data"
+  header=`cache_run 0 "instance_info_by_name.sh $instance_name" | head -1`
+  data=`cache_run $CACHE_SECONDS "instance_info_by_name.sh $instance_name" | tail -1`
+fi
 
 # get column numbers
 distro_column="`echo \"$header\"  | tr , \\\\n | grep -n distro | cut -f1 -d: `"
@@ -36,6 +50,12 @@ key_column="`echo \"$header\"  | tr , \\\\n | grep -n KeyName | cut -f1 -d: `"
 distro="`echo \"$data\" | cut -f$distro_column -d,`"
 dns="`echo \"$data\" | cut -f$dns_column -d,`"
 key="`echo \"$data\" | cut -f$key_column -d,`"
+
+if [ ! "$dns" -o "$dns" = "running" ]
+then
+  echo "Can't find dns info for server"
+  exit 3
+fi
 
 user=`getuserbydistro "$distro"`
 
