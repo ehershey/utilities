@@ -1,0 +1,46 @@
+#!/bin/sh
+#
+# run a command caching the output for an arbitrary period of time,
+# avoiding duplicate executions if unexpired cached output exists
+# usage: cache_run <lifetime> <cmd>
+#
+
+cachedir=$HOME/.generic_cache
+
+TIMEOUT=2
+
+if [ ! -d $cachedir ]
+then
+	mkdir $cachedir
+fi
+
+cache_life=$1
+cmd=$2
+
+if [ ! "$cmd" ]
+then
+	echo "usage: $0 <data_lifetime> <cmd>"
+	exit 2
+fi
+
+cachefile=$cachedir/`echo "$cmd" | sed 's/[^0-9a-zA-Z_-]/_/g'`
+
+if [ -e $cachefile ]
+then
+	# check if content has expired
+	# 
+	#file_mtime=`stat -f %m $cachefile`
+	file_mtime=`perl -MFile::stat -e 'print stat("'$cachefile'")->mtime'`
+
+	current_time=`date +%s`
+	if [ `expr $current_time - $file_mtime` -lt $cache_life ]
+	then
+		#echo cache hit >&2
+    cat $cachefile
+		exit
+	fi
+fi
+#echo cache miss >&2
+trap "rm $cachefile" INT
+eval $cmd | tee $cachefile
+	
