@@ -22,15 +22,24 @@ process.stdin.on('data', function(chunk) {
 //
 var output_tags = [ "Name", "Username", "Hostname", "started_by", "distro" ];
 
-process.stdout.write("State,");
-process.stdout.write("InstanceId,");
-process.stdout.write("InstanceType,");
+// json fields to include in output (case sensitive) (not tags, standard ec2 metadata)
+var output_fields = [ "StateName", "InstanceId", "InstanceType", "KeyName", "PublicDnsName" ]
+
+// to track whether to print a comma
+// 
+var printed_field = false; 
+output_fields.forEach(function(output_field) { 
+  if(printed_field) {
+    process.stdout.write(",");
+  }
+  process.stdout.write(output_field);
+  printed_field = true; 
+});
 
 output_tags.forEach(function(output_tag) { 
-  process.stdout.write(output_tag);
   process.stdout.write(",");
+  process.stdout.write(output_tag);
 });
-process.stdout.write("Dns");
 process.stdout.write("\n");
 
 process.stdin.on('end', function() {
@@ -52,23 +61,29 @@ process.stdin.on('end', function() {
           });
         });
 
-        process.stdout.write(instance.State.Name);
-        process.stdout.write(",");
+        // set StateName field to State.Name
+        //
+        instance.StateName = instance.State.Name;
 
-        process.stdout.write(instance.InstanceId);
-        process.stdout.write(",");
+        // to track whether to print a comma
+        // 
+        var printed_field = false; 
 
-        process.stdout.write(instance.InstanceType);
-        process.stdout.write(",");
+        output_fields.forEach(function(output_field) { 
+          if(!instance[output_field]) { instance[output_field] = ''; }
+          if(printed_field) {
+            process.stdout.write(",");
+          }
+          process.stdout.write(instance[output_field]);
+          printed_field = true;
+        });
 
         output_tags.forEach(function(output_tag) { 
           output_tag = output_tag.toLowerCase();
           if(!instance_tags[output_tag]) { instance_tags[output_tag] = ''; }
-          process.stdout.write(instance_tags[output_tag]);
           process.stdout.write(",");
+          process.stdout.write(instance_tags[output_tag]);
         });
-        if(!instance.PublicDnsName) { instance.PublicDnsName = ''; } 
-        process.stdout.write(instance.PublicDnsName);
         process.stdout.write("\n");
       });
   });
