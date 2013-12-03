@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 name="$1"
 if [ ! "$name" ] 
 then
@@ -6,4 +6,9 @@ then
   exit 2
 fi
 
-aws ec2 describe-instances --filters "Name=tag:Name,Values=$name" | `dirname $0`/format_aws_json.js
+if [ ! "$AWS_SECRET_ACCESS_KEY" -o ! "$AWS_ACCESS_KEY_ID" ]
+then
+  . ~/amazon-build.sh
+fi
+
+aws ec2 describe-instances --filters "Name=tag:Name,Values=$name" | node `dirname $0`/format_aws_json.js
