@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #
 # run a command caching the output for an arbitrary period of time,
 # avoiding duplicate executions if unexpired cached output exists
@@ -43,4 +43,3 @@ fi
 #echo cache miss >&2
 trap "rm $cachefile" INT
 eval $cmd | tee $cachefile
-	
