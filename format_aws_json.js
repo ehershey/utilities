@@ -39,7 +39,7 @@ process.stdin.on('end', function() {
 
         instance.Tags.forEach(function(tag) { 
           output_tags.forEach(function(output_tag) { 
-            output_tag_lower = output_tag.toLowerCase();
+            output_tag = output_tag.toLowerCase();
             if(tag.Key.toLowerCase() === output_tag) {
               instance_tags[output_tag] = tag.Value;
             }
