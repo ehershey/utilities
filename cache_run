@@ -29,7 +29,6 @@ if [ -e $cachefile ]
 then
 	# check if content has expired
 	# 
-	#file_mtime=`stat -f %m $cachefile`
 	file_mtime=`perl -MFile::stat -e 'print stat("'$cachefile'")->mtime'`
 
 	current_time=`date +%s`
@@ -40,6 +39,5 @@ then
 		exit
 	fi
 fi
-#echo cache miss >&2
 trap "rm $cachefile" INT
 eval $cmd | tee $cachefile
