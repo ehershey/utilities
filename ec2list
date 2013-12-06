@@ -1,6 +1,13 @@
-#!/bin/sh
+#!/bin/bash
 if [ ! "$AWS_SECRET_ACCESS_KEY" -o ! "$AWS_ACCESS_KEY_ID" ]
 then
   . ~/amazon-build.sh
 fi
-cache_run 300 "aws ec2 describe-instances | format_aws_json.js"
+
+if [ "$1" ]
+then
+  cache_run 300 "aws ec2 describe-instances | format_aws_json.js" | grep "$1"
+else
+  cache_run 300 "aws ec2 describe-instances | format_aws_json.js" | grep "$1"
+fi
+
