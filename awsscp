@@ -1,0 +1,79 @@
+#!/bin/bash
+#
+# Given an aws instance name, scp to/from it
+# 
+# Depends on: 
+# 1) ~/git/mci/config/distros.yml for usernames
+# 2) ~/.ssh/<key name>.pem with ssh private keys named after amazon key name
+# 3) cache_run executable
+# 4) instance_info_by_name.sh executable
+#
+# Only supported usage:
+#
+# 1) instance name in last arg: awsscp <localpath(s)> instance_name:[<remote_path>]
+# 2) instance name in first arg: awsscp instance_name:<remote_path(s)> localpath
+#
+# Does not support instance names with spaces in them
+#
+
+# how long to cache aws info 
+CACHE_SECONDS=300
+
+getuserbydistro () 
+{ 
+    distro="$1";
+    egrep --no-filename ^$distro:\|user: ~/git/mci/config/distros.yml* ~/distros.yml* | grep -A 1 ^$distro: | tail -1 | cut -f2 -d: | tr -d " "
+}
+
+if [ ! "$2" ] 
+then
+  echo "usage: "
+  echo "1) instance name in last arg: awsscp <localpath(s)> instance_name:[<remote_path>]"
+  echo "2) instance name in first arg: awsscp instance_name:<remote_path(s)> localpath"
+  exit 2
+fi
+
+instance_name=$(echo "$*" | tr \  \\n | grep : | cut -f1 -d:)
+
+if [ ! "$AWS_SECRET_ACCESS_KEY" -o ! "$AWS_ACCESS_KEY_ID" ]
+then
+  . ~/amazon-build.sh
+fi
+
+header=$(cache_run $CACHE_SECONDS "instance_info_by_name.sh $instance_name" | head -1)
+data=$(cache_run $CACHE_SECONDS "instance_info_by_name.sh $instance_name" | tail -1)
+
+# account for weird lost data
+#
+if [ \( ! "$data" \) -o "$(echo \"$data\" | grep running,\*$)" -o "$data" = "$header" ]
+then
+  echo "retrying to poll aws data"
+  header=$(cache_run 0 "instance_info_by_name.sh $instance_name" | head -1)
+  data=$(cache_run $CACHE_SECONDS "instance_info_by_name.sh $instance_name" | tail -1)
+fi
+
+# get column numbers
+distro_column="$(echo "$header"  | tr , \\n | grep -n distro | cut -f1 -d: )"
+dns_column="$(echo "$header"  | tr , \\n | grep -n PublicDnsName | cut -f1 -d: )"
+key_column="$(echo "$header"  | tr , \\n | grep -n KeyName | cut -f1 -d: )"
+
+distro="$(echo "$data" | cut -f$distro_column -d,)"
+dns="$(echo "$data" | cut -f$dns_column -d,)"
+key="$(echo "$data" | cut -f$key_column -d,)"
+
+if [ ! "$dns" -o "$dns" = "running" ]
+then
+  echo "Can't find dns info for server ($data)"
+  exit 3
+fi
+
+user=$(getuserbydistro "$distro")
+
+if [ ! "$user" ] 
+then
+  user=root
+fi
+
+args=$(echo "$*" | sed "s/$instance_name:/$user@$dns:/")
+
+scp -i ~/.ssh/$key.pem $args
