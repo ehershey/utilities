@@ -29,3 +29,4 @@ then
 fi
 
 echo aws ec2 create-tags --resources $instance_id  --tags "Key=Name,Value=$new_name"
+aws ec2 create-tags --resources $instance_id  --tags "Key=Name,Value=$new_name"
