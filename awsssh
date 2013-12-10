@@ -35,7 +35,7 @@ data=$(cache_run $CACHE_SECONDS "instance_info_by_name.sh $instance_name" | tail
 
 # account for weird lost data
 #
-if [ \( ! "$data" \) -o "$(echo \"$data\" | grep running,\*$)" -o "$data" = "$header" ]
+if [ \( ! "$data" \) -o "$(echo \"$data\" | grep running,\*$)" -o "$data" = "$header" -o "$(echo \"$data\" | grep stopped)" ]
 then
   echo "retrying to poll aws data"
   header=$(cache_run 0 "instance_info_by_name.sh $instance_name" | head -1)
