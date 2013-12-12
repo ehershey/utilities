@@ -1,4 +1,4 @@
-#!/usr/bin/node
+#!/usr/bin/env node
 var util = require('util');
 
 var Imap = require('imap');
