@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 file="$QUERY_STRING"
 if [ ! "`echo \"$file\" | grep ^/`" ]
