@@ -3,7 +3,7 @@ var util = require('util');
 
 var Imap = require('imap');
 
-var since = 'January 01, 2001';
+var since = 'October 01, 2013';
 var folder = 'UNSEEN';
 //var since = 'January 01, 2012';
 //var folder = 'ALL';
