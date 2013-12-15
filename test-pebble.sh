@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 i=2000 
 if [ "$1" ]
 then
