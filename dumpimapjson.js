@@ -3,7 +3,7 @@ var util = require('util');
 
 var Imap = require('imap');
 
-var since = 'October 01, 2013';
+var since = 'December 01, 2013';
 var folder = 'UNSEEN';
 //var since = 'January 01, 2012';
 //var folder = 'ALL';
@@ -36,6 +36,7 @@ var authdata = require('authdata');
 
   openInbox(function(err, mailbox) {
     if (err) die(err);
+    process.stderr.write('opened inbox\n');
     imap.search([ folder, ['SINCE', since] ], function(err, results) {
       if (err) die(err);
       imap.fetch(results,
@@ -46,13 +47,13 @@ var authdata = require('authdata');
             fetch.on('message', function(msg) {
               index++;
               process.stderr.write('.');
-              // process.stderr.write('starting message no. ' + index + "\n");
+               process.stderr.write('starting message no. ' + index + "\n");
               msg.on('headers', function(hdrs) {
                 process.stdout.write(JSON.stringify({ msg: msg, sequenceNo: msg.seqno, headers: hdrs}) + "\n");
-                // process.stderr.write('Headers for no. ' + msg.seqno + ': ' + show(hdrs) + "\n");
+                 process.stderr.write('Headers for no. ' + msg.seqno + ': ' + show(hdrs) + "\n");
               });
               msg.on('end', function() {
-                //process.stderr.write('ending message no. ' + index + "\n");
+                process.stderr.write('ending message no. ' + index + "\n");
               });
             });
           }
