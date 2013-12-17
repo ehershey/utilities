@@ -26,6 +26,11 @@ subtitle="" # ignored
 appname="" # ignored
 iconapp="" # ignored
 
+if [ ! "$1" ]
+then
+  echo "Usage: $0 -n <appname> -a <iconapp> -m <message> -t <title>"
+fi
+
 while [ "$1" ]
 do
   if [ "$1" = "-n" ]
@@ -64,5 +69,7 @@ do
 done
 if [ "$message" ]
 then
+    set -x 
     terminal-notifier -message "$message" -title "$title" 
+    set +x
 fi
