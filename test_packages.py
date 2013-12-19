@@ -79,7 +79,7 @@ print "connecting..."
 print "dns name: %s " % inst.dns_name
 
 # TODO actually check for availability
-sleep(5)
+time.sleep(5)
 
 
 env.hosts = [inst.dns_name]
