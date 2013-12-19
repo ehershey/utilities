@@ -68,3 +68,10 @@ def is_mongod_running():
       return False
 
 
+def install_package_building_prereqs():
+    sudo("apt-get --assume-yes update")
+    sudo("apt-get install --assume-yes dpkg-dev rpm debhelper  createrepo git")
+
+def clone_mongodb_repo():
+    sudo("chown ubuntu /mnt")
+    run("git clone git@github.com:mongodb/mongo /mnt/mongo")
