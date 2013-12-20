@@ -8,6 +8,7 @@ import os
 import settings
 import time
 
+USERNAME = os.environ['USER']
 
 
 env.timeout = 60
@@ -15,6 +16,7 @@ env.connection_attempts = 5
 
 region = 'us-east-1'
 key_name = 'admin1'
+env.key_filename = '/Users/ernie/.ssh/admin1.pem'
 security_group = 'default'
 instance_type = 'm1.large'
 
@@ -22,7 +24,7 @@ instance_type = 'm1.large'
 #
 label = 'ubuntu 12.04' 
 ami_id = 'ami-3fec7956'
-env['user'] = 'ec2-user'
+env['user'] = 'ubuntu'
 
 
 
@@ -58,6 +60,7 @@ timestamp_string = start_time.strftime("%Y%m%d%H%M%S")
 instance_name = "pkg-tst-%s-%s" % (label.replace(" ", "_"), timestamp_string)
 
 inst.add_tag("Name", instance_name)
+inst.add_tag("Username", USERNAME)
 inst.update()
 
 print "instance name: %s" % instance_name
@@ -81,16 +84,20 @@ print "dns name: %s " % inst.dns_name
 # TODO actually check for availability
 time.sleep(5)
 
+elapsed_seconds = (datetime.datetime.now() - start_time).seconds
+
+print "%d seconds elapsed" % elapsed_seconds
 
 env.hosts = [inst.dns_name]
 
 execute(install_package_building_prereqs)
 execute(clone_mongodb_repo)
+execute(packager_py)
 
 # done - spin up ubuntu machine 
 # install pre-req packages
 # install gpg key
-# clone repo
+# done - clone repo
 # tag repo
 # run packager.py 
 # copy repo into place

@@ -12,6 +12,8 @@ import fabric.utils
 env['use_ssh_config'] = True
 env['key_filename'] = "/Users/ernie/git/ops-private/ec2/aws-build/admin1.pem"
 
+# where to build packages
+WORKDIR="/mnt/mongo"
 
 expected_version = "2.4.3"
 
@@ -67,11 +69,18 @@ def is_mongod_running():
     else:
       return False
 
+def install_github_hostkey():
+    run("echo 'github.com,207.97.227.239 ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAq2A7hRGmdnm9tUDbO9IDSwBK6TbQa+PXYPCPy6rbTrTtw7PHkccKrpp0yVhp5HdEIcKr6pLlVDBfOLX9QUsyCOV0wzfjIJNlGEYsdlLJizHhbn2mUjvSAHQqZETYP81eFzLQNnPHt4EVVUh7VfDESU84KezmD5QlWpXLmvU31/yMf+Se8xhHTvKSCZIFImWwoG6mbUoWf9nzpIoaSjB+weqqUUmpaaasXVal72J+UX2B+2RPW3RcT0eOzQgqlJL3RKrTJvdsjE3JEAvGq3lGHSZXy28G3skua2SmVi/w4yCE6gbODqnTWlg7+wC604ydGXA8VJiS5ap43JXiUFFAaQ==' >> .ssh/known_hosts")
+    run("sort -u -o .ssh/known_hosts .ssh/known_hosts")
 
 def install_package_building_prereqs():
     sudo("apt-get --assume-yes update")
     sudo("apt-get install --assume-yes dpkg-dev rpm debhelper  createrepo git")
+    sudo("chown ubuntu /mnt")
 
 def clone_mongodb_repo():
-    sudo("chown ubuntu /mnt")
-    run("git clone git@github.com:mongodb/mongo /mnt/mongo")
+    install_github_hostkey()
+    run("git clone git@github.com:mongodb/mongo %s" % WORKDIR)
+
+def packager_py(version):
+    run("cd %s/buildscripts; packager.py %s" % (WORKDIR, version) )
