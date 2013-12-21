@@ -22,3 +22,4 @@ client_secrets.json
 node_modules
 authdata.js
 crontab.env
+gpgexport
