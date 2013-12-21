@@ -2,7 +2,7 @@
 
 import boto.ec2
 import datetime
-from fabfile import install_package_building_prereqs, clone_mongodb_repo
+from fabfile import install_package_building_prereqs, clone_mongodb_repo, packager_py, packager_enterprise_py, install_gpg_key
 from fabric.api import execute, env
 import os
 import settings
@@ -92,14 +92,30 @@ env.hosts = [inst.dns_name]
 
 execute(install_package_building_prereqs)
 execute(clone_mongodb_repo)
+
+execute(install_gpg_key)
+
+# need to figure out how to determine this version more dynamically
+# 
+env['package_version_to_build'] = '2.5.4'
+env['package_suffix'] = '-org-unstable'
 execute(packager_py)
 
+# need to figure out how to determine this version more dynamically
+# 
+env['package_version_to_build'] = '2.5.4'
+env['package_suffix'] = '-enterprise-unstable'
+execute(packager_enterprise_py)
+
+
+
+
 # done - spin up ubuntu machine 
-# install pre-req packages
-# install gpg key
+# done install pre-req packages
+# done install gpg key
 # done - clone repo
-# tag repo
-# run packager.py 
+# done tag repo
+# done run packager.py 
 # copy repo into place
 # run packager-enterprise.py into /tmp
 # copy repo into place

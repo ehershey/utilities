@@ -6,7 +6,7 @@
 # fab setuprepo installpackage verifypackage uninstallpackage
 #
 #
-from fabric.api import env, run, sudo
+from fabric.api import env, run, sudo, put, cd
 import fabric.utils
 
 env['use_ssh_config'] = True
@@ -75,12 +75,45 @@ def install_github_hostkey():
 
 def install_package_building_prereqs():
     sudo("apt-get --assume-yes update")
-    sudo("apt-get install --assume-yes dpkg-dev rpm debhelper  createrepo git")
+    sudo("apt-get install --assume-yes dpkg-dev rpm debhelper createrepo git libc6:i386 lib32stdc++6 apache2")
     sudo("chown ubuntu /mnt")
+    sudo("chown ubuntu /var/www")
+
+def clean_workdir():
+    run("rm -rf %s" % WORKDIR)
 
 def clone_mongodb_repo():
     install_github_hostkey()
+    clean_workdir()
     run("git clone git@github.com:mongodb/mongo %s" % WORKDIR)
 
-def packager_py(version):
-    run("cd %s/buildscripts; packager.py %s" % (WORKDIR, version) )
+def packager_py():
+    version = env['package_version_to_build']
+    suffix = env['package_suffix']
+    branch = "local-community-v%s" % version
+    tag = "r%s" % version
+    with cd(WORKDIR):
+      run("git checkout -b %s" % branch)
+      run("perl -i -p -e 's/Version: .*/Version: %s/' /mnt/mongo/rpm/*.spec" % version)
+      run("git commit -m 'version bump for community packages version %s' rpm/*.spec --allow-empty" % version)
+      run("git tag %s -f" % tag)
+      with cd("buildscripts"):
+        run("python packager.py %s:%s" % (version, suffix) )
+
+def packager_enterprise_py():
+    version = env['package_version_to_build']
+    suffix = env['package_suffix']
+    branch = "local-enterprise-v%s" % version
+    tag = "r%s" % version
+    with cd(WORKDIR):
+      run("git checkout -b %s" % branch)
+      run("perl -i -p -e 's/Version: .*/Version: %s/' /mnt/mongo/rpm/*.spec" % version)
+      run("git commit -m 'version bump for enterprise packages version %s' rpm/*.spec --allow-empty" % version)
+      run("git tag %s -f" % tag)
+      with cd("buildscripts"):
+        run("python packager-enterprise.py %s:%s" % (version, suffix) )
+
+
+def install_gpg_key():
+    put("gpgexport")
+    run("gpg --import < gpgexport")
