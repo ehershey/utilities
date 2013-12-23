@@ -33,6 +33,13 @@ var url_configs = [
     negated: true
   },
   { 
+    url: 'http://www.mongodb.org/downloads',
+    badcell_selector: ".release-version",
+    text_finder_from_badcell_jqobj: function(jqobj) { return "Unused"; },
+    ignore_text: '',
+    negated: true
+  },
+  { 
     url: 'http://buildbot.mongodb.org/buildslaves',
     badcell_selector: ".offline",
     text_finder_from_badcell_jqobj: function(jqobj) { return jqobj.parent().children().first().text(); },
