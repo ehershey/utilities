@@ -24,14 +24,22 @@ var nodemailer_transport = nodemailer.createTransport();
 //
 //
 
-var url_configs = [ 
+var erl_configs = [ 
   { 
     url: 'http://mci.10gen.com/ui/',
-    badcell_selector: "body",
+    badcell_selector: "#content",
     text_finder_from_badcell_jqobj: function(jqobj) { return "Unused"; },
     ignore_text: '',
     negated: true
   },
+  { 
+    url: 'http://mci.10gen.com/ui/',
+    badcell_selector: "body:contains(Service Unavailable)",
+    text_finder_from_badcell_jqobj: function(jqobj) { return jqobj.text(); },
+    ignore_text: '',
+    negated: false
+  },
+
   { 
     url: 'http://www.mongodb.org/downloads',
     badcell_selector: ".release-version",
@@ -43,7 +51,7 @@ var url_configs = [
     url: 'http://buildbot.mongodb.org/buildslaves',
     badcell_selector: ".offline",
     text_finder_from_badcell_jqobj: function(jqobj) { return jqobj.parent().children().first().text(); },
-    ignore_text: 'bs-win-64-3',
+    ignore_text: '',
     negated: false
   },
   { 
