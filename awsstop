@@ -1,0 +1,59 @@
+#!/bin/bash
+#
+# Given an aws instance name, stop it
+# 
+# Depends on: 
+# 1) cache_run executable
+# 2) instance_info_by_name.sh executable
+# 3) awscli python package and "aws" executable
+
+# how long to cache aws info 
+CACHE_SECONDS=300
+
+instance_name="$1"
+
+if [ ! "$instance_name" ] 
+then
+  echo "usage: $0 <instance_name>"
+  exit 2
+fi
+
+if [ ! "$AWS_SECRET_ACCESS_KEY" -o ! "$AWS_ACCESS_KEY_ID" ]
+then
+  . ~/amazon-build.sh
+fi
+
+header=$(cache_run $CACHE_SECONDS "instance_info_by_name.sh $instance_name" | head -1)
+data=$(cache_run $CACHE_SECONDS "instance_info_by_name.sh $instance_name" | tail -1)
+
+# account for weird lost data
+#
+if [ \( ! "$data" \) -o "$(echo \"$data\" | grep running,\*$)" -o "$data" = "$header" ]
+then
+  echo "retrying to poll aws data"
+  header=$(cache_run 0 "instance_info_by_name.sh $instance_name" | head -1)
+  data=$(cache_run $CACHE_SECONDS "instance_info_by_name.sh $instance_name" | tail -1)
+fi
+
+# get column numbers
+id_column="$(echo "$header"  | tr , \\n | grep -n InstanceId | cut -f1 -d: )"
+state_column="$(echo "$header"  | tr , \\n | grep -n StateName | cut -f1 -d: )"
+
+id="$(echo "$data" | cut -f$id_column -d,)"
+state="$(echo "$data" | cut -f$state_column -d,)"
+
+if [ ! "$id" -o "$id" = "running" ]
+then
+  echo "Can't find dns info for server ($data)"
+  exit 3
+fi
+
+if [ "$state" != "running" ]
+then
+  echo "Invalid state to stop instance from: $state"
+  exit 4
+fi
+
+echo aws ec2 stop-instances --instance-id $id
+aws ec2 stop-instances --instance-id $id
+
