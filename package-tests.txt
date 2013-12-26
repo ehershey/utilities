@@ -9,8 +9,11 @@ CentOS 6.x 32 bit
 CentOS 5.x 64 bit
 CentOS 5.x 32 bit
 
-Fedora 64 bit
-Fedora 32 bit
+Fedora 8 64 bit
+Fedora 8 32 bit
+
+Fedora X 64 bit (latest)
+Fedora X 32 bit (latest)
 
 Ubuntu 12.04 64 bit
 Ubuntu 12.04 32 bit
@@ -27,37 +30,37 @@ Amazon Linux 32 bit
 
 
 Install main package
-verify server installed
-verify shell installed
-verify tools installed
-verify mongos installed
+Verify server installed
+Verify shell installed
+Verify tools installed
+Verify mongos installed
 
 Uninstall main package
-verify server uninstalled
-verify shell uninstalled
-verify tools uninstalled
-verify mongos uninstalled
+Verify server uninstalled
+Verify shell uninstalled
+Verify tools uninstalled
+Verify mongos uninstalled
 
-install server package
-verify server package installed
-verify no other mongodb packages installed
-uninstall server package
-verify server uninstalled
+Install server package
+Verify server package installed
+Verify no other mongodb packages installed
+Uninstall server package
+Verify server uninstalled
 
-install shell package
-verify shell package installed
-verify no other mongodb packages installed
-uninstall shell package
-verify shell uninstalled
+Install shell package
+Verify shell package installed
+Verify no other mongodb packages installed
+Uninstall shell package
+Verify shell uninstalled
 
-install tools package
-verify tools package installed
-verify no other mongodb packages installed
-uninstall tools package
-verify tools uninstalled
+Install tools package
+Verify tools package installed
+Verify no other mongodb packages installed
+Uninstall tools package
+Verify tools uninstalled
 
-install mongos package
-verify mongos package installed
-uninstall mongos package
-verify mongos uninstalled
-verify no other mongodb packages installed
+Install mongos package
+Verify mongos package installed
+Uninstall mongos package
+Verify mongos uninstalled
+Verify no other mongodb packages installed
