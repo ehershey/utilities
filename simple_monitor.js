@@ -24,7 +24,7 @@ var nodemailer_transport = nodemailer.createTransport();
 //
 //
 
-var erl_configs = [ 
+var url_configs = [ 
   { 
     url: 'http://mci.10gen.com/ui/',
     badcell_selector: "#content",
