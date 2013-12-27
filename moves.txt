@@ -18,3 +18,5 @@ curl  --data "grant_type=authorization_code&code=$AUTH_CODE&client_id=$CLIENT_ID
 
 # response looks like: 
 {"access_token":"xxxxx","token_type":"bearer","expires_in":15551999,"refresh_token":"yyyyy","user_id":zzzzzzzzz}
+
+6) Set access token to $MOVES_ACCESS_TOKEN
