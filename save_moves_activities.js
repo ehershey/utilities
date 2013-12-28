@@ -134,6 +134,8 @@ process.stdin.on('end', function() {
                 save_segment(db, segment);
         
                 var activities = segment.activities;
+
+                if(!activities) { activities = [] }
         
                 for(var k = 0 ; k < activities.length ; k++) 
                 {
@@ -211,10 +213,7 @@ function save_day_entry(db,entry)
 
         console.log("saved entry");
         wrote_entry_count++;
-        if(wrote_activity_count === total_activity_count && wrote_entry_count === total_entry_count && wrote_segment_count === total_segment_count) 
-        {
-          db.close();
-        }
+        cleanup_db_connection(db);
 
       });
     });
@@ -279,10 +278,7 @@ function save_segment(db,segment)
 
         console.log("saved segment");
         wrote_segment_count++;
-        if(wrote_activity_count === total_activity_count && wrote_entry_count === total_entry_count && wrote_segment_count === total_segment_count) 
-        {
-          db.close();
-        }
+        cleanup_db_connection(db);
       });
     });
   });
@@ -346,12 +342,18 @@ function save_activity(db,activity)
 
         console.log("saved activity");
         wrote_activity_count++;
-        if(wrote_activity_count === total_activity_count && wrote_entry_count === total_entry_count && wrote_segment_count === total_segment_count) 
-        {
-          console.log('calling db.close()');
-          db.close();
-        }
+        cleanup_db_connection(db);
       });
     });
   });
+}
+
+function cleanup_db_connection(db) {
+  setTimeout(function() { 
+    if(wrote_activity_count === total_activity_count && wrote_entry_count === total_entry_count && wrote_segment_count === total_segment_count) 
+    {
+      console.log('calling db.close()');
+      db.close();
+    }
+  }, 5000);
 }
