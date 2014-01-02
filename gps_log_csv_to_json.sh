@@ -31,15 +31,16 @@
 #
 # Usage: 
 # 
-# gps_log_csv_to_json.sh  < gps_log.txt | mongoimport
+# gps_log_csv_to_json.sh  < gps_log.txt | mongoimport --db ernie_org --collection locations
 
+use Data::Dumper;
 use Text::CSV;
 
 my @rows;
 my $csv = Text::CSV->new ()
 or die "Cannot use CSV: ".Text::CSV->error_diag ();
 
-open my $fh, "<:encoding(utf8)", <> or die "stdin: $!";
+my $fh = \*STDIN;
 while ( my $row = $csv->getline( $fh ) ) {
   push @rows, $row;
 }
@@ -47,3 +48,6 @@ $csv->eof or $csv->error_diag();
 close $fh;
 
 $csv->eol ("\r\n");
+
+print "row count: " . scalar(@rows) . "\n";
+print Dumper \@rows;
