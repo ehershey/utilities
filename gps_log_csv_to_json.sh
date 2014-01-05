@@ -33,6 +33,8 @@
 # 
 # gps_log_csv_to_json.sh  < gps_log.txt | mongoimport --db ernie_org --collection locations
 
+use strict;
+use warnings;
 use Data::Dumper;
 use Text::CSV;
 
@@ -40,14 +42,26 @@ my @rows;
 my $csv = Text::CSV->new ()
 or die "Cannot use CSV: ".Text::CSV->error_diag ();
 
+my $column_indexes = { 
+  entry_id => 0,
+  last_update => 1,
+  entry_date => 2,
+  longitude => 3,
+  latitude => 4,
+  entry_source => 5,
+  accuracy => 6,
+};
+
 my $fh = \*STDIN;
 while ( my $row = $csv->getline( $fh ) ) {
   push @rows, $row;
+  #print Dumper $row;
+  print "{loc: { type: \"Point\" , coordinates : [ " . $row->[$column_indexes->{"longitude"}] . ", " . $row->[$column_indexes->{"latitude"}] . " ] } }\n";
 }
 $csv->eof or $csv->error_diag();
 close $fh;
 
 $csv->eol ("\r\n");
 
-print "row count: " . scalar(@rows) . "\n";
-print Dumper \@rows;
+#print "row count: " . scalar(@rows) . "\n";
+#print Dumper \@rows;
