@@ -2,7 +2,7 @@
 #
 #
 # Take gps log data exported via:
-# mysqldump ernie_org gps_log --tab=gps_log --fields-terminated-by="," --fields-enclosed-by="\"" --lines-terminated-by="\r\n"
+# mysqldump ernie_org gps_log --tz-utc --tab=/tmp --fields-terminated-by="," --fields-enclosed-by="\"" --lines-terminated-by="\r\n"
 #
 # Import it into mongodb to look like: 
 # {
@@ -31,7 +31,7 @@
 #
 # Usage: 
 # 
-# gps_log_csv_to_json.sh  < gps_log.txt | mongoimport --db ernie_org --collection locations
+# gps_log_csv_to_json.sh  "old gps_log db" < gps_log.txt | mongoimport --db ernie_org --collection locations
 
 use strict;
 use warnings;
@@ -41,6 +41,8 @@ use Text::CSV;
 my @rows;
 my $csv = Text::CSV->new ()
 or die "Cannot use CSV: ".Text::CSV->error_diag ();
+
+my $override_entry_source = $ARGV[0] || "";
 
 my $column_indexes = { 
   entry_id => 0,
@@ -56,7 +58,24 @@ my $fh = \*STDIN;
 while ( my $row = $csv->getline( $fh ) ) {
   push @rows, $row;
   #print Dumper $row;
-  print "{loc: { type: \"Point\" , coordinates : [ " . $row->[$column_indexes->{"longitude"}] . ", " . $row->[$column_indexes->{"latitude"}] . " ] } }\n";
+  print "{\n";
+  print "loc: { type: \"Point\" , coordinates : [ " . $row->[$column_indexes->{"longitude"}] . ", " . $row->[$column_indexes->{"latitude"}] . " ] },\n";
+  print "entry_date: ISODate(" . $row->[$column_indexes->{"entry_date"}] . "),\n";
+  print "last_update: ISODate(" . $row->[$column_indexes->{"last_update"}] . "),\n";
+  my $entry_source;
+  if($override_entry_source) { 
+    $entry_source = $override_entry_source;
+  } else {
+    $entry_source = $row->[$column_indexes->{"entry_source"}];
+  }
+  my $accuracy = $row->[$column_indexes->{"accuracy"}];
+  $accuracy =~ s/\\N//gi;
+  if($accuracy) { 
+    print "accuracy: \"$accuracy\",\n";
+  }
+
+  print "entry_source: \"$entry_source\"\n";
+  print "}\n";
 }
 $csv->eof or $csv->error_diag();
 close $fh;
