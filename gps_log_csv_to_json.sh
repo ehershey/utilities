@@ -36,6 +36,7 @@
 use strict;
 use warnings;
 use Data::Dumper;
+use Date::Parse qw(str2time);
 use Text::CSV;
 
 my @rows;
@@ -58,10 +59,10 @@ my $fh = \*STDIN;
 while ( my $row = $csv->getline( $fh ) ) {
   push @rows, $row;
   #print Dumper $row;
-  print "{\n";
-  print "loc: { type: \"Point\" , coordinates : [ " . $row->[$column_indexes->{"longitude"}] . ", " . $row->[$column_indexes->{"latitude"}] . " ] },\n";
-  print "entry_date: ISODate(" . $row->[$column_indexes->{"entry_date"}] . "),\n";
-  print "last_update: ISODate(" . $row->[$column_indexes->{"last_update"}] . "),\n";
+  print "{ ";
+  print "loc: { type: \"Point\" , coordinates : [ " . $row->[$column_indexes->{"longitude"}] . ", " . $row->[$column_indexes->{"latitude"}] . " ] }, ";
+  print "entry_date: Date(" . str2time($row->[$column_indexes->{"entry_date"}] . "-0000") . "000), ";
+  print "last_update: Date(" . str2time($row->[$column_indexes->{"last_update"}] . "-0000") . "000), ";
   my $entry_source;
   if($override_entry_source) { 
     $entry_source = $override_entry_source;
@@ -71,10 +72,10 @@ while ( my $row = $csv->getline( $fh ) ) {
   my $accuracy = $row->[$column_indexes->{"accuracy"}];
   $accuracy =~ s/\\N//gi;
   if($accuracy) { 
-    print "accuracy: \"$accuracy\",\n";
+    print "accuracy: \"$accuracy\", ";
   }
 
-  print "entry_source: \"$entry_source\"\n";
+  print "entry_source: \"$entry_source\" ";
   print "}\n";
 }
 $csv->eof or $csv->error_diag();
