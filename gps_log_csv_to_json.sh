@@ -10,8 +10,8 @@
 #   loc : { type : "Point" ,
 #         coordinates : [ 40, 5 ]
 #   },
-#   last_update: ISODate("2013-12-30T11:43:36.362Z"),
-#   entry_date: ISODate("2013-12-30T11:43:36.362Z"),
+#   last_update: Date(1151381451000),
+#   entry_date: Date(1151381451000),
 #   entry_source: "movesapp",
 #   accuracy: null
 # }
