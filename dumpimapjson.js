@@ -76,12 +76,13 @@ imap.once('ready', function() {
       f.once('end',function() {
           process.stderr.write('Done fetching all messages!' + "\n");
           imap.end();
+          process.exit();
       });
     });
   });
 });
 imap.once('error', function(err) {
-    process.stderr.write(err + "\n");
+    process.stderr.write("imap.once error: " + err + "\n");
 });
 
 imap.once('end', function() {
