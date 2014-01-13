@@ -26,6 +26,14 @@ var nodemailer_transport = nodemailer.createTransport();
 
 var url_configs = [ 
   { 
+    url: 'http://downloads-distro.mongodb.org/repo/ubuntu-upstart/dists/dist/10gen/binary-amd64/',
+    badcell_selector: "a:contains(deb)",
+    text_finder_from_badcell_jqobj: function(jqobj) { return "Unused"; },
+    ignore_text: '',
+    negated: true
+  },
+ 
+  { 
     url: 'http://mci.10gen.com/ui/',
     badcell_selector: "#content",
     text_finder_from_badcell_jqobj: function(jqobj) { return "Unused"; },
