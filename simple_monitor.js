@@ -9,7 +9,7 @@
 var jsdom = require('jsdom');
 var fs = require('fs');
 var nodemailer = require('nodemailer');
-require('date-utils');
+var date_utils = require('date-utils');
 
 var MAILTO = 'Ernie Hershey <ernie@mongodb.com>'
 var MAILFROM = 'Simple Monitor <ernie@mongodb.com>'
@@ -25,6 +25,14 @@ var nodemailer_transport = nodemailer.createTransport();
 //
 
 var url_configs = [ 
+  { 
+    url: 'http://buildbot.mongodb.org:8081/builders/Windows%2032-bit/builds/-1',
+    badcell_selector: "div.success:contains('( 0 secs )')",
+    text_finder_from_badcell_jqobj: function(jqobj) { return "Windows 32-bit builder in zombie state"; },
+    ignore_text: '',
+    negated: false
+  },
+ 
   { 
     url: 'http://downloads-distro.mongodb.org/repo/ubuntu-upstart/dists/dist/10gen/binary-amd64/',
     badcell_selector: "a:contains(deb)",
