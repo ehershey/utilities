@@ -22,7 +22,7 @@ instance_type = 'm1.large'
 
 # ubuntu 12.04
 #
-label = 'ubuntu 12.04' 
+label = 'ubuntu1204' 
 ami_id = 'ami-3fec7956'
 env['user'] = 'ubuntu'
 
@@ -57,7 +57,7 @@ inst = res.instances[0]
 
 start_time = datetime.datetime.now()
 timestamp_string = start_time.strftime("%Y%m%d%H%M%S")
-instance_name = "pkg-tst-%s-%s" % (label.replace(" ", "_"), timestamp_string)
+instance_name = "pkg_test_%s_%s" % (label.replace(" ", "_"), timestamp_string)
 
 inst.add_tag("Name", instance_name)
 inst.add_tag("Username", USERNAME)
