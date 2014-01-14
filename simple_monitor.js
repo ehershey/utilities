@@ -26,6 +26,14 @@ var nodemailer_transport = nodemailer.createTransport();
 
 var url_configs = [ 
   { 
+    url: 'https://jira.mongodb.org/issues/?jql=assignee%20%3D%20%22ernie.hershey%4010gen.com%22%20AND%20(priority%20%3D%20%22Blocker%20-%20P1%22%20OR%20priority%20%3D%20%22Critical%20-%20P2%22)%20AND%20status%20!%3D%20%22Resolved%22%20and%20status%20!%3D%20%22Closed%22%20AND%20status%20!%3D%20%22In%20Progress%22',
+    badcell_selector: "a.issue-link",
+    text_finder_from_badcell_jqobj: function(jqobj) { return jqobj.text(); },
+    ignore_text: '',
+    negated: false
+  },
+ 
+  { 
     url: 'http://buildbot.mongodb.org:8081/builders/Windows%2032-bit/builds/-1',
     badcell_selector: "div.success:contains('( 0 secs )')",
     text_finder_from_badcell_jqobj: function(jqobj) { return "Windows 32-bit builder in zombie state"; },
