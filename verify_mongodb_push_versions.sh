@@ -13,6 +13,11 @@ then
   exit 1
 fi
 
+if [ ! "$AWS_SECRET_ACCESS_KEY" -o ! "$AWS_ACCESS_KEY_ID" ]
+then
+  . ~/amazon-nocadmin.sh
+fi
+
 all_files="
 s3://downloads.10gen.com/linux/mongodb-linux-x86_64-subscription-amzn64-%s.tgz
 s3://downloads.10gen.com/linux/mongodb-linux-x86_64-subscription-rhel57-%s.tgz
@@ -34,8 +39,12 @@ s3://downloads.mongodb.org/osx/mongodb-osx-x86_64-%s.tgz
 s3://downloads.mongodb.org/sunos5/mongodb-sunos5-x86_64-%s.tgz
 "
 
+tried=0
+found=0
+
 for push_file_pattern in $all_files
 do
+  tried=`expr $tried + 1`
   push_file=`printf $push_file_pattern $version`
   #echo push_file: $push_file
   echo -n .
@@ -43,46 +52,9 @@ do
   then
     echo
     echo "ERROR: missing file: $push_file"
+  else
+    found=`expr $found + 1`
   fi
 done
 echo
-exit
-
-tempdir=`mktemp -d /tmp/verify_versions.XXXXXX`
-
-echo "tempdir: $tempdir"
-
-cd $tempdir
-
-cache_get 86400 http://downloads.mongodb.org/src/mongodb-src-r$version.tar.gz | tar zxf - 
-
-echo checking version.cpp
-grep 'const char versionString\[\] = "'$version'"' mongodb-src-r$version/src/mongo/util/version.cpp 
-echo checking doxygenConfig
-grep "PROJECT_NUMBER *= $version$" mongodb-src-r$version/doxygenConfig
-
-
-filename=mongodb-osx-x86_64-$version.tgz
-cache_get 86400 http://downloads.mongodb.org/osx/$filename | tar zxf - 
-
-while [ $port"0" -eq "0" -o $port"0" -le 10240 ]
-do
-    port=$RANDOM
-  done
-
-echo checking mongod --version:
-./mongodb-osx-x86_64-$version/bin/mongod --version | tee /dev/tty | grep "db version v"$version
-echo checking mongo shell --version:
-./mongodb-osx-x86_64-$version/bin/mongo --version | tee /dev/tty | grep " "$version$
-
-./mongodb-osx-x86_64-$version/bin/mongod --bind_ip 127.0.0.1 --port $port --syslog --fork --dbpath . --pidfilepath $tempdir/pid.txt
-sleep 5
-echo 'checking db.serverBuildInfo()' 
-
-echo 'db.serverBuildInfo().version' | ./mongodb-osx-x86_64-$version/bin/mongo --port $port | grep -x $version
-
-kill `cat $tempdir/pid.txt`
-rm -rf $tempdir
-
-echo ALL VERSIONS VERIFIED
-
+echo "Found $found/$tried"
