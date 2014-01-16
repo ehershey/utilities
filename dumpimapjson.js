@@ -38,7 +38,7 @@ imap.once('ready', function() {
     if (err) die(err);
     process.stderr.write('opened inbox\n');
     //imap.search([ folder, ['SINCE', since] ], function(err, results) {
-    imap.search([ folder, ['SINCE', 'Dec 20, 2013'] ], function(err, results) {
+    imap.search([ folder, ['SINCE', since] ], function(err, results) {
       if (err) die(err);
       var index = 0;
       var f = imap.fetch(results, { headers: true, bodies: 'HEADER.FIELDS (FROM TO SUBJECT DATE)', struct: true });
