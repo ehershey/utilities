@@ -6,8 +6,8 @@ fi
 
 if [ "$1" ]
 then
-  cache_run 300 "aws ec2 describe-instances | format_aws_json.js" | grep -i "$1"
+  cache_run 300 "aws ec2 describe-instances | format_aws_json.js $AWS_ACCESS_KEY_ID" | grep -i "$1"
 else
-  cache_run 300 "aws ec2 describe-instances | format_aws_json.js" | grep -i "$1"
+  cache_run 300 "aws ec2 describe-instances | format_aws_json.js $AWS_ACCESS_KEY_ID" | grep -i "$1"
 fi
 
