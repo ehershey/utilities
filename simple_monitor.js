@@ -50,6 +50,14 @@ var url_configs = [
   },
  
   { 
+    url: 'https://jenkins.10gen.com/robots.txt',
+    badcell_selector: "body:contains(Disallow)",
+    text_finder_from_badcell_jqobj: function(jqobj) { return "Unused"; },
+    ignore_text: '',
+    negated: true
+  },
+ 
+  { 
     url: 'http://mci.10gen.com/ui/',
     badcell_selector: "#content",
     text_finder_from_badcell_jqobj: function(jqobj) { return "Unused"; },
@@ -75,7 +83,7 @@ var url_configs = [
     url: 'http://buildbot.mongodb.org/buildslaves',
     badcell_selector: ".offline",
     text_finder_from_badcell_jqobj: function(jqobj) { return jqobj.parent().children().first().text(); },
-    ignore_text: '',
+    ignore_text: 'bs-win32-2',
     negated: false
   },
   { 
