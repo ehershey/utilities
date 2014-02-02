@@ -57,20 +57,20 @@ var url_configs = [
     // negated: true
   // },
  
-  { 
-    url: 'http://mci.10gen.com/ui/',
-    badcell_selector: "#content",
-    text_finder_from_badcell_jqobj: function(jqobj) { return "Unused"; },
-    ignore_text: '',
-    negated: true
-  },
-  { 
-    url: 'http://mci.10gen.com/ui/',
-    badcell_selector: "body:contains(Service Unavailable)",
-    text_finder_from_badcell_jqobj: function(jqobj) { return jqobj.text(); },
-    ignore_text: '',
-    negated: false
-  },
+  // { 
+    // url: 'http://mci.10gen.com/ui/',
+    // badcell_selector: "#content",
+    // text_finder_from_badcell_jqobj: function(jqobj) { return "Unused"; },
+    // ignore_text: '',
+    // negated: true
+  // },
+  // { 
+    // url: 'http://mci.10gen.com/ui/',
+    // badcell_selector: "body:contains(Service Unavailable)",
+    // text_finder_from_badcell_jqobj: function(jqobj) { return jqobj.text(); },
+    // ignore_text: '',
+    // negated: false
+  // },
 
   { 
     url: 'http://www.mongodb.org/downloads',
