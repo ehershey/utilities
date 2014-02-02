@@ -19,11 +19,12 @@ then
 fi
 
 all_files="
-s3://downloads.10gen.com/linux/mongodb-linux-x86_64-subscription-amzn64-%s.tgz
-s3://downloads.10gen.com/linux/mongodb-linux-x86_64-subscription-rhel57-%s.tgz
-s3://downloads.10gen.com/linux/mongodb-linux-x86_64-subscription-rhel62-%s.tgz
-s3://downloads.10gen.com/linux/mongodb-linux-x86_64-subscription-suse11-%s.tgz
-s3://downloads.10gen.com/linux/mongodb-linux-x86_64-subscription-ubuntu1204-%s.tgz
+s3://downloads.10gen.com/linux/mongodb-linux-x86_64-enterprise-amzn64-%s.tgz
+s3://downloads.10gen.com/linux/mongodb-linux-x86_64-enterprise-rhel57-%s.tgz
+s3://downloads.10gen.com/linux/mongodb-linux-x86_64-enterprise-rhel62-%s.tgz
+s3://downloads.10gen.com/linux/mongodb-linux-x86_64-enterprise-suse11-%s.tgz
+s3://downloads.10gen.com/linux/mongodb-linux-x86_64-enterprise-ubuntu1204-%s.tgz
+s3://downloads.10gen.com/win32/mongodb-win32-x86_64-enterprise-windows-64-2.5.5.msi
 s3://downloads.mongodb.org/linux/mongodb-linux-i686-%s.tgz
 s3://downloads.mongodb.org/linux/mongodb-linux-i686-debugsymbols-%s.tgz
 s3://downloads.mongodb.org/linux/mongodb-linux-i686-rhel57-%s.tgz
