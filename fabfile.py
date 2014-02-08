@@ -85,7 +85,9 @@ def clean_workdir():
 def clone_mongodb_repo():
     install_github_hostkey()
     clean_workdir()
-    run("git clone git@github.com:mongodb/mongo %s" % WORKDIR)
+    server_repo = env['server_repo']
+    server_repo_branch = env['server_repo_branch']
+    run("git clone %s %s --branch %s" % (server_repo, WORKDIR, server_repo_branch))
 
 def packager_py():
     version = env['package_version_to_build']
@@ -116,4 +118,5 @@ def packager_enterprise_py():
 
 def install_gpg_key():
     put("gpgexport")
+    run("rm -rf .gnupg")
     run("gpg --import < gpgexport")
