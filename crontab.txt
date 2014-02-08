@@ -16,7 +16,7 @@
 0 * * * * cp -pri /tmp/uploadr.log /home/ernie/Dropbox/Misc/
 #* * * * * cd /home/ernie/Dropbox/Photos/Android ; PYTHONPATH=. flock --exclusive --nonblock /home/ernie/Dropbox/Unix/bin/flickr_uploadr.py /home/ernie/Dropbox/Unix/bin/flickr_uploadr.py >> /tmp/uploadr.log 2>&1
 * * * * * cd /home/ernie/Dropbox/Camera\ Uploads ; PYTHONPATH=. flock --exclusive --nonblock /home/ernie/Dropbox/Unix/bin/flickr_uploadr.py /home/ernie/Dropbox/Unix/bin/flickr_uploadr.py >> /tmp/uploadr.log 2>&1
-* * * * * /home/ernie/Dropbox/Unix/bin/email_clisk.sh >> /tmp/email_clisk.log 2>&1
+# * * * * * /home/ernie/Dropbox/Unix/bin/email_clisk.sh >> /tmp/email_clisk.log 2>&1
 
 */5 * * * * curl http://metrics.ernie.org/update_all > /tmp/update_all.log 2>&1
 
