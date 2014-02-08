@@ -91,19 +91,22 @@ print "%d seconds elapsed" % elapsed_seconds
 env.hosts = [inst.dns_name]
 
 execute(install_package_building_prereqs)
+
+env['server_repo'] = 'git@github.com:mongodb/mongo'
+env['server_repo_branch'] = 'master'
 execute(clone_mongodb_repo)
 
 execute(install_gpg_key)
 
 # need to figure out how to determine this version more dynamically
 # 
-env['package_version_to_build'] = '2.5.4'
+env['package_version_to_build'] = '2.5.5'
 env['package_suffix'] = '-org-unstable'
 execute(packager_py)
 
 # need to figure out how to determine this version more dynamically
 # 
-env['package_version_to_build'] = '2.5.4'
+env['package_version_to_build'] = '2.5.5'
 env['package_suffix'] = '-enterprise-unstable'
 execute(packager_enterprise_py)
 
