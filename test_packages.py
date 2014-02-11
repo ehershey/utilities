@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 # spin up packaging server, generate packages and test them
 #
-# Usage: test_packages [ --skip-community ] [ --skip-enterprise ] [ packaging server ]
+# Usage: test_packages [ --skip-community ] [ --skip-enterprise ] [ --server <packaging server> ] [ --server-repo <repo - e.g. git@github.com:mongodb/mongo> ] [ --server-repo-branch <branch> ] [ --skip-clone ] --version <version - e.g. 2.5.5>
+#
 
 import argparse
 import boto.ec2
@@ -48,14 +49,21 @@ if not AWS_SECRET_ACCESS_KEY:
 parser = argparse.ArgumentParser(description='Test packages')
 parser.add_argument('--skip-community', action='store_true', required=False, help='Skip community packages', default = False);
 parser.add_argument('--skip-enterprise', action='store_true', required=False, help='Skip enterprise packages', default = False);
+parser.add_argument('--skip-clone', action='store_true', required=False, help='Skip cloning server repo', default = False);
+parser.add_argument('--server-repo', help='Github repo to use', default = 'git@github.com:mongodb/mongo');
+parser.add_argument('--server-repo-branch', help='Branch in repo to use', default = 'master');
 parser.add_argument('--server', help='Packaging serfver to use', default = None);
+parser.add_argument('--version', help='Version number to build', required = True, default = None);
+args = parser.parse_args()
 
 os.environ['AWS_ACCESS_KEY_ID'] = AWS_ACCESS_KEY_ID
 os.environ['AWS_SECRET_ACCESS_KEY'] = AWS_SECRET_ACCESS_KEY
 
-if sys.argv[1]:
-  env.hosts = [sys.argv[1]]
+if args.server:
+  print("Using server %s\n" % args.server)
+  env.hosts = [args.server]
 else:
+  print("Creating server\n")
   conn = boto.ec2.connect_to_region(region)
 
 
@@ -102,30 +110,31 @@ else:
 
   print "%d seconds elapsed" % elapsed_seconds
 
+
+  execute(install_package_building_prereqs)
+  execute(install_gpg_key)
+
   env.hosts = [inst.dns_name]
 
+if not args.skip_clone:
+    # env['server_repo'] = 'git@github.com:mongodb/mongo'
+    # env['server_repo_branch'] = 'master'
+    # env['server_repo'] = 'git@github.com:ehershey/mongo'
+    # env['server_repo_branch'] = 'SERVER-9123-pkgtst'
+    env['server_repo'] = args.server_repo
+    env['server_repo_branch'] = args.server_repo_branch
+    execute(clone_mongodb_repo)
 
-execute(install_package_building_prereqs)
 
-# env['server_repo'] = 'git@github.com:mongodb/mongo'
-# env['server_repo_branch'] = 'master'
-env['server_repo'] = 'git@github.com:ehershey/mongo'
-env['server_repo_branch'] = 'SERVER-9123-pkgtst'
-execute(clone_mongodb_repo)
+env['package_version_to_build'] = args.version
 
-execute(install_gpg_key)
+if not args.skip_community:
+    env['package_suffix'] = '-org-unstable'
+    execute(packager_py)
 
-# need to figure out how to determine this version more dynamically
-# 
-env['package_version_to_build'] = '2.5.5'
-env['package_suffix'] = '-org-unstable'
-execute(packager_py)
-
-# need to figure out how to determine this version more dynamically
-# 
-env['package_version_to_build'] = '2.5.5'
-env['package_suffix'] = '-enterprise-unstable'
-execute(packager_enterprise_py)
+if not args.skip_enterprise:
+    env['package_suffix'] = '-enterprise-unstable'
+    execute(packager_enterprise_py)
 
 
 
