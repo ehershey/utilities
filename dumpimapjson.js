@@ -36,7 +36,7 @@ function openInbox(cb) {
 imap.once('ready', function() {
   openInbox(function(err, mailbox) {
     if (err) die(err);
-    process.stderr.write('opened inbox\n');
+    process.stderr.write('Opened inbox\n');
     //imap.search([ folder, ['SINCE', since] ], function(err, results) {
     imap.search([ folder, ['SINCE', since] ], function(err, results) {
       if (err) die(err);
@@ -74,7 +74,7 @@ imap.once('ready', function() {
           if (err) die(err);
       });
       f.once('end',function() {
-          process.stderr.write('Done fetching all messages!' + "\n");
+          process.stderr.write('\nDone fetching all messages!' + "\n");
           imap.end();
           process.exit();
       });
