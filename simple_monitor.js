@@ -49,13 +49,13 @@ var url_configs = [
     negated: true
   },
  
-  // { 
-    // url: 'https://jenkins.10gen.com/robots.txt',
-    // badcell_selector: "body:contains(Disallow)",
-    // text_finder_from_badcell_jqobj: function(jqobj) { return "Unused"; },
-    // ignore_text: '',
-    // negated: true
-  // },
+  { 
+    url: 'https://jenkins.10gen.com/robots.txt',
+    badcell_selector: "body:contains(Disallow)",
+    text_finder_from_badcell_jqobj: function(jqobj) { return "Unused"; },
+    ignore_text: '',
+    negated: true
+  },
  
   // { 
     // url: 'http://mci.10gen.com/ui/',
