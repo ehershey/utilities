@@ -4,7 +4,7 @@
   "description": "Ernie Command Line Utilities",
   "main": "index.js",
   "scripts": {
-    "test": "test.sh"
+    "test": "./test.sh"
   },
   "repository": {
     "type": "git",
