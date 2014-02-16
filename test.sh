@@ -71,7 +71,7 @@ do
     fi
   elif head -1 "$file" | grep -q node || echo "$file" | grep -q \\.js$
   then
-    if ! tail +2 "$file" | uglifyjs > /dev/null
+    if ! tail -n +2 "$file" | uglifyjs > /dev/null
     then
       let errors=errors+1
       echo ERROR: syntax check failed
