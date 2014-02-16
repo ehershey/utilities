@@ -31,6 +31,9 @@ do
   if [ -d "$file" ] 
   then
     echo Skipping directory
+  elif [ "$file" = "gpgexport" ]
+  then
+    echo Skipping gpgexport
   elif head -1 "$file" | grep -q sh || echo "$file" | grep -q \\.sh$ || echo "$file" | grep -q \\.env$
   then
     if ! bash -n "$file"
