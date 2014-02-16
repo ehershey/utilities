@@ -25,7 +25,6 @@ region = 'us-east-1'
 key_name = 'admin1'
 env.key_filename = '/Users/ernie/.ssh/admin1.pem'
 security_group = 'default'
-instance_type = 'm1.large'
 
 # ubuntu 12.04
 #
@@ -53,6 +52,7 @@ parser.add_argument('--skip-clone', action='store_true', required=False, help='S
 parser.add_argument('--server-repo', help='Github repo to use', default = 'git@github.com:mongodb/mongo');
 parser.add_argument('--server-repo-branch', help='Branch in repo to use', default = 'master');
 parser.add_argument('--server', help='Packaging serfver to use', default = None);
+parser.add_argument('--instance-type', help='Instance Type', default = 'm3.xlarge');
 parser.add_argument('--version', help='Version number to build', required = True, default = None);
 args = parser.parse_args()
 
@@ -65,12 +65,12 @@ if args.server:
 else:
   print("Creating server\n")
   conn = boto.ec2.connect_to_region(region)
-
+  bdm = boto.ec2.blockdevicemapping.BlockDeviceMapping({'/dev/xvdb': 'ephemeral0', '/dev/xvdc': 'ephemeral1'})
 
   res = conn.run_instances(
     ami_id,
     key_name = key_name,
-    instance_type = instance_type,
+    instance_type = args.instance_type,
     security_groups=[security_group])
 
   timeout = 60
