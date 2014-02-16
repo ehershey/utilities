@@ -8,4 +8,4 @@ notifications:
     on_success: aways
     on_failure: always
 
-before_install: cpanm Text::CSV
+before_install: cpan -i Text::CSV
