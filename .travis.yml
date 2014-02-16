@@ -1,3 +1,11 @@
 language: node_js
 node_js:
    - "0.10"
+notifications:
+  recipients:
+    - github@ernie.org
+  email:
+    on_success: aways
+    on_failure: always
+
+before_install: cpanm Text::CSV
