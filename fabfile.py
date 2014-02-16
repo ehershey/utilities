@@ -75,8 +75,7 @@ def install_github_hostkey():
 
 def install_package_building_prereqs():
     sudo("apt-get --assume-yes update")
-    sudo("apt-get install --assume-yes dpkg-dev rpm debhelper createrepo git libc6:i386 lib32stdc++6 apache2 libsasl2-2 libssl1.0.0 libsnmp15")
-    sudo("chown ubuntu /mnt")
+    sudo("apt-get install --assume-yes dpkg-dev rpm debhelper createrepo git libc6:i386 lib32stdc++6 apache2 libsasl2-2 libssl1.0.0 libsnmp15 xfsprogs")
     sudo("chown ubuntu /var/www")
 
 def clean_workdir():
@@ -120,3 +119,9 @@ def install_gpg_key():
     put("gpgexport")
     run("rm -rf .gnupg")
     run("gpg --import < gpgexport")
+
+def mount_drive():
+    sudo("umount /dev/xvdb");
+    sudo("mkfs.xfs -f /dev/xvdb");
+    sudo("mount /dev/xvdb");
+    sudo("chown ubuntu /mnt")

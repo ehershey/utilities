@@ -6,8 +6,9 @@
 
 import argparse
 import boto.ec2
+from  boto.ec2.blockdevicemapping import BlockDeviceMapping, BlockDeviceType
 import datetime
-from fabfile import install_package_building_prereqs, clone_mongodb_repo, packager_py, packager_enterprise_py, install_gpg_key
+from fabfile import install_package_building_prereqs, clone_mongodb_repo, packager_py, packager_enterprise_py, install_gpg_key, mount_drive
 from fabric.api import execute, env
 import os
 import settings
@@ -65,13 +66,18 @@ if args.server:
 else:
   print("Creating server\n")
   conn = boto.ec2.connect_to_region(region)
-  bdm = boto.ec2.blockdevicemapping.BlockDeviceMapping({'/dev/xvdb': 'ephemeral0', '/dev/xvdc': 'ephemeral1'})
+  dev_sdb = BlockDeviceType()
+  dev_sdb.ephemeral_name = 'ephemeral0' 
+  bdm = BlockDeviceMapping()
+  bdm['/dev/sdb'] = dev_sdb
+  # bdm = boto.ec2.blockdevicemapping.BlockDeviceMapping({'/dev/xvdb': 'ephemeral0', '/dev/xvdc': 'ephemeral1'})
 
   res = conn.run_instances(
     ami_id,
     key_name = key_name,
     instance_type = args.instance_type,
-    security_groups=[security_group])
+    security_groups=[security_group],
+    block_device_map = bdm)
 
   timeout = 60
 
@@ -114,6 +120,7 @@ else:
 
 
   execute(install_package_building_prereqs)
+  execute(mount_drive)
   execute(install_gpg_key)
 
 
