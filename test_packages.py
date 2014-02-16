@@ -110,11 +110,12 @@ else:
 
   print "%d seconds elapsed" % elapsed_seconds
 
+  env.hosts = [inst.dns_name]
+
 
   execute(install_package_building_prereqs)
   execute(install_gpg_key)
 
-  env.hosts = [inst.dns_name]
 
 if not args.skip_clone:
     # env['server_repo'] = 'git@github.com:mongodb/mongo'
