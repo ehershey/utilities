@@ -1,0 +1,20 @@
+#!/bin/bash
+
+distro="$1"
+
+if [ ! "$distro" ]
+then
+  echo "Usage: $0 <distro>"
+  exit 2
+fi
+
+findcmd="tail -n 1000 ~/.spawn.log | grep \"spawn.sh $distro\" | grep ^ssh | tail -1 "
+echo "$findcmd"
+command=$(eval "$findcmd")
+if [ ! "$command" ]
+then
+  echo "Can't find spawn log entry for distro $distro"
+  exit 3
+fi
+echo "$command"
+eval "$command"
