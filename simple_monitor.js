@@ -116,9 +116,11 @@ url_configs.forEach( function(url_config) {
 
   var text_finder_from_badcell_jqobj = url_config.text_finder_from_badcell_jqobj;
 
-  console.log('checking url: ' + url);
+  console.log('Starting request for url: ' + url);
 
   jsdom.env ( url, ["http://code.jquery.com/jquery.js"], function(errors, window) {
+    console.log('In callback for url: ' + url);
+
     if(errors) {
       console.log('errors loading url: ' + errors);
       console.log('sending mail');
