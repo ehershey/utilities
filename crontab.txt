@@ -37,3 +37,5 @@
 
 # */5 * * * * ~/git/utilities/simple_monitor.js >> /tmp/simple_monitor.log 2>&1
 */5 * * * * /home/ernie/git/sharewarn/src/runner.sh >> /tmp/runner.sh.log 2>&1
+
+*/7 * * * * /usr/bin/killall node curl; sleep  5; /usr/bin/killall node curl
