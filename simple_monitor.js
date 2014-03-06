@@ -56,14 +56,20 @@ var url_configs = [
     ignore_text: '',
     negated: true
   },
- 
-  // { 
-    // url: 'http://mci.10gen.com/ui/',
-    // badcell_selector: "#content",
-    // text_finder_from_badcell_jqobj: function(jqobj) { return "Unused"; },
-    // ignore_text: '',
-    // negated: true
-  // },
+  { 
+    url: 'http://mci.10gen.com/ui/',
+    badcell_selector: "#content",
+    text_finder_from_badcell_jqobj: function(jqobj) { return "Unused"; },
+    ignore_text: '',
+    negated: true
+  },
+  { 
+    url: 'http://mci-motu.10gen.cc:8080/api/',
+    badcell_selector: "body:contains(api)",
+    text_finder_from_badcell_jqobj: function(jqobj) { return "Unused"; },
+    ignore_text: '',
+    negated: true
+  },
   // { 
     // url: 'http://mci.10gen.com/ui/',
     // badcell_selector: "body:contains(Service Unavailable)",
