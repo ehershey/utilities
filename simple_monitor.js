@@ -70,13 +70,13 @@ var url_configs = [
     ignore_text: '',
     negated: true
   },
-  { 
-    url: 'http://mci.10gen.com/ui/hosts/',
-    badcell_selector: "td:contains(unreachable)",
-    text_finder_from_badcell_jqobj: function(jqobj) { return jqobj.parent().children().first().text(); },
-    ignore_text: '',
-    negated: false
-  },
+  // { 
+    // url: 'http://mci.10gen.com/ui/',
+    // badcell_selector: "body:contains(Service Unavailable)",
+    // text_finder_from_badcell_jqobj: function(jqobj) { return jqobj.text(); },
+    // ignore_text: '',
+    // negated: false
+  // },
 
   { 
     url: 'http://www.mongodb.org/downloads',
@@ -125,7 +125,6 @@ url_configs.forEach( function(url_config) {
   console.log('Starting request for url: ' + url);
 
   jsdom.env ( url, ["http://code.jquery.com/jquery.js"], function(errors, window) {
-    console.log('');
     console.log('In callback for url: ' + url);
 
     if(errors) {
@@ -161,8 +160,8 @@ url_configs.forEach( function(url_config) {
               from: MAILFROM,
               to: MAILTO,
               subject: SUBJECT,
-              text: 'Error checking URL: ' + url + "\nBad cell count: " + badcells.length + "\nError detail text: " + detail_text,
-              html: '<b>Error checking URL: <a href="' + url + '">' + url + '</a></b><br/>Bad cell length: ' + badcells.length + '<br/>Error detail text: ' + detail_text
+              text: 'Error checking URL: ' + url + "\nError detail text: " + detail_text,
+              html: '<b>Error checking URL: <a href="' + url + '">' + url + '</a></b><br/>Error detail text: ' + detail_text
           });
         }
       }
