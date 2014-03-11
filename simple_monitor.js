@@ -125,6 +125,7 @@ url_configs.forEach( function(url_config) {
   console.log('Starting request for url: ' + url);
 
   jsdom.env ( url, ["http://code.jquery.com/jquery.js"], function(errors, window) {
+    console.log('');
     console.log('In callback for url: ' + url);
 
     if(errors) {
@@ -160,8 +161,8 @@ url_configs.forEach( function(url_config) {
               from: MAILFROM,
               to: MAILTO,
               subject: SUBJECT,
-              text: 'Error checking URL: ' + url + "\nError detail text: " + detail_text,
-              html: '<b>Error checking URL: <a href="' + url + '">' + url + '</a></b><br/>Error detail text: ' + detail_text
+              text: 'Error checking URL: ' + url + "\nBad cell count: " + badcells.length + "\nError detail text: " + detail_text,
+              html: '<b>Error checking URL: <a href="' + url + '">' + url + '</a></b><br/>Bad cell length: ' + badcells.length + '<br/>Error detail text: ' + detail_text
           });
         }
       }
