@@ -73,7 +73,7 @@ var url_configs = [
   },
   { 
     url: 'http://mci.10gen.com/ui/hosts/',
-    cell_selector: "td:contains(running)",
+    cell_selector: "td:contains(unreachable)",
     // Crazy jquery magic to get a delimited string of all the unreachable hostnames
     // 
     // Mostly from http://bugs.jquery.com/ticket/5858
