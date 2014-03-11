@@ -182,6 +182,7 @@ function check_url(url_config, done_checking_one) {
 
 function done_checking_all(err) {
   if(err) throw err;
+  console.log('');
   console.log('Total errors found: ' + errors_found);
 }
 
