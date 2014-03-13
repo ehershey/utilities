@@ -169,8 +169,8 @@ function check_url(url_config, done_checking_one) {
               from: MAILFROM,
               to: MAILTO,
               subject: SUBJECT,
-              text: 'Error checking URL: ' + url + "\nMatching cell count: " + cells.length + "\nError detail text: " + detail_text,
-              html: '<b>Error checking URL: <a href="' + url + '">' + url + '</a></b><br/>Matching cell length: ' + cells.length + '<br/>Error detail text: ' + detail_text
+              text: 'Error checking URL: ' + url + '\nCell selector: ' + cell_selector + '\nMatching cell count: ' + cells.length + '\nError detail text: ' + detail_text,
+              html: '<b>Error checking URL: <a href="' + url + '">' + url + '</a></b><br/>Cell selector: ' + cell_selector + '<br/>Matching cell length: ' + cells.length + '<br/>Error detail text: ' + detail_text
           });
           errors_found++;
         }
