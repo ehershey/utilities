@@ -1,0 +1,13 @@
+#!/bin/bash
+while true
+do
+  args="$*"
+  #echo "args: $args"
+  if which xtitle >/dev/null 2>&1
+    then
+      xtitle ssh ${args/* /}
+    fi
+  ssh "$@"
+  sleep 5
+  date
+done
