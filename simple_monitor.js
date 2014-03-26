@@ -82,10 +82,16 @@ var url_configs = [
     ignore_text: 'mci@build-osx-2.ny.corp.10gen.cc:2212 | mci@build-osx-2.ny.corp.10gen.cc:2213 | mci@build-osx-2.ny.corp.10gen.cc:2214 | mci@build-osx-2.ny.corp.10gen.cc:2215',
     negated: false
   },
-
   { 
     url: 'http://www.mongodb.org/downloads',
     cell_selector: ".release-version",
+    text_finder_from_cell_jqobj: function(jqobj) { return "Unused"; },
+    ignore_text: '',
+    negated: true
+  },
+  { 
+    url: 'http://buildlogs.mongodb.org/',
+    cell_selector: "body",
     text_finder_from_cell_jqobj: function(jqobj) { return "Unused"; },
     ignore_text: '',
     negated: true
