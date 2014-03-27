@@ -51,6 +51,23 @@ var url_configs = [
   },
  
   { 
+    url: 'http://repo.mongodb.org/repo/ubuntu-upstart/dists/dist/10gen/binary-amd64/',
+    cell_selector: "a:contains(deb)",
+    text_finder_from_cell_jqobj: function(jqobj) { return "Unused"; },
+    ignore_text: '',
+    negated: true
+  },
+  
+  { 
+    url: 'http://repo.mongodb.com/yum/redhat/6/mongodb-enterprise/2.6/x86_64/repodata/',
+    cell_selector: "a:contains(repomd.xml)",
+    text_finder_from_cell_jqobj: function(jqobj) { return "Unused"; },
+    ignore_text: '',
+    negated: true
+  },
+ 
+
+  { 
     url: 'https://jenkins.10gen.com/robots.txt',
     cell_selector: "body:contains(Disallow)",
     text_finder_from_cell_jqobj: function(jqobj) { return "Unused"; },
