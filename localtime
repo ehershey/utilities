@@ -1,3 +1,5 @@
 #!/usr/bin/perl
+#
+# Convert seconds since the epoch to human-readable timestamp string
 
 print scalar localtime($ARGV[0] || time),"\n";
