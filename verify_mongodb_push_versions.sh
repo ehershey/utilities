@@ -47,13 +47,11 @@ for push_file_pattern in $all_files
 do
   tried=`expr $tried + 1`
   push_file=`printf $push_file_pattern $version`
-  #echo push_file: $push_file
-  echo -n .
   if ! aws s3 ls $push_file | grep `basename $push_file`$ >/dev/null 
   then
-    echo
-    echo "ERROR: missing file: $push_file"
+    echo "ERROR: $push_file"
   else
+    echo "FOUND: $push_file"
     found=`expr $found + 1`
   fi
 done
