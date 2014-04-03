@@ -36,26 +36,26 @@ then
   . ~/amazon-build.sh
 fi
 
-header=$(cache_run $CACHE_SECONDS "instance_info_by_name.sh $instance_name" | head -1)
-data=$(cache_run $CACHE_SECONDS "instance_info_by_name.sh $instance_name" | tail -1)
+count=$(ec2list running $instance_name | wc -l)
+header=$(ec2list | head -1)
+data=$(ec2list running $instance_name | tail -1)
 
-# account for weird lost data
-#
-if [ \( ! "$data" \) -o "$(echo \"$data\" | grep running,\*$)" -o "$data" = "$header" -o "$(echo \"$data\" | grep stopped)" ]
+if [ "$count" -gt 2 ]
 then
-  echo "retrying to poll aws data"
-  header=$(cache_run 0 "instance_info_by_name.sh $instance_name" | head -1)
-  data=$(cache_run $CACHE_SECONDS "instance_info_by_name.sh $instance_name" | tail -1)
+  data=$(ec2list ernie running $instance_name | tail -1)
 fi
 
+
 # get column numbers
-distro_column="$(echo "$header"  | tr , \\n | grep -n distro | cut -f1 -d: )"
-dns_column="$(echo "$header"  | tr , \\n | grep -n PublicDnsName | cut -f1 -d: )"
-key_column="$(echo "$header"  | tr , \\n | grep -n KeyName | cut -f1 -d: )"
+distro_column="$(echo "$header"  | tr , \\n | grep -nx distro | cut -f1 -d: )"
+dns_column="$(echo "$header"  | tr , \\n | grep -nx PublicDnsName | cut -f1 -d: )"
+key_column="$(echo "$header"  | tr , \\n | grep -nx KeyName | cut -f1 -d: )"
+name_column="$(echo "$header"  | tr , \\n | grep -nx Name | cut -f1 -d: )"
 
 distro="$(echo "$data" | cut -f$distro_column -d,)"
 dns="$(echo "$data" | cut -f$dns_column -d,)"
 key="$(echo "$data" | cut -f$key_column -d,)"
+name="$(echo "$data" | cut -f$name_column -d,)"
 
 if [ ! "$dns" -o "$dns" = "running" ]
 then
@@ -73,4 +73,6 @@ then
   user=root
 fi
 
+echo connecting to $name
+echo "$data"
 ssh -i ~/.ssh/$key.pem $user@$dns
