@@ -1,0 +1,51 @@
+#!/bin/sh
+#
+# create an rsa key for ssh if one doesn't exist and copy it
+# into the authorized keys file on a remote host
+
+
+key="$HOME/.ssh/id_rsa.pub"
+authfile=".ssh/authorized_keys"
+tmpauthfile=".ssh/authorized_keys.tmp"
+
+shortname=`basename $0`
+
+if [ ! -f $key ]
+then
+	echo "creating key"
+	ssh-keygen -t rsa
+fi
+
+if [ ! "$1" ]
+then
+	echo "Usage: $shortname hostname"
+	exit
+fi
+
+#args="$*"
+
+echo type your password:
+#scp $key $*:/tmp/tmp_$shortname.pub
+ssh "$*" "if [ ! -e .ssh ] ; then mkdir .ssh; fi; (cat >> $authfile); chmod 600 $authfile; chmod 700 .ssh ; sort -u $authfile > $tmpauthfile && cat $tmpauthfile > $authfile && rm $tmpauthfile" < "$key"
+#echo ssh "$*" "if [ ! -e .ssh ] ; then mkdir .ssh; fi; cat >> $authfile; chmod 600 $authfile; chmod 700 .ssh ; sort -u < $authfile > $tmpauthfile ; cat $tmpauthfile > $authfile && rm $tmpauthfile" < "$key"
+
+
+#echo type your password:
+#ssh $* mkdir -p .ssh \; cat /tmp/tmp_$shortname.pub \>\> $authfile \; chmod 600 $authfile 
+
+
+#echo type your password:
+#ssh $* rm /tmp/tmp_$shortname.pub
+
+echo "running test connection"
+
+echo this should not ask for your password:
+
+if which shared-ssh-agent >/dev/null 2>&1
+then
+	ssh="shared-ssh-agent ssh"
+else
+	ssh="ssh"
+fi
+
+$ssh -o "PasswordAuthentication=no" $* echo connection succeeded || echo connection failed
