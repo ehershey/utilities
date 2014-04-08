@@ -8,7 +8,7 @@
 # {
 #   _id: blah,
 #   loc : { type : "Point" ,
-#         coordinates : [ 40, 5 ]
+#         coordinates : [ 73.9879226, 40.7573039 ]
 #   },
 #   last_update: Date(1151381451000),
 #   entry_date: Date(1151381451000),
