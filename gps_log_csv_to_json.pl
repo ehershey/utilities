@@ -60,7 +60,7 @@ while ( my $row = $csv->getline( $fh ) ) {
   push @rows, $row;
   #print Dumper $row;
   print "{ ";
-  print "loc: { type: \"Point\" , coordinates : [ " . $row->[$column_indexes->{"longitude"}] . ", " . $row->[$column_indexes->{"latitude"}] . " ] }, ";
+  print "_id: " . $row->[$column_indexes->{"entry_id"}] . ", loc: { type: \"Point\" , coordinates : [ " . $row->[$column_indexes->{"longitude"}] . ", " . $row->[$column_indexes->{"latitude"}] . " ] }, ";
   print "entry_date: Date(" . str2time($row->[$column_indexes->{"entry_date"}] . "-0000") . "000), ";
   print "last_update: Date(" . str2time($row->[$column_indexes->{"last_update"}] . "-0000") . "000), ";
   my $entry_source;
