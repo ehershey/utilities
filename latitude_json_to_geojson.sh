@@ -35,7 +35,14 @@
 #   accuracy: 5,
 # }
 # 
-# latitude_json_to_geojson.sh < LocationHistory.json | mongoimport --db ernie_org --collection locations
+# latitude_json_to_geojson.sh "Latitude import" < LocationHistory.json | mongoimport --db ernie_org --collection locations
+
+if [ "$1" ] 
+then
+  entry_source_sed="sed 's/}$/, entry_source: \"$1\"/g'"
+else
+  entry_source_sed="cat"
+fi
 
 cat | \
  tail -n +3 | \
@@ -52,5 +59,6 @@ cat | \
  sed 's/coordinates: *\[ *\([0-9.-][0-9.-]*\), *\([0-9.-][0-9.-]*\)\]/coordinates: [\2, \1]/g'  | \
   tr -d \\n | \
  tr \# \\n  | \
- sed 's/"timestampMs" : "\([0-9][0-9]*\)"/entry_date: new Date(\1)/g'    | \
- sed 's/, *}/}/g' 
+ sed 's/"timestampMs" : "\([0-9][0-9]*\)"/entry_date: new Date(\1), last_update: new Date(\1)/g'    | \
+ sed 's/, *}/}/g' | \
+ eval $entry_source_sed
