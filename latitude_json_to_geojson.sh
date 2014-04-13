@@ -37,3 +37,20 @@
 # 
 # latitude_json_to_geojson.sh < LocationHistory.json | mongoimport --db ernie_org --collection locations
 
+cat | \
+ tail -n +3 | \
+ grep -vx '}' | \
+ sed 's/^  } \]/}/' | \
+ sed 's/^  }, {/}# {/g' | \
+ sed 's/"locations" : \[//' | \
+ sed 's/"latitudeE7" *: *00*,/loc: { type: "Point", coordinates: [ 0,/' | \
+ sed 's/"longitudeE7" *: *00*,/0]},/' | \
+ sed 's/"longitudeE7" *: *00*$/0]}/' | \
+ sed 's/"latitudeE7" *: *\(-*..\)/loc: { type: "Point", coordinates: [ \1./' | \
+ sed 's/"longitudeE7" *: *\(-*..\)\([0-9.][0-9.]*\)/\1.\2]}/' | \
+ tr -d \\n  | \
+ sed 's/coordinates: *\[ *\([0-9.-][0-9.-]*\), *\([0-9.-][0-9.-]*\)\]/coordinates: [\2, \1]/g'  | \
+  tr -d \\n | \
+ tr \# \\n  | \
+ sed 's/"timestampMs" : "\([0-9][0-9]*\)"/entry_date: new Date(\1)/g'    | \
+ sed 's/, *}/}/g' 
