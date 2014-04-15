@@ -1,0 +1,53 @@
+#!/bin/sh
+#
+# 2003022100
+# added askpass/agent processing, stolen from xssh
+# fixed test error with quotes
+
+
+if [  "$SSH_ASKPASS" ]
+then
+	echo>/dev/null
+elif [ -e /usr/libexec/openssh/x11-ssh-askpass ]
+then
+	export SSH_ASKPASS=/usr/libexec/openssh/x11-ssh-askpass
+elif [ -e /usr/X11R6/bin/ssh-askpass ]
+then
+	export SSH_ASKPASS=/usr/X11R6/bin/ssh-askpass
+elif [ -e /usr/bin/ssh-askpass ]
+then
+	export SSH_ASKPASS=/usr/bin/ssh-askpass
+elif [ -e /usr/bin/x11-ssh-askpass ]
+then
+	export SSH_ASKPASS=/usr/bin/x11-ssh-askpass
+fi
+
+if [ -e ~/.ssh-agent ]
+then
+	. ~/.ssh-agent
+	if [ "`ssh-add -l|grep 'The agent has no identities.'`" ]
+	then
+		if [ "$DISPLAY" ]
+		then
+			ssh-add </dev/null
+		else
+			ssh-add
+		fi
+	fi
+fi
+
+if [ \( ! "$SSH_AGENT_PID" -o ! "`ps $SSH_AGENT_PID | grep -v grep | grep $SSH_AGENT_PID`" \) -o \( ! "$SSH_AUTH_SOCK" \) -o \( ! -e "$SSH_AUTH_SOCK" \) ]
+then
+	echo "CREATING .ssh-agent" >&2
+	ssh-agent | grep -v ^echo > ~/.ssh-agent
+	. ~/.ssh-agent
+	echo "RUNNING ssh-add" >&2
+	if [ "$DISPLAY" ]
+	then
+		ssh-add </dev/null
+	else
+		ssh-add
+	fi
+fi
+
+"$@"
