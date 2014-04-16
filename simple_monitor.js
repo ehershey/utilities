@@ -26,7 +26,7 @@ var nodemailer_transport = nodemailer.createTransport();
 //
 
 var url_configs = [ 
-  { 
+    { 
     url: 'https://jira.mongodb.org/issues/?jql=assignee%20%3D%20%22ernie.hershey%4010gen.com%22%20AND%20(priority%20%3D%20%22Blocker%20-%20P1%22%20OR%20priority%20%3D%20%22Critical%20-%20P2%22)%20AND%20status%20!%3D%20%22Resolved%22%20and%20status%20!%3D%20%22Closed%22%20AND%20status%20!%3D%20%22In%20Progress%22',
     cell_selector: "a.issue-link",
     text_finder_from_cell_jqobj: function(jqobj) { return jqobj.text(); },
@@ -138,6 +138,20 @@ var url_configs = [
     text_finder_from_cell_jqobj: function(jqobj) { return "Date not found in page! (" + (new Date((new Date()) - 23 * 60 * 60 * 1000)).toFormat("MMMM DD") + ')'; },
     ignore_text: '',
     negated: true
+  },
+  {
+    url: 'http://frau.ernie.org/',
+    cell_selector: "body:contains(frau.ernie.org)",
+    text_finder_from_cell_jqobj: function(jqobj) { return jqobj.text(); },
+    ignore_text: '',
+    negated: true
+  },
+  { 
+    url: 'http://testchunk.ernie.org/weather.html',
+    cell_selector: "body:contains(Weather widget)",
+    text_finder_from_cell_jqobj: function(jqobj) { return jqobj.text(); },
+    ignore_text: '',
+    negated: true
   }
 ];
 
@@ -155,7 +169,7 @@ function check_url(url_config, done_checking_one) {
 
   console.log('Starting request for url: ' + url);
 
-  jsdom.env ( url, ["http://code.jquery.com/jquery.js"], function(errors, window) {
+  var handler = function(errors, window) {
     console.log('');
     console.log('In callback for url: ' + url);
 
@@ -200,7 +214,9 @@ function check_url(url_config, done_checking_one) {
       }
     }
     done_checking_one();
-  });
+  };
+  var timeout = setTimeout(function() { handler('timed out',null); }, 10000);
+  jsdom.env ( url, ["http://code.jquery.com/jquery.js"], function(errors, window) { clearTimeout(timeout); handler(errors, window); });
 }
 
 function done_checking_all(err) {
