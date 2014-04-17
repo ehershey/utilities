@@ -35,7 +35,7 @@
 #   accuracy: 5,
 # }
 # 
-# latitude_json_to_geojson.sh "Latitude import" < LocationHistory.json | mongoimport --db ernie_org --collection locations
+# latitude_json_to_geojson.sh "Latitude import" <~/Dropbox/Misc/LocationHistory.json | mongoimport --db ernie_org --collection gps_log --drop --stopOnError
 
 if [ "$1" ] 
 then
