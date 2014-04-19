@@ -36,7 +36,7 @@ then
 	fi
 fi
 
-if [ \( ! "$SSH_AGENT_PID" -o ! "`ps $SSH_AGENT_PID | grep -v grep | grep $SSH_AGENT_PID`" \) -o \( ! "$SSH_AUTH_SOCK" \) -o \( ! -e "$SSH_AUTH_SOCK" \) ]
+if [ \( ! "$SSH_AGENT_PID" -o ! "`ps $SSH_AGENT_PID | grep -v grep | grep \"$SSH_AGENT_PID\"`" \) -o \( ! "$SSH_AUTH_SOCK" \) -o \( ! -e "$SSH_AUTH_SOCK" \) ]
 then
 	echo "CREATING .ssh-agent" >&2
 	ssh-agent | grep -v ^echo > ~/.ssh-agent
