@@ -1,6 +1,8 @@
 // update gps_log data with the number of nearby points that occurred before it 
 //
 //
+// usage :
+// mongo ernie_org < print_location_newness.js
 //
 var criteria = { entry_date: { $gte: new Date(2014,03,1,0,0,0,0) } };
 var distance_required_to_be_new_meters = 25;
