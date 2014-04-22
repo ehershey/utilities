@@ -1,0 +1,48 @@
+#!/bin/sh
+#
+# retrieve a url caching it for an arbitrary period of time,
+# avoiding duplicate requests if unexpired cached output exists
+# usage: cache_get <lifetime> <url>
+#
+
+cachedir=$HOME/.generic_cache
+
+TIMEOUT=2
+
+if [ ! -d $cachedir ]
+then
+	mkdir $cachedir
+fi
+
+cache_life=$1
+url=$2
+
+if [ ! "$url" ]
+then
+	echo "usage: $0 <data_lifetime> <url>"
+	exit 2
+fi
+
+cachefile=$cachedir/`echo "$url" | sed 's/[^0-9a-zA-Z_-]/_/g'`
+
+if [ -e $cachefile ]
+then
+    echo "found file $cachefile" >&2
+	# check if content has expired
+	# 
+	#file_mtime=`stat -f %m $cachefile`
+	file_mtime=`perl -MFile::stat -e 'print stat("'$cachefile'")->mtime'`
+
+	current_time=`date +%s`
+	if [ `expr $current_time - $file_mtime` -lt $cache_life ]
+	then
+		#echo cache hit >&2
+    cat $cachefile
+		exit
+	fi
+#else
+    #echo "did not find file $cachefile" >&2
+fi
+#echo cache miss >&2
+lwp-request -m GET -t $TIMEOUT $url | tee $cachefile
+	
