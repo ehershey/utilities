@@ -29,17 +29,29 @@ fi
 
 all_files="
 s3://downloads.10gen.com/linux/mongodb-linux-x86_64-$enterprise_name-amzn64-%s.tgz
+s3://downloads.10gen.com/linux/mongodb-linux-x86_64-$enterprise_name-amzn64-debugsymbols-%s.tgz
 s3://downloads.10gen.com/linux/mongodb-linux-x86_64-$enterprise_name-rhel57-%s.tgz
+s3://downloads.10gen.com/linux/mongodb-linux-x86_64-$enterprise_name-rhel57-debugsymbols-%s.tgz
 s3://downloads.10gen.com/linux/mongodb-linux-x86_64-$enterprise_name-rhel62-%s.tgz
+s3://downloads.10gen.com/linux/mongodb-linux-x86_64-$enterprise_name-rhel62-debugsymbols-%s.tgz
 s3://downloads.10gen.com/linux/mongodb-linux-x86_64-$enterprise_name-suse11-%s.tgz
+s3://downloads.10gen.com/linux/mongodb-linux-x86_64-$enterprise_name-suse11-debugsymbols-%s.tgz
 s3://downloads.10gen.com/linux/mongodb-linux-x86_64-$enterprise_name-ubuntu1204-%s.tgz
+s3://downloads.10gen.com/linux/mongodb-linux-x86_64-$enterprise_name-ubuntu1204-debugsymbols-%s.tgz
 s3://downloads.10gen.com/win32/mongodb-win32-x86_64-$enterprise_name-windows-64-%s.msi
+s3://downloads.10gen.com/win32/mongodb-win32-x86_64-$enterprise_name-windows-64-debugsymbols-%s.zip
 s3://downloads.mongodb.org/linux/mongodb-linux-i686-%s.tgz
+s3://downloads.mongodb.org/linux/mongodb-linux-i686-debugsymbols-%s.tgz
 s3://downloads.mongodb.org/linux/mongodb-linux-x86_64-%s.tgz
+s3://downloads.mongodb.org/linux/mongodb-linux-x86_64-debugsymbols-%s.tgz
 s3://downloads.mongodb.org/win32/mongodb-win32-i386-%s.zip
+s3://downloads.mongodb.org/win32/mongodb-win32-i386-debugsymbols-%s.zip
 s3://downloads.mongodb.org/win32/mongodb-win32-x86_64-%s.zip
+s3://downloads.mongodb.org/win32/mongodb-win32-x86_64-debugsymbols-%s.zip
 s3://downloads.mongodb.org/win32/mongodb-win32-x86_64-2008plus-%s.zip
+s3://downloads.mongodb.org/win32/mongodb-win32-x86_64-2008plus-debugsymbols-%s.zip
 s3://downloads.mongodb.org/osx/mongodb-osx-x86_64-%s.tgz
+s3://downloads.mongodb.org/osx/mongodb-osx-x86_64-debugsymbols-%s.tgz
 s3://downloads.mongodb.org/sunos5/mongodb-sunos5-x86_64-%s.tgz
 "
 # s3://downloads.mongodb.org/linux/mongodb-linux-x86_64-legacy-%s.tgz
