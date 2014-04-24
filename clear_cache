@@ -1,0 +1,5 @@
+#!/bin/sh
+# 
+# Delete cache entries from cache_get and cache_run
+#
+rm -rf ~/.generic_cache/*
