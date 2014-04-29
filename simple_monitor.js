@@ -65,8 +65,13 @@ var url_configs = [
     ignore_text: '',
     negated: true
   },
- 
-
+  { 
+    url: 'https://jenkins.10gen.com/',
+    cell_selector: "body:contains(Please wait while Jenkins is restarting.)",
+    text_finder_from_cell_jqobj: function(jqobj) { return jqobj.text(); },
+    ignore_text: '',
+    negated: false
+  },
   { 
     url: 'https://jenkins.10gen.com/robots.txt',
     cell_selector: "body:contains(Disallow)",
