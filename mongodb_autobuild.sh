@@ -7,6 +7,9 @@ BUILD_DIR=/Users/ernie/git/mongo.autobuild
 REV=master
 SCONS_ARGS="-j8 --ssl all" 
 
+
+export PATH=$PATH:/usr/local/bin
+
 for module in "$BUILD_DIR/src/mongo/db/modules/"*
 do
   if [ -e "$module" ]
