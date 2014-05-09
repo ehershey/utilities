@@ -14,27 +14,32 @@
         <th>Vs. 2013</th>
       </tr>
       <tr>
+        <td>Today:</td>
+        <td>{units_today} </td>
+        <td>{units_today_2013_diff}</td>
+      </tr>
+      <tr>
+        <td>Yesterday:</td>
+        <td>{units_yesterday} </td>
+        <td>{units_yesterday_2013_diff}</td>
+      </tr>
+      <tr>
         <td>2013 Average:</td>
         <td>{units_average_2013}</td>
         <td></td>
       </tr>
       <tr>
-        <td>units_today:</td>
-        <td>{units_today} </td>
-        <td></td>
-      </tr>
-      <tr>
-				<td>units_average:</td>
+				<td>Alltime Average:</td>
         <td>{units_average}</td>
         <td></td>
       </tr>
       <tr>
-				<td>units_average_2014:</td>
+				<td>2014 Average:</td>
         <td>{units_average_2014}</td>
         <td></td>
       </tr>
       <tr>
-				<td>units_average_7days:</td>
+				<td>Last 7 days:</td>
         <td>{units_average_7days}</td>
         <td></td>
       </tr>
@@ -44,7 +49,11 @@
     <table cellpadding='0' cellspacing='0'>
       <tr>
         <td>HTML generated:</td>
-        <td>{now}</td>
+        <td><!--diffignore-->{now}</td>
+      </tr>
+      <tr>
+        <td>Moves data updated:</td>
+        <td>{moves_csv_modified}</td>
       </tr>
     </table>
   </body>
