@@ -16,7 +16,7 @@ new_md5=$(grep -v diffignore "$tempfile" | md5sum)
 echo "old_md5: $old_md5"
 echo "new_md5: $new_md5"
 
-if [ "$old_md5" != "$new_md5" ]
+if [ -s "$tempfile" -a "$old_md5" != "$new_md5" ]
 then
   echo "Generating new report" >&2
   cat "$tempfile" > "$REPORT"
