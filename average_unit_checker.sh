@@ -11,8 +11,8 @@ then
   if [ ! -e "$LOCKFILE" ]
   then
     echo "Surpassed unit average! (today: $units_today, average: $units_average)" | mail average_unit_checker@ernie.org
+    touch "$LOCKFILE"
   fi
 else
   rm -rf "$LOCKFILE"
 fi
-
