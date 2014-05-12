@@ -4,7 +4,7 @@ import os
 import os.path
 import time
 from os.path import expanduser
-home = expanduser("~")
+home = expanduser("~ernie")
 
 
 TEMPLATE_FILENAME = "%s/unit-report-template.html" % os.path.dirname(os.path.realpath(__file__)) 
@@ -22,15 +22,47 @@ units_average_7days = os.popen("head -8 %s | tail -7 | cut -f5 -d, | awk '{ tota
 
 units_today_2013_diff = float(units_today) - float(units_average_2013)
 units_yesterday_2013_diff = float(units_yesterday) - float(units_average_2013)
+units_average_2013_diff = float(units_average) - float(units_average_2013)
+units_average_7days_2013_diff = float(units_average_7days) - float(units_average_2013)
+units_average_2014_2013_diff = float(units_average_2014) - float(units_average_2013)
+
+if units_today_2013_diff > 0:
+    placeholder['today_class'] = "positive_diff"
+else:
+    placeholder['today_class'] = "negative_diff"
+
+if units_yesterday_2013_diff > 0:
+    placeholder['yesterday_class'] = "positive_diff"
+else:
+    placeholder['yesterday_class'] = "negative_diff"
+
+if units_average_7days_2013_diff > 0:
+    placeholder['7days_class'] = "positive_diff"
+else:
+    placeholder['7days_class'] = "negative_diff"
+
+if units_average_2014_2013_diff > 0:
+    placeholder['2014_class'] = "positive_diff"
+else:
+    placeholder['2014_class'] = "negative_diff"
+
+if units_average_2013_diff > 0:
+    placeholder['alltime_class'] = "positive_diff"
+else:
+    placeholder['alltime_class'] = "negative_diff"
+
 
 placeholder['units_today_2013_diff'] = units_today_2013_diff 
 placeholder['units_today'] = units_today 
 placeholder['units_yesterday_2013_diff'] = units_yesterday_2013_diff 
 placeholder['units_yesterday'] = units_yesterday 
 placeholder['units_average'] = units_average 
+placeholder['units_average_2013_diff'] = units_average_2013_diff 
 placeholder['units_average_2013'] = units_average_2013 
 placeholder['units_average_2014'] = units_average_2014 
+placeholder['units_average_2014_2013_diff'] = units_average_2014_2013_diff 
 placeholder['units_average_7days'] = units_average_7days 
+placeholder['units_average_7days_2013_diff'] = units_average_7days_2013_diff 
 placeholder['now'] = time.ctime()
 placeholder['moves_csv_modified'] = time.ctime(os.path.getmtime(MOVES_CSV_FILENAME))
 
