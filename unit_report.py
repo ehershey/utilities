@@ -2,8 +2,11 @@
 import datetime
 import os
 import os.path
+import sys
 import time
 from os.path import expanduser
+import urllib2
+import numerous_apikey
 home = expanduser("~ernie")
 
 
@@ -12,12 +15,12 @@ MOVES_CSV_FILENAME = "%s/Dropbox/Web/moves.csv" % home
 
 placeholder = {}
 
-units_average = os.popen("cut -f5 -d, %s| awk '{ total += $1; count++ } END { print total/count }'" % MOVES_CSV_FILENAME).read()
-units_today = os.popen("cut -f5 -d, %s  | head -2 | tail -1" % MOVES_CSV_FILENAME).read()
-units_yesterday = os.popen("cut -f5 -d, %s  | head -3 | tail -1" % MOVES_CSV_FILENAME).read()
-units_average_2013 = os.popen("grep ^2013- %s | cut -f5 -d, | awk '{ total += $1; count++ } END { print total/count }'" % MOVES_CSV_FILENAME).read()
-units_average_2014 = os.popen("grep ^2014- %s | cut -f5 -d, | awk '{ total += $1; count++ } END { print total/count }'" % MOVES_CSV_FILENAME).read()
-units_average_7days = os.popen("head -8 %s | tail -7 | cut -f5 -d, | awk '{ total += $1; count++ } END { print total/count }'" % MOVES_CSV_FILENAME).read()
+units_average = os.popen("cut -f5 -d, %s| awk '{ total += $1; count++ } END { print total/count }'" % MOVES_CSV_FILENAME).read().rstrip()
+units_today = os.popen("cut -f5 -d, %s  | head -2 | tail -1" % MOVES_CSV_FILENAME).read().rstrip()
+units_yesterday = os.popen("cut -f5 -d, %s  | head -3 | tail -1" % MOVES_CSV_FILENAME).read().rstrip()
+units_average_2013 = os.popen("grep ^2013- %s | cut -f5 -d, | awk '{ total += $1; count++ } END { print total/count }'" % MOVES_CSV_FILENAME).read().rstrip()
+units_average_2014 = os.popen("grep ^2014- %s | cut -f5 -d, | awk '{ total += $1; count++ } END { print total/count }'" % MOVES_CSV_FILENAME).read().rstrip()
+units_average_7days = os.popen("head -8 %s | tail -7 | cut -f5 -d, | awk '{ total += $1; count++ } END { print total/count }'" % MOVES_CSV_FILENAME).read().rstrip()
 
 
 units_today_2013_diff = float(units_today) - float(units_average_2013)
@@ -83,3 +86,24 @@ if __name__ == '__main__':
 
     formated = template.format(**placeholder)
     print formated
+
+    # Report to numerous
+    #
+    # TODO: move this out of report script
+    #
+    metric_id = "6359390767342201980"
+    url = "https://api.numerousapp.com/v1/metrics/%s/events" % metric_id
+    auth_handler = urllib2.HTTPBasicAuthHandler()
+    auth_handler.add_password(realm = 'Numerous',
+                                  uri = url, 
+                                  user = numerous_apikey.apikey,
+                                  passwd='')
+    opener = urllib2.build_opener(auth_handler)
+    # ...and install it globally so it can be used with urlopen.
+    urllib2.install_opener(opener)
+
+    values = """ { "value": %s, "onlyIfChanged": true } """ % units_today
+    headers = { 'Content-Type': 'application/json' }
+    request = urllib2.Request(url, data=values, headers=headers)
+    response_body = urllib2.urlopen(request).read()
+    sys.stderr.write(response_body)
