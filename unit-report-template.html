@@ -2,8 +2,17 @@
   <head>
     <style>
     table,tr,td,th {{
-      border: 1px solid black;
-      }}
+        border: 1px solid black;
+        padding: 5px;
+    }}
+    .positive_diff {{
+        background: green;
+        color: white;
+    }}
+    .negative_diff {{ 
+        background: red; 
+        color: black;
+    }}
     </style>
   </head>
   <body>
@@ -13,14 +22,14 @@
         <th>Value</th>
         <th>Vs. 2013</th>
       </tr>
-      <tr>
+      <tr class={today_class}>
         <td>Today:</td>
-        <td>{units_today} </td>
+        <td>{units_today}</td>
         <td>{units_today_2013_diff}</td>
       </tr>
-      <tr>
+      <tr class={yesterday_class}>
         <td>Yesterday:</td>
-        <td>{units_yesterday} </td>
+        <td>{units_yesterday}</td>
         <td>{units_yesterday_2013_diff}</td>
       </tr>
       <tr>
@@ -28,20 +37,20 @@
         <td>{units_average_2013}</td>
         <td></td>
       </tr>
-      <tr>
+      <tr class={alltime_class}>
 				<td>Alltime Average:</td>
         <td>{units_average}</td>
-        <td></td>
+        <td>{units_average_2013_diff}</td>
       </tr>
-      <tr>
+      <tr class={2014_class}>
 				<td>2014 Average:</td>
         <td>{units_average_2014}</td>
-        <td></td>
+        <td>{units_average_2014_2013_diff}</td>
       </tr>
-      <tr>
+      <tr class={7days_class}>
 				<td>Last 7 days:</td>
         <td>{units_average_7days}</td>
-        <td></td>
+        <td>{units_average_7days_2013_diff}</td>
       </tr>
     </table>
     <br/>
