@@ -65,6 +65,14 @@ do
       let errors=errors+1
       echo ERROR: syntax check failed
     fi
+  elif echo "$file" | grep -q \\.html$
+  then
+    if ! tidy -error "$file" 
+    then
+      let errors=errors+1
+      echo ERROR: syntax check failed
+    fi
+ 
   elif echo "$file" | grep -q \\.md$
   then
     if ! cat "$file" | md2html > /dev/null
