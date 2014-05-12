@@ -78,7 +78,6 @@ placeholder['moves_csv_modified'] = time.ctime(os.path.getmtime(MOVES_CSV_FILENA
 
 
 if __name__ == '__main__':
-    is_release_candidate = False
 
     with open (TEMPLATE_FILENAME, "r") as myfile:
           template=myfile.read()
