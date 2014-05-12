@@ -1,7 +1,10 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html>
-  <head>
-    <style>
-    table,tr,td,th {{
+<head>
+  <meta name="generator" content=
+  "HTML Tidy for Linux (vers 14 June 2007), see www.w3.org">
+  <style type="text/css">
+table,tr,td,th {{
         border: 1px solid black;
         padding: 5px;
     }}
@@ -13,57 +16,59 @@
         background: red; 
         color: black;
     }}
-    </style>
-  </head>
-  <body>
-    <table cellpadding='0' cellspacing='0' >
-      <tr>
-        <th>What</th>
-        <th>Value</th>
-        <th>Vs. 2013</th>
-      </tr>
-      <tr class={today_class}>
-        <td>Today:</td>
-        <td>{units_today}</td>
-        <td>{units_today_2013_diff}</td>
-      </tr>
-      <tr class={yesterday_class}>
-        <td>Yesterday:</td>
-        <td>{units_yesterday}</td>
-        <td>{units_yesterday_2013_diff}</td>
-      </tr>
-      <tr>
-        <td>2013 Average:</td>
-        <td>{units_average_2013}</td>
-        <td></td>
-      </tr>
-      <tr class={alltime_class}>
-				<td>Alltime Average:</td>
-        <td>{units_average}</td>
-        <td>{units_average_2013_diff}</td>
-      </tr>
-      <tr class={2014_class}>
-				<td>2014 Average:</td>
-        <td>{units_average_2014}</td>
-        <td>{units_average_2014_2013_diff}</td>
-      </tr>
-      <tr class={7days_class}>
-				<td>Last 7 days:</td>
-        <td>{units_average_7days}</td>
-        <td>{units_average_7days_2013_diff}</td>
-      </tr>
-    </table>
-    <br/>
-    <br/>
-    <table cellpadding='0' cellspacing='0'>
-      <tr>
-        <td>HTML generated:</td>
-        <td><!--diffignore-->{now}</td>
-      </tr>
-      <tr>
-        <td>Moves data updated:</td>
-        <td>{moves_csv_modified}</td>
-      </tr>
-    </table>
-  </body>
+  </style>
+  <title></title>
+</head>
+<body>
+  <table summary="Averages and differences" cellpadding='0'
+  cellspacing='0'>
+    <tr>
+      <th>What</th>
+      <th>Value</th>
+      <th>Vs. 2013</th>
+    </tr>
+    <tr class="{today_class}">
+      <td>Today:</td>
+      <td>{units_today}</td>
+      <td>{units_today_2013_diff}</td>
+    </tr>
+    <tr class="{yesterday_class}">
+      <td>Yesterday:</td>
+      <td>{units_yesterday}</td>
+      <td>{units_yesterday_2013_diff}</td>
+    </tr>
+    <tr>
+      <td>2013 Average:</td>
+      <td>{units_average_2013}</td>
+      <td></td>
+    </tr>
+    <tr class="{alltime_class}">
+      <td>Alltime Average:</td>
+      <td>{units_average}</td>
+      <td>{units_average_2013_diff}</td>
+    </tr>
+    <tr class="{2014_class}">
+      <td>2014 Average:</td>
+      <td>{units_average_2014}</td>
+      <td>{units_average_2014_2013_diff}</td>
+    </tr>
+    <tr class="{7days_class}">
+      <td>Last 7 days:</td>
+      <td>{units_average_7days}</td>
+      <td>{units_average_7days_2013_diff}</td>
+    </tr>
+  </table><br>
+  <br>
+  <table summary="Timestamp information" cellpadding='0'
+  cellspacing='0'>
+    <tr>
+      <td>HTML generated:</td>
+      <td><!--diffignore-->{now}</td>
+    </tr>
+    <tr>
+      <td>Moves data updated:</td>
+      <td>{moves_csv_modified}</td>
+    </tr>
+  </table>
+</body>
 </html>
