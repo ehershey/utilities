@@ -2,8 +2,8 @@
 
 date >&2
 
-SCRIPT=~/git/utilities/unit_report.py
-REPORT=~/Dropbox/Web/goeverywhere/unit_report.html
+SCRIPT=~ernie/git/utilities/unit_report.py
+REPORT=~ernie/Dropbox/Web/goeverywhere/unit_report.html
 
 
 tempfile=$(mktemp /tmp/average_unit_report.XXXXXX)
