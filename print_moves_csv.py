@@ -9,7 +9,8 @@
 #
 #
 import datetime
-import json
+import simplejson as json
+import time
 import os.path
 import re
 import sys
@@ -29,12 +30,20 @@ for activity_name, verbose_activity_name in sorted(verbose_activity_names.items(
   sys.stdout.write(verbose_activity_name)
 sys.stdout.write(",Calories\n")
 
+if hasattr(datetime.datetime, 'strptime'):
+    #python 2.6
+    strptime = datetime.datetime.strptime
+else:
+    #python 2.4 equivalent
+    strptime = lambda date_string, format: datetime.datetime(*(time.strptime(date_string, format)[0:6]))
+
+
 def print_workouts_from_json_stream(instream):
   output = json.load(instream)
 
   for index, summary in enumerate(output):
     activities = summary['summary']
-    sys.stdout.write(str(datetime.datetime.strptime(summary['date'], '%Y%m%d')))
+    sys.stdout.write(str(strptime(summary['date'], '%Y%m%d')))
     activities_by_name = {}
     calories = 0
     if activities:
