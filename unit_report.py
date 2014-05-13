@@ -116,3 +116,4 @@ if __name__ == '__main__':
     #
     post_numerous_metric(6359390767342201980, units_today)
     post_numerous_metric(7670190745339240677, biked_today)
+    post_numerous_metric(5212351794073589044, units_today_2013_diff)
