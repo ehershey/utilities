@@ -2,11 +2,9 @@
 import datetime
 import os
 import os.path
-import sys
 import time
 from os.path import expanduser
-import urllib2
-import numerous_apikey
+from ernie import post_numerous_metric
 home = expanduser("~ernie")
 
 
@@ -78,27 +76,6 @@ placeholder['moves_csv_modified'] = time.ctime(os.path.getmtime(MOVES_CSV_FILENA
 # echo "units_average_2013: $units_average_2013"
 # echo "units_average_2014: $units_average_2014"
 # echo "units_average_7days: $units_average_7days"
-
-def post_numerous_metric(metric_id, value):
-    auth_handler = urllib2.HTTPBasicAuthHandler()
-
-    url = "https://api.numerousapp.com/v1/metrics/%s/events" % metric_id
-
-
-    auth_handler.add_password(realm = 'Numerous', uri = url, user = numerous_apikey.apikey, passwd='')
-    opener = urllib2.build_opener(auth_handler)
-    # ...and install it globally so it can be used with urlopen.
-    urllib2.install_opener(opener)
-
-    values = """ { "value": %s, "onlyIfChanged": true } """ % value
-    headers = { 'Content-Type': 'application/json' }
-    request = urllib2.Request(url, data=values, headers=headers)
-
-    try:
-      response_body = urllib2.urlopen(request).read()
-      sys.stderr.write(response_body)
-    except urllib2.URLError as e:
-      sys.stderr.write("Error updating value to %s via url: %s: %s\n" % (value, url, e))
 
 
 
