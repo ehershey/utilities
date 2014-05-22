@@ -52,7 +52,7 @@ parser.add_argument('--skip-enterprise', action='store_true', required=False, he
 parser.add_argument('--skip-clone', action='store_true', required=False, help='Skip cloning server repo', default = False);
 parser.add_argument('--server-repo', help='Github repo to use', default = 'git@github.com:mongodb/mongo');
 parser.add_argument('--server-repo-branch', help='Branch in repo to use', default = 'master');
-parser.add_argument('--server', help='Packaging serfver to use', default = None);
+parser.add_argument('--server', help='Packaging server to use', default = None);
 parser.add_argument('--instance-type', help='Instance Type', default = 'm3.xlarge');
 parser.add_argument('--version', help='Version number to build', required = True, default = None);
 args = parser.parse_args()
