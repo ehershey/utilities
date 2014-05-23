@@ -27,7 +27,7 @@ def main():
 
   weights = get_withings_weight(fromdate = one_year_ago_plus_margin, todate = one_year_ago)
 
-  post_numerous_metric(METRIC_ID, weights[len(weights)-1])
+  post_numerous_metric(METRIC_ID, weights[0])
 
 
 if __name__ == '__main__':
