@@ -13,7 +13,6 @@ def post_numerous_metric(metric_id, value):
 
   url = "https://api.numerousapp.com/v1/metrics/%s/events" % metric_id
 
-
   auth_handler.add_password(realm = 'Numerous', uri = url, user = numerous_apikey.apikey, passwd='')
   opener = urllib2.build_opener(auth_handler)
   # ...and install it globally so it can be used with urlopen.
@@ -31,7 +30,6 @@ def post_numerous_metric(metric_id, value):
 
 
 def get_withings_weight(fromdate, todate):
-
 
   # Withings API
   withings = WithingsAccount(withings_auth.username, withings_auth.password)
