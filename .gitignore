@@ -24,3 +24,6 @@ authdata.js
 crontab.env
 gpgexport
 settings.py
+numerous-env.sh
+numerous_apikey.py
+withings_auth.py
