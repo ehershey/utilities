@@ -2,3 +2,4 @@
 */15 * * * * ~/git/utilities/average_unit_checker.sh >> /tmp/average_unit_checker.log 2>&1
 */15 * * * * ~/git/utilities/unit_report_generator.sh  >> /tmp/unit_report.log 2>&1
 15 0 * * * ~/git/utilities/post_year_ago_weight_to_numerous.py  >> /tmp/post_year_ago_weight_to_numerous.log 2>&1
+*/15 * * * * ~/git/utilities/update_moves_csv.sh  >> /tmp/update_moves_csv.log 2>&1
