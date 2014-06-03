@@ -50,7 +50,6 @@ s3://downloads.mongodb.org/win32/mongodb-win32-x86_64-%s.zip
 s3://downloads.mongodb.org/win32/mongodb-win32-x86_64-2008plus-%s.msi
 s3://downloads.mongodb.org/win32/mongodb-win32-x86_64-2008plus-%s.zip
 s3://downloads.mongodb.org/osx/mongodb-osx-x86_64-%s.tgz
-s3://downloads.mongodb.org/osx/mongodb-osx-x86_64-debugsymbols-%s.tgz
 s3://downloads.mongodb.org/sunos5/mongodb-sunos5-x86_64-%s.tgz
 "
 # s3://downloads.mongodb.org/linux/mongodb-linux-x86_64-legacy-%s.tgz
