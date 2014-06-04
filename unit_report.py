@@ -20,6 +20,7 @@ units_yesterday = os.popen("cut -f5 -d, %s  | head -3 | tail -1" % MOVES_CSV_FIL
 units_average_2013 = os.popen("grep ^2013- %s | cut -f5 -d, | awk '{ total += $1; count++ } END { print total/count }'" % MOVES_CSV_FILENAME).read().rstrip()
 units_average_2014 = os.popen("grep ^2014- %s | cut -f5 -d, | awk '{ total += $1; count++ } END { print total/count }'" % MOVES_CSV_FILENAME).read().rstrip()
 units_average_7days = os.popen("head -8 %s | tail -7 | cut -f5 -d, | awk '{ total += $1; count++ } END { print total/count }'" % MOVES_CSV_FILENAME).read().rstrip()
+units_average_2days = os.popen("head -3 %s | tail -2 | cut -f5 -d, | awk '{ total += $1; count++ } END { print total/count }'" % MOVES_CSV_FILENAME).read().rstrip()
 
 if biked_today == "":
   biked_today = 0
@@ -28,6 +29,7 @@ units_today_2013_diff = float(units_today) - float(units_average_2013)
 units_yesterday_2013_diff = float(units_yesterday) - float(units_average_2013)
 units_average_2013_diff = float(units_average) - float(units_average_2013)
 units_average_7days_2013_diff = float(units_average_7days) - float(units_average_2013)
+units_average_2days_2013_diff = float(units_average_2days) - float(units_average_2013)
 units_average_2014_2013_diff = float(units_average_2014) - float(units_average_2013)
 
 if units_today_2013_diff > 0:
@@ -39,6 +41,11 @@ if units_yesterday_2013_diff > 0:
     placeholder['yesterday_class'] = "positive_diff"
 else:
     placeholder['yesterday_class'] = "negative_diff"
+
+if units_average_2days_2013_diff > 0:
+    placeholder['2days_class'] = "positive_diff"
+else:
+    placeholder['2days_class'] = "negative_diff"
 
 if units_average_7days_2013_diff > 0:
     placeholder['7days_class'] = "positive_diff"
@@ -67,6 +74,8 @@ placeholder['units_average_2014'] = units_average_2014
 placeholder['units_average_2014_2013_diff'] = units_average_2014_2013_diff
 placeholder['units_average_7days'] = units_average_7days
 placeholder['units_average_7days_2013_diff'] = units_average_7days_2013_diff
+placeholder['units_average_2days'] = units_average_2days
+placeholder['units_average_2days_2013_diff'] = units_average_2days_2013_diff
 placeholder['now'] = time.ctime()
 placeholder['moves_csv_modified'] = time.ctime(os.path.getmtime(MOVES_CSV_FILENAME))
 
