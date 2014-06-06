@@ -2,6 +2,7 @@
 #
 # List user metrics from Numerous 
 #
+import ernie
 import json
 import urllib2
 import numerous_apikey
@@ -25,4 +26,5 @@ if __name__ == '__main__':
     for metric in metrics_json:
       print "label: %s" % metric['label']
       print "id: %s" % metric['id']
+      print "last_value: %s" % ernie.get_numerous_metric_value(metric['id'])
       print ""
