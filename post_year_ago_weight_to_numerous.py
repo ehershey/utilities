@@ -16,7 +16,8 @@ METRIC_ID = 2541720541413967188
 DIFF_METRIC_ID = 414939844104127128
 
 import datetime
-from ernie import post_numerous_metric, get_withings_weight
+from numerousapp import update_metric_value
+from ernie import get_withings_weight
 
 def main():
 
@@ -30,8 +31,8 @@ def main():
   weights = get_withings_weight(fromdate = one_year_ago_minus_margin, todate = one_year_ago)
   today_weights = get_withings_weight(fromdate = today_minus_margin, todate = today)
 
-  post_numerous_metric(METRIC_ID, weights[0])
-  post_numerous_metric(DIFF_METRIC_ID, weights[0] - today_weights[0])
+  update_metric_value(METRIC_ID, weights[0])
+  update_metric_value(DIFF_METRIC_ID, weights[0] - today_weights[0])
 
 
 if __name__ == '__main__':

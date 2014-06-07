@@ -4,7 +4,7 @@ import os
 import os.path
 import time
 from os.path import expanduser
-from ernie import post_numerous_metric
+from numerousapp import update_metric_value
 home = expanduser("~ernie")
 
 
@@ -100,6 +100,6 @@ if __name__ == '__main__':
     #
     # TODO: move this out of report script
     #
-    post_numerous_metric(6359390767342201980, units_today)
-    post_numerous_metric(7670190745339240677, biked_today)
-    post_numerous_metric(5212351794073589044, units_today_2013_diff)
+    update_metric_value(6359390767342201980, units_today)
+    update_metric_value(7670190745339240677, biked_today)
+    update_metric_value(5212351794073589044, units_today_2013_diff)
