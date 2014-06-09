@@ -129,7 +129,8 @@ var url_configs = [
     url: 'http://buildbot-special.10gen.com/buildslaves',
     cell_selector: ".offline",
     text_finder_from_cell_jqobj: function(jqobj) { return jqobj.parent().children(":first-child").text(); },
-    ignore_text: 'bs-e-rhel57',
+    #ignore_text: 'bs-e-rhel57',
+    ignore_text: '',
     negated: false
   },
   { 
