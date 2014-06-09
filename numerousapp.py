@@ -3,10 +3,7 @@ import sys
 import urllib2
 import numerous_apikey
 
-def get_metrics():
-
-    url = "https://api.numerousapp.com/v1/users/%s/metrics" % numerous_apikey.userid
-
+def make_auth_request(url = None, data = None, headers = None):
     auth_handler = urllib2.HTTPBasicAuthHandler()
     auth_handler.add_password(realm = 'Numerous',
                                   uri = url, 
@@ -15,26 +12,31 @@ def get_metrics():
     opener = urllib2.build_opener(auth_handler)
     # ...and install it globally so it can be used with urlopen.
     urllib2.install_opener(opener)
+    if data and headers:
+        return urllib2.Request(url, data, headers)
+    else:
+        return urllib2.Request(url)
 
-    request = urllib2.Request(url)
+
+def get_metrics():
+
+    url = "https://api.numerousapp.com/v1/users/%s/metrics" % numerous_apikey.userid
+
+    request = make_auth_request(url)
+
     response_body = urllib2.urlopen(request).read()
     metrics_json = json.loads(response_body)
     return metrics_json
 
 
 def update_metric_value(metric_id, value):
-  auth_handler = urllib2.HTTPBasicAuthHandler()
 
   url = "https://api.numerousapp.com/v1/metrics/%s/events" % metric_id
 
-  auth_handler.add_password(realm = 'Numerous', uri = url, user = numerous_apikey.apikey, passwd='')
-  opener = urllib2.build_opener(auth_handler)
-  # ...and install it globally so it can be used with urlopen.
-  urllib2.install_opener(opener)
-
   values = """ { "value": %s, "onlyIfChanged": true } """ % value
   headers = { 'Content-Type': 'application/json' }
-  request = urllib2.Request(url, data=values, headers=headers)
+
+  request = make_auth_request(url, data=values, headers=headers)
 
   try:
     response_body = urllib2.urlopen(request).read()
@@ -43,20 +45,10 @@ def update_metric_value(metric_id, value):
     sys.stderr.write("Error updating value to %s via url: %s: %s\n" % (value, url, e))
 
 def get_metric_value(metric_id):
-  auth_handler = urllib2.HTTPBasicAuthHandler()
 
   url = "https://api.numerousapp.com/v1/metrics/%s/events" % metric_id
 
-  auth_handler.add_password(realm = 'Numerous', uri = url, user = numerous_apikey.apikey, passwd='')
-  opener = urllib2.build_opener(auth_handler)
-  # ...and install it globally so it can be used with urlopen.
-  urllib2.install_opener(opener)
-
-  # values = """ { "value": %s, "onlyIfChanged": true } """ % value
-  # values = """ {} """
-  # headers = { 'Content-Type': 'application/json' }
-  #request = urllib2.Request(url, data=values, headers=headers)
-  request = urllib2.Request(url)
+  request = make_auth_request(url)
 
   try:
     response_body = urllib2.urlopen(request).read()
@@ -66,14 +58,8 @@ def get_metric_value(metric_id):
     sys.stderr.write("Error fetching value via url %s: %s\n" % (url, e))
 
 def create_metric(label, description, kind = "number", value = None, units = None, private = True, writeable = False ):
-    auth_handler = urllib2.HTTPBasicAuthHandler()
 
     url = "https://api.numerousapp.com/v1/metrics"
-
-    auth_handler.add_password(realm = 'Numerous', uri = url, user = numerous_apikey.apikey, passwd='')
-    opener = urllib2.build_opener(auth_handler)
-    # ...and install it globally so it can be used with urlopen.
-    urllib2.install_opener(opener)
 
     # required parameters:
     # label
@@ -93,7 +79,7 @@ def create_metric(label, description, kind = "number", value = None, units = Non
 
     values = json.dumps(values)
     headers = { 'Content-Type': 'application/json' }
-    request = urllib2.Request(url, data=values, headers=headers)
+    request = make_auth_request(url, data=values, headers=headers)
 
     try:
         response_body = urllib2.urlopen(request).read()
