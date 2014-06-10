@@ -23,7 +23,9 @@ def main():
 
   today = datetime.date.today()
 
-  one_year_ago = today - datetime.timedelta(days=365)
+  # Use 52 weeks ago (364 days) so days of the week match
+  # 
+  one_year_ago = today - datetime.timedelta(days=364)
 
   one_year_ago_minus_margin = one_year_ago - datetime.timedelta(days = MARGIN_PREVIOUS_WEIGHT)
   today_minus_margin = today - datetime.timedelta(days = MARGIN_PREVIOUS_WEIGHT)
