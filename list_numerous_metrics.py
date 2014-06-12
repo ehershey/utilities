@@ -8,6 +8,7 @@ metrics = numerousapp.get_metrics()
 
 for metric in metrics:
     print "label: %s" % metric['label']
+    print "description: %s" % metric['description']
     print "id: %s" % metric['id']
     print "last_value: %s" % numerousapp.get_metric_value(metric['id'])
     print ""
