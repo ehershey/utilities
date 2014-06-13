@@ -17,6 +17,16 @@ def make_auth_request(url = None, data = None, headers = None):
     else:
         return urllib2.Request(url)
 
+def delete_metric(metric_id):
+
+    url = "https://api.numerousapp.com/v1/metrics/%s" % metric_id
+
+    request = make_auth_request(url)
+    request.get_method = lambda: 'DELETE'
+
+    response_body = urllib2.urlopen(request).read()
+    return response_body
+
 
 def get_metrics():
 
@@ -53,7 +63,10 @@ def get_metric_value(metric_id):
   try:
     response_body = urllib2.urlopen(request).read()
     response = json.loads(response_body)
-    return response['events'][0]['value']
+    if 'events' in response and len(response['events']) > 0:
+      return response['events'][0]['value']
+    else:
+      return None
   except urllib2.URLError as e:
     sys.stderr.write("Error fetching value via url %s: %s\n" % (url, e))
 
@@ -83,6 +96,7 @@ def create_metric(label, description, kind = "number", value = None, units = Non
 
     try:
         response_body = urllib2.urlopen(request).read()
+        print response_body
         response = json.loads(response_body)
         return response['events'][0]['value']
     except urllib2.URLError as e:
