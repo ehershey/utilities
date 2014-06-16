@@ -1,4 +1,6 @@
-#!/bin/bash -ex
+#!/bin/bash
+set -o errexit
+set -o errtrace
 trap "echo ERROR!" err
 
 version="$1"
@@ -14,7 +16,7 @@ echo "tempdir: $tempdir"
 
 cd $tempdir
 
-cache_get 86400 http://downloads.mongodb.org/src/mongodb-src-r$version.tar.gz | tar zxf - 
+curl http://downloads.mongodb.org/src/mongodb-src-r$version.tar.gz | tar zxf - 
 
 echo checking version.cpp
 grep 'const char versionString\[\] = "'$version'"' mongodb-src-r$version/src/mongo/util/version.cpp 
@@ -23,7 +25,7 @@ grep "PROJECT_NUMBER *= $version$" mongodb-src-r$version/doxygenConfig
 
 
 filename=mongodb-osx-x86_64-$version.tgz
-cache_get 86400 http://downloads.mongodb.org/osx/$filename | tar zxf - 
+curl http://downloads.mongodb.org/osx/$filename | tar zxf - 
 
 while [ $port"0" -eq "0" -o $port"0" -le 10240 ]
 do
