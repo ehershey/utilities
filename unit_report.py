@@ -11,6 +11,8 @@ home = expanduser("~ernie")
 TEMPLATE_FILENAME = "%s/unit-report-template.html" % os.path.dirname(os.path.realpath(__file__))
 MOVES_CSV_FILENAME = "%s/Dropbox/Web/moves.csv" % home
 
+MIN_HOUR_FOR_ZERO_POST = 5
+
 placeholder = {}
 
 units_today = os.popen("cut -f5 -d, %s  | head -2 | tail -1" % MOVES_CSV_FILENAME).read().rstrip()
@@ -100,7 +102,12 @@ if __name__ == '__main__':
     #
     # TODO: move this out of report script
     #
-    update_metric_value(6359390767342201980, units_today)
-    update_metric_value(7670190745339240677, biked_today)
-    update_metric_value(5212351794073589044, units_today_2013_diff)
-    update_metric_value(7170780739467042866, units_average_2days)
+
+    # Only post if we have data for today or it's been long enough that we should have data for today
+    #
+    if units_today > 0 or datetime.datetime.now().hour > MIN_HOUR_FOR_ZERO_POST:
+        #update_metric_value(6359390767342201980, units_yesterday, updated = "2014-06-15T23:59:59.000Z")
+        update_metric_value(6359390767342201980, units_today)
+        update_metric_value(7670190745339240677, biked_today)
+        update_metric_value(5212351794073589044, units_today_2013_diff)
+        update_metric_value(7170780739467042866, units_average_2days)
