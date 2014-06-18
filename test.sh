@@ -51,7 +51,7 @@ do
   elif echo "$file" | grep -q \\.html$
   then
     echo Skipping HTML file
-  elif head -1 "$file" | grep -q sh || echo "$file" | grep -q \\.sh$ || echo "$file" | grep -q \\.env$
+  elif head -1 "$file" | grep -q bin/.\*sh || echo "$file" | grep -q \\.sh$ || echo "$file" | grep -q \\.env$
   then
     if ! bash -n "$file"
     then
