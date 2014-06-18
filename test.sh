@@ -17,16 +17,27 @@
 # Markdown
 # Bourne Shell
 #
+# Usage:
+# test.sh [ <filename glob pattern> ]
+#
+# Tests everything by default
 
 set -o errexit
 errors=0
-files=0
+filecount=0
+
+if [ "$1" ]
+then
+  filelist="$(echo *$1*)"
+else
+  filelist="$(echo *)"
+fi
 
 export PATH=$PATH:./node_modules/.bin
 
-for file in *
+for file in $filelist
 do
-  let files=files+1
+  let filecount=filecount+1
   echo "Testing file: $file"
   if [ -d "$file" ] 
   then
@@ -102,7 +113,7 @@ do
   fi
 done
 
-echo "Examined $files files"
+echo "Examined $filecount filecount"
 echo "Found $errors errors"
 if [ $errors -gt 0 ] 
 then
