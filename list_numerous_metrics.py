@@ -12,5 +12,5 @@ for metric in metrics:
     print "label: %s" % metric['label']
     print "description: %s" % metric['description'].encode('ascii', 'ignore')
     print "id: %s" % metric['id']
-    print "last_value: %s" % numerousapp.get_metric_value(metric['id'])
+    print "last_value: %s" % numerousapp.get_metric_value(metric['id'])['value']
     print ""
