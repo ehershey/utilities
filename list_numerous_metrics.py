@@ -4,8 +4,18 @@
 #
 import numerousapp
 import codecs
+import argparse
 
-metrics = numerousapp.get_metrics()
+
+parser = argparse.ArgumentParser(description='List Numerous metrics')
+parser.add_argument('-l', '--labelsearch', help='Label regular expression search')
+parser.add_argument('-v', '--verbose', action='store_true', help='Include some extra details')
+parser.add_argument('-d', '--debug', action='store_true', help='Include a lot of extra details')
+args = parser.parse_args()
+
+
+
+metrics = numerousapp.get_metrics(args.labelsearch)
 
 for metric in metrics:
     # print metric
@@ -13,4 +23,8 @@ for metric in metrics:
     print "description: %s" % metric['description'].encode('ascii', 'ignore')
     print "id: %s" % metric['id']
     print "last_value: %s" % numerousapp.get_metric_value(metric['id'])['value']
+    if args.verbose:
+      print "photoURL: %s" % metric['photoURL']
+    if args.debug:
+      print "Raw JSON: %s" % metric
     print ""
