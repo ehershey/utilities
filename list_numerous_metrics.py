@@ -25,6 +25,7 @@ for metric in metrics:
     print "last_value: %s" % numerousapp.get_metric_value(metric['id'])['value']
     if args.verbose:
       print "photoURL: %s" % metric['photoURL']
+      print "updated: %s" % metric['updated']
     if args.debug:
       print "Raw JSON: %s" % metric
     print ""
