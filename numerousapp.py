@@ -28,6 +28,17 @@ def delete_metric(metric_id):
     response_body = urllib2.urlopen(request).read()
     return response_body
 
+def get_metric(metric_id):
+
+    url = "https://api.numerousapp.com/v1/metrics/%s" % metric_id
+
+    request = make_auth_request(url)
+
+    response_body = urllib2.urlopen(request).read()
+    metric = json.loads(response_body)
+    return metric
+
+
 
 def get_metrics(labelsearch = ''):
 
