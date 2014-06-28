@@ -24,7 +24,7 @@ for metric_id in metric_ids:
   print "Metric: " + metric['label']
   printed = 0
   for value in values:
-      print datetime.datetime.strptime(value['updated'], '%Y-%m-%dT%H:%M:%S.%fZ')
+      print datetime.datetime.strptime(value['updated'], '%Y-%m-%dT%H:%M:%S.%fZ').strftime("%Y-%m-%d %H:%M:%S")
       print value['value']
       print ""
       printed+= 1
