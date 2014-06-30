@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #
 #
 # Increase volume of audio files
