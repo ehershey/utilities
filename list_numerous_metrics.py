@@ -14,7 +14,6 @@ parser.add_argument('-d', '--debug', action='store_true', help='Include a lot of
 args = parser.parse_args()
 
 
-
 metrics = numerousapp.get_metrics(args.labelsearch)
 
 for metric in metrics:
