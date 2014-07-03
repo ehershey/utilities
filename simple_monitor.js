@@ -101,7 +101,7 @@ var url_configs = [
     // Mostly from http://bugs.jquery.com/ticket/5858
     //
     text_finder_from_cell_jqobj: function(jqobj) { return jqobj.parent().children(":first-child").not(":last").append(" | ").end().text(); },
-    ignore_text: 'mci@build-osx-2.ny.corp.10gen.cc:2212 | mci@build-osx-2.ny.corp.10gen.cc:2213 | mci@build-osx-2.ny.corp.10gen.cc:2214 | mci@build-osx-2.ny.corp.10gen.cc:2215',
+    ignore_text: '',
     negated: false
   },
   { 
@@ -129,8 +129,8 @@ var url_configs = [
     url: 'http://buildbot-special.10gen.com/buildslaves',
     cell_selector: ".offline",
     text_finder_from_cell_jqobj: function(jqobj) { return jqobj.parent().children(":first-child").text(); },
-    ignore_text: 'bs-e-rhel57',
-    // ignore_text: '',
+    // ignore_text: 'bs-e-rhel57',
+    ignore_text: '',
     negated: false
   },
   { 
