@@ -21,4 +21,4 @@ done
 
 # TODO fix '-e' interpreted characters in filenames
 #
-echo -e "Adjusted files: $adjusted_files"
+echo -e "Adjusted files:\n$adjusted_files"
