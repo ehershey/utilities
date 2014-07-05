@@ -88,7 +88,7 @@ var url_configs = [
   },
   { 
     url: 'http://mci-motu.10gen.cc:8080/api/',
-    cell_selector: "body:contains(api)",
+    cell_selector: "body:contains(API)",
     text_finder_from_cell_jqobj: function(jqobj) { return "Unused"; },
     ignore_text: '',
     negated: true
