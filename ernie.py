@@ -30,7 +30,8 @@ def get_withings_weight(fromdate, todate):
     # print "date: %s " % dt
     # print "weight: %f lb" % (weight * POUNDS_IN_KILOGRAMS);
     # print "fat ratio: %f " % (fat_ratio or 0);
-    weights.append(weight * POUNDS_IN_KILOGRAMS)
+    if weight:
+        weights.append(weight * POUNDS_IN_KILOGRAMS)
   return weights
 
 
