@@ -13,6 +13,6 @@ do
  echo $date
  (echo test $i 
  date ) | mail -s "test $i at $date" $recip
-  i=`expr $i + 1`
+  let i=i+1 
  sleep 5 
 done
