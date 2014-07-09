@@ -43,6 +43,10 @@ data=$(ec2list running $instance_name | tail -1)
 if [ "$count" -gt 2 ]
 then
   data=$(ec2list ernie running $instance_name | tail -1)
+  if [ ! "$data" ]
+  then
+    data=$(ec2list running $instance_name | head -1)
+  fi
 fi
 
 
