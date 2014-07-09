@@ -24,4 +24,5 @@ done
 cd "$BUILD_DIR"
 git fetch --all
 git reset --hard "origin/$REV"
+echo scons $SCONS_ARGS >> autobuild-scons-cmd.txt
 eval scons $SCONS_ARGS
