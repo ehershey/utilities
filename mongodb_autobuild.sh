@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # Automatically build MongoDB every night
 #
 #
