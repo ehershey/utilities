@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 units_average=$(cut -f5 -d, ~/Dropbox/Web/moves.csv  | awk '{ total += $1; count++ } END { print total/count }' | sed 's/\..*//')
 double_units_average=$(cut -f5 -d, ~/Dropbox/Web/moves.csv  | awk '{ total += 2*$1; count++ } END { print total/count }' | sed 's/\..*//')
 units_today=$(cut -f5 -d, ~/Dropbox/Web/moves.csv  | head -2 | tail -1 | sed 's/\..*//')
