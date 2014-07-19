@@ -19,11 +19,7 @@
 # how long to cache aws info 
 CACHE_SECONDS=300
 
-getuserbydistro () 
-{ 
-    distro="$1";
-    egrep --no-filename ^$distro:\|user: ~/git/mci/config/distros.yml* ~/distros.yml* | grep -A 1 ^$distro: | tail -1 | cut -f2 -d: | tr -d " "
-}
+. getuserbydistro.sh
 
 if [ ! "$2" ] 
 then

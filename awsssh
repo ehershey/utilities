@@ -11,6 +11,8 @@
 # how long to cache aws info 
 CACHE_SECONDS=300
 
+. getuserbydistro.sh
+
 getuserbydistro () 
 { 
     distro="$1";
