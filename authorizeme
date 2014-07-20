@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #
 # create an rsa key for ssh if one doesn't exist and copy it
 # into the authorized keys file on a remote host

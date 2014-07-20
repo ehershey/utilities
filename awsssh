@@ -81,4 +81,5 @@ fi
 
 echo connecting to $name
 echo "$data"
+set -x
 ssh -i ~/.ssh/$key.pem $user@$dns
