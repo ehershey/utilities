@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #
 # retrieve a url caching it for an arbitrary period of time,
 # avoiding duplicate requests if unexpired cached output exists
