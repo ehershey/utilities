@@ -6,9 +6,10 @@
 # alarm.sh [ <minutes> ]
 #
 # Requires:
-# "at" service - https://developer.apple.com/library/mac/documentation/Darwin/Reference/Manpages/man1/at.1.html#//apple_ref/doc/man/1/at
-# afplay executable - https://developer.apple.com/library/mac/documentation/Darwin/Reference/Manpages/man1/afplay.1.html#//apple_ref/doc/man/1/afplay
-# ~/Dropbox/Misc/ascending.mp3 audio file
+# * "at" service - https://developer.apple.com/library/mac/documentation/Darwin/Reference/Manpages/man1/at.1.html#//apple_ref/doc/man/1/at
+# ** Enable with:            launchctl load -w /System/Library/LaunchDaemons/com.apple.atrun.plist
+# * afplay executable - https://developer.apple.com/library/mac/documentation/Darwin/Reference/Manpages/man1/afplay.1.html#//apple_ref/doc/man/1/afplay
+# * ~/Dropbox/Misc/ascending.mp3 audio file
 #
 AUDIOFILE=~/Dropbox/Misc/ascending.mp3
 
