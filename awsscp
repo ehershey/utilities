@@ -36,8 +36,8 @@ then
   . ~/amazon-build.sh
 fi
 
-header=$(cache_run $CACHE_SECONDS "instance_info_by_name.sh $instance_name" | head -1)
-data=$(cache_run $CACHE_SECONDS "instance_info_by_name.sh $instance_name" | tail -1)
+header=$(ec2list | head -1)
+data=$(ec2list running $instance_name | tail -1)
 
 # account for weird lost data
 #
