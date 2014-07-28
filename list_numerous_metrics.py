@@ -2,9 +2,10 @@
 #
 # List user metrics from Numerous 
 #
-import numerousapp
-import codecs
 import argparse
+import codecs
+import numerousapp
+import sys
 
 
 parser = argparse.ArgumentParser(description='List Numerous metrics')
@@ -21,9 +22,12 @@ for metric in metrics:
     print "label: %s" % metric['label']
     print "description: %s" % metric['description'].encode('ascii', 'ignore')
     print "id: %s" % metric['id']
-    last_value = numerousapp.get_metric_value(metric['id'])
+    try:
+      last_value = numerousapp.get_metric_value(metric['id'])
+    except KeyboardInterrupt:
+      sys.exit(1)
     if last_value:
-        print "last_value: %s" % numerousapp.get_metric_value(metric['id'])['value']
+        print "last_value: %s" % last_value['value']
     if args.verbose:
         if 'photoURL' in metric:
             print "photoURL: %s" % metric['photoURL']
