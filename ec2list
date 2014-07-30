@@ -1,4 +1,13 @@
 #!/bin/bash
+#
+# ec2list
+#
+# List instances in EC2 with caching. All arguments are case-independent grep patterns to filter by.
+#
+# Example:
+# ec2list running ernie-keypair1 sometagvalue
+#
+#
 if [ ! "$AWS_SECRET_ACCESS_KEY" -o ! "$AWS_ACCESS_KEY_ID" ]
 then
   . ~/amazon-build.sh
