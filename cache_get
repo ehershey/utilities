@@ -1,8 +1,8 @@
 #!/bin/bash
 #
-# retrieve a url caching it for an arbitrary period of time,
-# avoiding duplicate requests if unexpired cached output exists
-# usage: cache_get <lifetime> <url>
+# Retrieve a url and cache it for an arbitrary period of time,
+# avoiding duplicate requests if unexpired cached output exists.
+# Usage: cache_get <lifetime> <url>
 #
 
 cachedir=$HOME/.generic_cache
@@ -19,7 +19,7 @@ url=$2
 
 if [ ! "$url" ]
 then
-	echo "usage: $0 <data_lifetime> <url>"
+	echo "usage: $0 <data_lifetime_seconds> <url>"
 	exit 2
 fi
 
