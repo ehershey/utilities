@@ -1,3 +1,4 @@
+import datetime
 import json
 import re
 import sys
@@ -84,7 +85,11 @@ def get_metric_values(metric_id):
     response_body = urllib2.urlopen(request).read()
     response = json.loads(response_body)
     if 'events' in response:
-        return response['events']
+      values = []
+      for value in response['events']:
+        value['updated_pretty'] = datetime.datetime.strptime(value['updated'], '%Y-%m-%dT%H:%M:%S.%fZ').strftime("%Y-%m-%d %H:%M:%S")
+        values.append(value)
+      return values
     else:
       return []
   except urllib2.URLError as e:
