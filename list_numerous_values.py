@@ -4,7 +4,6 @@
 #
 import numerousapp
 import argparse
-import datetime
 
 parser = argparse.ArgumentParser(description='List values for a Numerous metric')
 parser.add_argument('-n', '--number', help='Number of values to retrieve', type = int, default = 10)
@@ -24,7 +23,7 @@ for metric_id in metric_ids:
   print "Metric: " + metric['label']
   printed = 0
   for value in values:
-      print "%s: %s" % (datetime.datetime.strptime(value['updated'], '%Y-%m-%dT%H:%M:%S.%fZ').strftime("%Y-%m-%d %H:%M:%S"), value['value'])
+      print "%s: %s" % (value['updated_pretty'], value['value'])
       printed+= 1
       if printed > args.number:
         break
