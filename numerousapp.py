@@ -50,6 +50,8 @@ def get_metrics(labelsearch = ''):
     response_body = urllib2.urlopen(request).read()
     metrics = json.loads(response_body)
     labelsearchre = re.compile(labelsearch, flags = re.IGNORECASE)
+    for metric in metrics:
+        metric['updated_pretty'] = datetime.datetime.strptime(metric['updated'], '%Y-%m-%dT%H:%M:%S.%fZ').strftime("%Y-%m-%d %H:%M:%S")
     return filter(lambda x: labelsearchre.search(x['label']), metrics)
 
 
