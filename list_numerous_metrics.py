@@ -31,7 +31,7 @@ for metric in metrics:
     if args.verbose:
         if 'photoURL' in metric:
             print "photoURL: %s" % metric['photoURL']
-        print "updated: %s" % metric['updated']
+        print "updated: %s" % metric['updated_pretty']
     if args.debug:
         print "Raw JSON: %s" % metric
     print ""
