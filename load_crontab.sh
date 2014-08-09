@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # load crontab from crontab.txt and crontab.env
 #
 #
