@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # 
 # Delete cache entries from cache_get and cache_run
 #
