@@ -31,6 +31,14 @@ fi
 
 instance_name=$(echo "$*" | tr \  \\n | grep : | cut -f1 -d:)
 
+if echo $instance_name | grep -q @
+then
+  user=$(echo $instance_name | cut -f1 -d@)
+  instance_name=$(echo $instance_name | cut -f2 -d@)
+fi
+
+
+
 if [ ! "$AWS_SECRET_ACCESS_KEY" -o ! "$AWS_ACCESS_KEY_ID" ]
 then
   . ~/amazon-build.sh
@@ -63,7 +71,10 @@ then
   exit 3
 fi
 
-user=$(getuserbydistro "$distro")
+if [ ! "$user" ]
+then
+  user=$(getuserbydistro "$distro")
+fi
 
 if [ ! "$user" ] 
 then
