@@ -1,10 +1,10 @@
 #!/bin/bash
 #
-# Given an aws instance name, stop it
+# Given an aws instance name or other identifying information from format_aws_json.js, stop it
 # 
 # Depends on: 
 # 1) cache_run executable
-# 2) instance_info_by_name.sh executable
+# 2) ec2list executable
 # 3) awscli python package and "aws" executable
 
 # how long to cache aws info 
@@ -14,7 +14,7 @@ instance_name="$1"
 
 if [ ! "$instance_name" ] 
 then
-  echo "usage: $0 <instance_name>"
+  echo "usage: $0 <instance_name_or_info>"
   exit 2
 fi
 
@@ -23,16 +23,16 @@ then
   . ~/amazon-build.sh
 fi
 
-header=$(cache_run $CACHE_SECONDS "instance_info_by_name.sh $instance_name" | head -1)
-data=$(cache_run $CACHE_SECONDS "instance_info_by_name.sh $instance_name" | tail -1)
+header=$(cache_run $CACHE_SECONDS "ec2list" | head -1)
+data=$(cache_run $CACHE_SECONDS "ec2list $instance_name" | tail -1)
 
 # account for weird lost data
 #
 if [ \( ! "$data" \) -o "$(echo \"$data\" | grep running,\*$)" -o "$data" = "$header" ]
 then
   echo "retrying to poll aws data"
-  header=$(cache_run 0 "instance_info_by_name.sh $instance_name" | head -1)
-  data=$(cache_run $CACHE_SECONDS "instance_info_by_name.sh $instance_name" | tail -1)
+  header=$(cache_run 0 "ec2list $instance_name" | head -1)
+  data=$(cache_run $CACHE_SECONDS "ec2list $instance_name" | tail -1)
 fi
 
 # get column numbers
