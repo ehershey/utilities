@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 BGDIR=$HOME/bg
 LOGFILE=/tmp/setbg.log
 
