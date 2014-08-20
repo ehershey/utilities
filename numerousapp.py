@@ -133,7 +133,7 @@ def create_metric(label, description, kind = "number", value = None, units = Non
         response_body = urllib2.urlopen(request).read()
         print response_body
         response = json.loads(response_body)
-        return response['events'][0]['value']
+        return response
     except urllib2.URLError as e:
         sys.stderr.write("Error fetching value via url %s: %s\n" % (url, e))
 
