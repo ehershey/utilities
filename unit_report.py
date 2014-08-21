@@ -111,3 +111,4 @@ if __name__ == '__main__':
         update_metric_value(7670190745339240677, biked_today)
         update_metric_value(5212351794073589044, units_today_2013_diff)
         update_metric_value(7170780739467042866, units_average_2days)
+        update_metric_value(1242812163656294116, units_average_2days_2013_diff)
