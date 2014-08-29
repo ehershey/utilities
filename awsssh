@@ -45,6 +45,12 @@ then
   fi
 fi
 
+if [ ! "$data" ]
+then
+  clear_cache
+  data=$(ec2list ernie running $instance_name | tail -1)
+fi
+
 
 # get column numbers
 distro_column="$(echo "$header"  | tr , \\n | grep -nx distro | cut -f1 -d: )"
