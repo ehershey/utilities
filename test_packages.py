@@ -29,8 +29,8 @@ security_group = 'default'
 
 # ubuntu 12.04
 #
-label = 'ubuntu1204' 
-ami_id = 'ami-3fec7956'
+label = 'ubuntu1404' 
+ami_id = 'ami-1d8c9574'
 env['user'] = 'ubuntu'
 
 
