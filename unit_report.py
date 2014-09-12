@@ -17,6 +17,8 @@ placeholder = {}
 
 units_today = os.popen("cut -f5 -d, %s  | head -2 | tail -1" % MOVES_CSV_FILENAME).read().rstrip()
 biked_today = os.popen("cut -f2 -d, %s  | head -2 | tail -1 | tr -d a-z" % MOVES_CSV_FILENAME).read().rstrip()
+ran_today = os.popen("cut -f3 -d, %s  | head -2 | tail -1 | tr -d a-z" % MOVES_CSV_FILENAME).read().rstrip()
+walked_today = os.popen("cut -f4 -d, %s  | head -2 | tail -1 | tr -d a-z" % MOVES_CSV_FILENAME).read().rstrip()
 units_average = os.popen("cut -f5 -d, %s| awk '{ total += $1; count++ } END { print total/count }'" % MOVES_CSV_FILENAME).read().rstrip()
 units_yesterday = os.popen("cut -f5 -d, %s  | head -3 | tail -1" % MOVES_CSV_FILENAME).read().rstrip()
 units_average_2013 = os.popen("grep ^2013- %s | cut -f5 -d, | awk '{ total += $1; count++ } END { print total/count }'" % MOVES_CSV_FILENAME).read().rstrip()
@@ -109,6 +111,8 @@ if __name__ == '__main__':
         #update_metric_value(6359390767342201980, units_yesterday, updated = "2014-06-15T23:59:59.000Z")
         update_metric_value(6359390767342201980, units_today)
         update_metric_value(7670190745339240677, biked_today)
+        update_metric_value(3043034116976301897, walked_today)
+        update_metric_value(3398081990673437243, ran_today)
         update_metric_value(5212351794073589044, units_today_2013_diff)
         update_metric_value(7170780739467042866, units_average_2days)
         update_metric_value(1242812163656294116, units_average_2days_2013_diff)
