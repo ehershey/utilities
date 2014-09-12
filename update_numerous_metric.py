@@ -29,7 +29,6 @@ if len(metric_ids) > 1:
 
 
 def main():
-
   metric_id = metric_ids[0]
   metric = numerousapp.get_metric(metric_id = metric_id);
   print "Metric: " + metric['label']
