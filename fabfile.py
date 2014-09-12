@@ -75,7 +75,7 @@ def install_github_hostkey():
 
 def install_package_building_prereqs():
     sudo("apt-get --assume-yes update")
-    sudo("apt-get install --assume-yes dpkg-dev rpm debhelper createrepo git libc6:i386 lib32stdc++6 apache2 libsasl2-2 libssl1.0.0 libsnmp15 xfsprogs")
+    sudo("apt-get install --assume-yes dpkg-dev rpm debhelper createrepo git lib32stdc++6 apache2 libsasl2-2 libssl1.0.0 libsnmp30 xfsprogs")
     sudo("chown ubuntu /var/www")
 
 def clean_workdir():
