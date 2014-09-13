@@ -4,7 +4,7 @@ import os
 import os.path
 import time
 from os.path import expanduser
-from numerousapp import update_metric_value
+from numerousapp import update_metric_value, get_metric_value
 home = expanduser("~ernie")
 
 
@@ -26,8 +26,6 @@ units_average_2014 = os.popen("grep ^2014- %s | cut -f5 -d, | awk '{ total += $1
 units_average_7days = os.popen("head -8 %s | tail -7 | cut -f5 -d, | awk '{ total += $1; count++ } END { print total/count }'" % MOVES_CSV_FILENAME).read().rstrip()
 units_average_2days = os.popen("head -3 %s | tail -2 | cut -f5 -d, | awk '{ total += $1; count++ } END { print total/count }'" % MOVES_CSV_FILENAME).read().rstrip()
 
-if biked_today == "":
-  biked_today = 0
 
 units_today_2013_diff = float(units_today) - float(units_average_2013)
 units_yesterday_2013_diff = float(units_yesterday) - float(units_average_2013)
@@ -108,11 +106,39 @@ if __name__ == '__main__':
     # Only post if we have data for today or it's been long enough that we should have data for today
     #
     if units_today > 0 or datetime.datetime.now().hour > MIN_HOUR_FOR_ZERO_POST:
-        #update_metric_value(6359390767342201980, units_yesterday, updated = "2014-06-15T23:59:59.000Z")
-        update_metric_value(6359390767342201980, units_today)
-        update_metric_value(7670190745339240677, biked_today)
-        update_metric_value(3043034116976301897, walked_today)
-        update_metric_value(3398081990673437243, ran_today)
-        update_metric_value(5212351794073589044, units_today_2013_diff)
-        update_metric_value(7170780739467042866, units_average_2days)
-        update_metric_value(1242812163656294116, units_average_2days_2013_diff)
+      running_goal = get_metric_value(5818738672989877729)
+      walking_goal = get_metric_value(7758304728227275179)
+      biking_goal = get_metric_value(5595761423440323786)
+      if ran_today == "" or ran_today == None:
+          ran_today = 0
+      if biked_today == "" or biked_today == None:
+          biked_today = 0
+      if walked_today == "" or walked_today == None:
+          walked_today = 0
+      if running_goal:
+        running_goal = running_goal['value']
+      else:
+        running_goal = 0
+      if walking_goal:
+        walking_goal = walking_goal['value']
+      else:
+        walking_goal = 0
+      if biking_goal:
+        biking_goal = biking_goal['value']
+      else:
+        biking_goal = 0
+
+      biked_today = float(biked_today)
+      ran_today = float(ran_today)
+      walked_today = float(walked_today)
+      update_metric_value(8748753640388107935, running_goal - ran_today)
+      update_metric_value(94526752002396912, walking_goal - walked_today)
+      update_metric_value(111285933456617558, biking_goal - biked_today)
+      #update_metric_value(6359390767342201980, units_yesterday, updated = "2014-06-15T23:59:59.000Z")
+      update_metric_value(6359390767342201980, units_today)
+      update_metric_value(7670190745339240677, biked_today)
+      update_metric_value(3043034116976301897, walked_today)
+      update_metric_value(3398081990673437243, ran_today)
+      update_metric_value(5212351794073589044, units_today_2013_diff)
+      update_metric_value(7170780739467042866, units_average_2days)
+      update_metric_value(1242812163656294116, units_average_2days_2013_diff)
