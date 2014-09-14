@@ -26,8 +26,6 @@ units_average_2014 = os.popen("grep ^2014- %s | cut -f5 -d, | awk '{ total += $1
 units_average_7days = os.popen("head -8 %s | tail -7 | cut -f5 -d, | awk '{ total += $1; count++ } END { print total/count }'" % MOVES_CSV_FILENAME).read().rstrip()
 units_average_2days = os.popen("head -3 %s | tail -2 | cut -f5 -d, | awk '{ total += $1; count++ } END { print total/count }'" % MOVES_CSV_FILENAME).read().rstrip()
 
-if biked_today == "":
-  biked_today = 0
 
 units_today_2013_diff = float(units_today) - float(units_average_2013)
 units_yesterday_2013_diff = float(units_yesterday) - float(units_average_2013)
