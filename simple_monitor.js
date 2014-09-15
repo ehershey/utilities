@@ -118,21 +118,21 @@ var url_configs = [
     ignore_text: '',
     negated: true
   },
-  { 
-    url: 'http://buildbot.mongodb.org/buildslaves',
-    cell_selector: ".offline",
-    text_finder_from_cell_jqobj: function(jqobj) { return jqobj.parent().children(":first-child").text(); },
-    ignore_text: '',
-    negated: false
-  },
-  { 
-    url: 'http://buildbot-special.10gen.com/buildslaves',
-    cell_selector: ".offline",
-    text_finder_from_cell_jqobj: function(jqobj) { return jqobj.parent().children(":first-child").text(); },
-    // ignore_text: 'bs-e-rhel57',
-    ignore_text: '',
-    negated: false
-  },
+  // { 
+    // url: 'http://buildbot.mongodb.org/buildslaves',
+    // cell_selector: ".offline",
+    // text_finder_from_cell_jqobj: function(jqobj) { return jqobj.parent().children(":first-child").text(); },
+    // ignore_text: '',
+    // negated: false
+  // },
+  // { 
+    // url: 'http://buildbot-special.10gen.com/buildslaves',
+    // cell_selector: ".offline",
+    // text_finder_from_cell_jqobj: function(jqobj) { return jqobj.parent().children(":first-child").text(); },
+    // // ignore_text: 'bs-e-rhel57',
+    // ignore_text: '',
+    // negated: false
+  // },
   { 
     url: 'https://github.com/ehershey',
     
@@ -153,12 +153,28 @@ var url_configs = [
     negated: true
   },
   { 
-    url: 'http://testchunk.ernie.org/weather.html',
+    url: 'http://dropbox.ernie.org/weather.html',
     cell_selector: "body:contains(Weather widget)",
     text_finder_from_cell_jqobj: function(jqobj) { return jqobj.text(); },
     ignore_text: '',
     negated: true
+  },
+  { 
+    url: 'http://numpebble.ernie.org/config.html',
+    cell_selector: "body:contains(Title)",
+    text_finder_from_cell_jqobj: function(jqobj) { return jqobj.text(); },
+    ignore_text: '',
+    negated: true
+  },
+  { 
+    url: 'http://goeverywhere.ernie.org/get_points.cgi?from=09/15/2014&to=09/15/2014&min_lon=-80&max_lon=80&min_lat=-90&max_lat=90&bound_string=%28%2840.661127887535734%2C%20-74.28702794525663%29%2C%20%2840.77718145714685%2C%20-73.68380986664334%29%29&rind=1/1',
+    cell_selector: "body:contains(point)",
+    text_finder_from_cell_jqobj: function(jqobj) { return jqobj.text(); },
+    ignore_text: '',
+    negated: true
   }
+
+
 ];
 
 var errors_found = 0;
