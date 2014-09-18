@@ -1,0 +1,27 @@
+#!/bin/bash
+#
+# amilist
+#
+# List images in EC2 with caching. All arguments are case-independent grep patterns to filter by.
+#
+# Example:
+# amilist suse packer
+#
+#
+if [ ! "$AWS_SECRET_ACCESS_KEY" -o ! "$AWS_ACCESS_KEY_ID" ]
+then
+  . ~/amazon-build.sh
+fi
+
+tempfile=$(mktemp /tmp/amilist.XXXXXX)
+tempfile2=$(mktemp /tmp/amilist.XXXXXX)
+cache_run 300 "aws ec2 describe-images --owner self | format_ami_json.js" $AWS_ACCESS_KEY_ID > $tempfile
+while [ "$1" ]
+do
+  cat "$tempfile" | grep -i "$1" > "$tempfile2"
+  cat "$tempfile2" > "$tempfile"
+  shift
+done
+
+cat $tempfile
+
