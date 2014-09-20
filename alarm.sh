@@ -29,4 +29,5 @@ then
 fi
 
 echo "Will alarm in $minutes minutes"
-echo "(afplay "$AUDIOFILE" ; afplay "$AUDIOFILE" ) & killall PandoraJam iTunes iTunesHelper mdworker" | at now + $minutes minutes
+#echo "(afplay "$AUDIOFILE" ; afplay "$AUDIOFILE" ) & killall PandoraJam iTunes iTunesHelper mdworker" | at now + $minutes minutes
+echo "(afplay "$AUDIOFILE" ; afplay "$AUDIOFILE" ) & osxstop" | at now + $minutes minutes
