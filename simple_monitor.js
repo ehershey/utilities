@@ -80,7 +80,7 @@ var url_configs = [
     negated: true
   },
   { 
-    url: 'http://mci.10gen.com/ui/',
+    url: 'http://mci.10gen.com/',
     cell_selector: "#content",
     text_finder_from_cell_jqobj: function(jqobj) { return "Unused"; },
     ignore_text: '',
@@ -94,7 +94,7 @@ var url_configs = [
     negated: true
   },
   { 
-    url: 'http://mci.10gen.com/ui/hosts/',
+    url: 'http://mci.10gen.com/hosts/',
     cell_selector: "td:contains(unreachable)",
     // Crazy jquery magic to get a delimited string of all the unreachable hostnames
     // 
