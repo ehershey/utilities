@@ -246,6 +246,3 @@ function done_checking_all(err) {
   console.log('');
   console.log('Total errors found: ' + errors_found);
 }
-
-
-
