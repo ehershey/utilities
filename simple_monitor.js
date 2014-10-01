@@ -139,8 +139,8 @@ var url_configs = [
     // Date logic to get the full month name and day number of the day that was 23 hours ago,
     // so until 11pm this will return yesterday. This can be shaky logic since most days it shouldn't
     // trigger anyways
-    cell_selector: 'div.contrib-column:contains(Current streak):contains(' + (new Date((new Date()) - 23 * 60 * 60 * 1000)).toFormat("MMMM DD") + '), ' +
-                      'div.contrib-column:contains(Current streak):contains(' + (new Date()).toFormat("MMMM DD") + ')',
+    cell_selector: 'div.contrib-column:contains(Current streak):contains(' + (new Date((new Date()) - 23 * 60 * 60 * 1000)).toFormat("MMMM D") + '), ' +
+                      'div.contrib-column:contains(Current streak):contains(' + (new Date()).toFormat("MMMM D") + ')',
     text_finder_from_cell_jqobj: function(jqobj) { return "Date not found in page! (" + (new Date((new Date()) - 23 * 60 * 60 * 1000)).toFormat("MMMM DD") + ')'; },
     ignore_text: '',
     negated: true
