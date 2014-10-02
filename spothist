@@ -4,6 +4,10 @@
 #
 # List spot instance price history with caching. All arguments are case-independent grep patterns to filter by.
 #
+# Depends on: 
+# 1) cache_run executable
+# 2) awscli python package and "aws" executable
+#
 # Example:
 # spothist windows m3.xlarge
 #
