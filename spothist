@@ -1,0 +1,30 @@
+#!/bin/bash
+#
+# spothist
+#
+# List spot instance price history with caching. All arguments are case-independent grep patterns to filter by.
+#
+# Example:
+# spothist windows m3.xlarge
+#
+#
+if [ ! "$AWS_SECRET_ACCESS_KEY" -o ! "$AWS_ACCESS_KEY_ID" ]
+then
+  . ~/amazon-build.sh
+fi
+
+tempfile=$(mktemp /tmp/ec2list.XXXXXX)
+tempfile2=$(mktemp /tmp/ec2list.XXXXXX)
+start=$(date +%Y-%m-%d)T00:00:00.000Z
+cache_run 300 "aws ec2 describe-spot-price-history --start-time $start --output text" $AWS_ACCESS_KEY_ID > $tempfile
+while [ "$1" ]
+do
+  cat "$tempfile" | grep -i "$1" > "$tempfile2"
+  cat "$tempfile2" > "$tempfile"
+  shift
+done
+
+# sort with lowest price last
+#
+cat $tempfile | sort -n -k 5 -r -t \	
+
