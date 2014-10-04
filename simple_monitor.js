@@ -20,8 +20,8 @@ var nodemailer_transport = nodemailer.createTransport();
 
 // For each object in url_configs, hit "url" and run the "cell_selector" through jquery. 
 // if anything is matched and "negated" is not true (or if nothing matches and "negated" is true), 
-// and the detail text (return value of text_finder_from_cell_jqobj($(cell_selector)) !== "ignore_text",
-// send email from MAILFROM to MAILTO with details on the error
+// and the detail text (return value of text_finder_from_cell_jqobj($(cell_selector)) !== 
+// "ignore_text", send email from MAILFROM to MAILTO with details on the error
 //
 //
 
@@ -137,8 +137,9 @@ var url_configs = [
     url: 'https://github.com/ehershey',
     
     // Date logic to get the full month name and day number of the day that was 23 hours ago,
-    // so until 11pm this will return yesterday. This can be shaky logic since most days it shouldn't
-    // trigger anyways
+    // so until 11pm this will return yesterday. This can be shaky logic since most days it 
+    // shouldn't trigger anyways
+    //
     cell_selector: 'div.contrib-column:contains(Current streak):contains(' + (new Date((new Date()) - 23 * 60 * 60 * 1000)).toFormat("MMMM D") + '), ' +
                       'div.contrib-column:contains(Current streak):contains(' + (new Date()).toFormat("MMMM D") + ')',
     text_finder_from_cell_jqobj: function(jqobj) { return "Date not found in page! (" + (new Date((new Date()) - 23 * 60 * 60 * 1000)).toFormat("MMMM DD") + ')'; },
