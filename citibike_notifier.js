@@ -7,11 +7,12 @@
 var STARTURL = "https://www.citibikenyc.com/login";
 var TRIPURL = "https://www.citibikenyc.com/member/trips";
 
-var CHECK_INTERVAL_MILLIS = 5 * 60 * 1000;
-//var MAILFROM = 'Ernie Hershey <citinotifier@ernie.org>';
-//var MAILTO = 'Ernie Hershey <citinotify@ernie.org>';
-var MAILTO = 'Ernie Hershey <ehershey@gmail.com>';
-var MAILFROM = 'Ernie Hershey <ehershey@gmail.com>';
+// var CHECK_INTERVAL_MILLIS = 5 * 60 * 1000; // 5 minutes
+var CHECK_INTERVAL_MILLIS = 60 * 1000; // 1 minute
+// var MAILFROM = 'Ernie Hershey <citinotifier@ernie.org>';
+// var MAILTO = 'Ernie Hershey <citinotify@ernie.org>';
+var MAILTO = 'Ernie Hershey <ehershey+citibike@gmail.com>';
+var MAILFROM = 'Ernie Hershey <ehershey+citibike@gmail.com>';
 var SUBJECT = 'New Bikeshare Trip';
 
 var citibike_auth = require("citibike_auth");
@@ -22,36 +23,51 @@ var moment = require('moment');
 
 
 storage.initSync();
-var nodemailer_transport = nodemailer.createTransport();
-
-// Load the page from localhost
-browser = new Browser()
-browser.visit(STARTURL, function (err, passed_browser, status, errors) {
-  console.log('err: ' + err);
-  console.log('passed_browser: ' + passed_browser);
-  console.log('browser: ' + browser);
-  console.log('status: ' + status);
-  console.log('errors: ' + errors);
-  if(err) throw(err);
-  var usernameinput =   browser.query("#subscriberUsername");
-  console.log('usernameinput: ' + usernameinput);
-  var passwordinput =   browser.query("#subscriberPassword");
-  console.log('passwordinput: ' + passwordinput);
-  browser.fill("#subscriberUsername", citibike_auth.username);
-  browser.fill("#subscriberPassword", citibike_auth.password);
-  browser.pressButton("#login_submit", function(err) 
-  { 
-    console.log('in submit callback');
-    if(err) throw(err);
-    console.log('browser.location.pathname: ' + browser.location.pathname);
-    if(browser.location.pathname !== '/member/profile')
-    {
-      console.error("Login error? Path after login form submit: " + browser.location.pathname + " but expected /member/profile");
-    }
-    check_trips();
-    setInterval(check_trips,CHECK_INTERVAL_MILLIS);
-  });
+var nodemailer_transport = nodemailer.createTransport({
+      service: 'Gmail',
+        auth: {
+            user: citibike_auth.gmail_username,
+            pass: citibike_auth.gmail_password
+      }
 });
+var browser = new Browser();
+var interval;
+
+login();
+
+function login()
+{
+  if(interval)
+  {
+    clearInterval(interval);
+  }
+  browser.visit(STARTURL, function (err, passed_browser, status, errors) {
+    console.log('err: ' + err);
+    console.log('passed_browser: ' + passed_browser);
+    console.log('browser: ' + browser);
+    console.log('status: ' + status);
+    console.log('errors: ' + errors);
+    if(err) throw(err);
+    var usernameinput =   browser.query("#subscriberUsername");
+    console.log('usernameinput: ' + usernameinput);
+    var passwordinput =   browser.query("#subscriberPassword");
+    console.log('passwordinput: ' + passwordinput);
+    browser.fill("#subscriberUsername", citibike_auth.username);
+    browser.fill("#subscriberPassword", citibike_auth.password);
+    browser.pressButton("#login_submit", function(err) 
+    { 
+      console.log('in submit callback');
+      if(err) throw(err);
+      console.log('browser.location.pathname: ' + browser.location.pathname);
+      if(browser.location.pathname !== '/member/profile')
+      {
+        console.error("Login error? Path after login form submit: " + browser.location.pathname + " but expected /member/profile");
+      }
+      interval = setInterval(check_trips,CHECK_INTERVAL_MILLIS);
+      check_trips();
+    });
+  });
+}
 
 
 function check_trips() 
@@ -59,8 +75,22 @@ function check_trips()
   console.log("checking for new trips");
   browser.visit(TRIPURL, function(err, passed_browser, status, errors) {
     console.log('in trips callback');
+    console.log('browser.location.pathname: ' + browser.location.pathname);
+    if(browser.location.pathname !== '/member/trips') 
+    {
+      console.log("location is not trip page, re-running login()");
+      login();
+      return;
+    }
+
     var trip_trs = browser.querySelectorAll("tr.trip");
     console.log('trip_trs: ' + trip_trs);
+    if(trip_trs.length === 0)
+    {
+      console.log("trip_trs.length === 0, re-running login()");
+      login();
+      return;
+    }
     for(var i = 0 ; i < trip_trs.length ; i++) 
     {
       var trip_tr = trip_trs[i];
@@ -93,7 +123,7 @@ function notify_trip(trip_tr) {
       to: MAILTO,
       subject: SUBJECT,
       text: 'Recent trip took: ' + duration,
-      html: 'Recent trip took: ' + duration
+      html: '<html><head><title>' + SUBJECT + '</title></head><body>Recent trip took: ' + duration + '</body></html>'
   }, function(error, info){
     if(error){
         console.log(error);
