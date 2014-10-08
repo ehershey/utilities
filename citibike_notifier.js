@@ -7,8 +7,10 @@
 var STARTURL = "https://www.citibikenyc.com/login";
 var TRIPURL = "https://www.citibikenyc.com/member/trips";
 
-// var CHECK_INTERVAL_MILLIS = 5 * 60 * 1000; // 5 minutes
-var CHECK_INTERVAL_MILLIS = 60 * 1000; // 1 minute
+// Kill ourselves if we take this long
+//
+var PROCESS_TIMEOUT_MILLIS = 10000;
+
 // var MAILFROM = 'Ernie Hershey <citinotifier@ernie.org>';
 // var MAILTO = 'Ernie Hershey <citinotify@ernie.org>';
 var MAILTO = 'Ernie Hershey <ehershey+citibike@gmail.com>';
@@ -22,6 +24,8 @@ var nodemailer = require('nodemailer');
 var moment = require('moment');
 
 
+var fatal_timeout = setTimeout(function() { console.log('timeout'); process.exit(); }, PROCESS_TIMEOUT_MILLIS);
+
 storage.initSync();
 var nodemailer_transport = nodemailer.createTransport({
       service: 'Gmail',
@@ -31,15 +35,30 @@ var nodemailer_transport = nodemailer.createTransport({
       }
 });
 var browser = new Browser();
-var interval;
 
-login();
+var cookies = storage.getItem("cookies");
 
-function login()
+var done = function(err) { clearTimeout(fatal_timeout); if(err) { console.log("err: " + err); } else { console.log("Checked for trips") } };
+
+console.log("cookies: " + cookies);
+
+if(cookies) {
+  browser.loadCookies(cookies);
+  check_trips(null,done);
+  console.log('browser.saveCookies(): ' + browser.saveCookies());
+  storage.setItem("cookies", browser.saveCookies());
+}
+else {
+  login(null, function(err) { check_trips(err, done); });
+  console.log('browser.saveCookies(): ' + browser.saveCookies());
+  storage.setItem("cookies", browser.saveCookies());
+}
+
+function login(err,callback)
 {
-  if(interval)
-  {
-    clearInterval(interval);
+  if(err) {
+    callback(err);
+    return;
   }
   browser.visit(STARTURL, function (err, passed_browser, status, errors) {
     console.log('err: ' + err);
@@ -57,21 +76,29 @@ function login()
     browser.pressButton("#login_submit", function(err) 
     { 
       console.log('in submit callback');
-      if(err) throw(err);
+      if(err) callback(err);
       console.log('browser.location.pathname: ' + browser.location.pathname);
-      if(browser.location.pathname !== '/member/profile')
+      console.log('browser.saveCookies(): ' + browser.saveCookies());
+      storage.setItem("cookies", browser.saveCookies());
+      if(browser.location.pathname !== '/member/profile' && browser.location.pathname !== '/member/trips')
       {
-        console.error("Login error? Path after login form submit: " + browser.location.pathname + " but expected /member/profile");
+        callback("Login error? Path after login form submit: " + browser.location.pathname + " but expected /member/profile or /member/trips");
       }
-      interval = setInterval(check_trips,CHECK_INTERVAL_MILLIS);
-      check_trips();
+      callback();
     });
   });
 }
 
 
-function check_trips() 
+// can be used as a callback for login() or called directly and will
+// call login() if not logged in with itself as a callback
+//
+function check_trips(err, callback) 
 {
+  if(err) { 
+    callback(err);
+    return;
+  }
   console.log("checking for new trips");
   browser.visit(TRIPURL, function(err, passed_browser, status, errors) {
     console.log('in trips callback');
@@ -79,7 +106,7 @@ function check_trips()
     if(browser.location.pathname !== '/member/trips') 
     {
       console.log("location is not trip page, re-running login()");
-      login();
+      login(null,function(err) { check_trips(err,callback); });
       return;
     }
 
@@ -88,7 +115,7 @@ function check_trips()
     if(trip_trs.length === 0)
     {
       console.log("trip_trs.length === 0, re-running login()");
-      login();
+      login(null,function(err) { check_trips(err,callback); });
       return;
     }
     for(var i = 0 ; i < trip_trs.length ; i++) 
@@ -107,6 +134,7 @@ function check_trips()
         console.log("seen trip already, not notifying");
       }
     }
+    callback(null);
   });
 }
 
