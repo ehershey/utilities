@@ -7,13 +7,14 @@
 // Daily total macronutrient intake (ideally carbs/fat/protein, but dynamic based on report 
 // configuration)
 //
-// Usage: save_myfitnesspal_data.js [ YYYY-MM-DD ] # defauls to today
+// Usage: save_myfitnesspal_data.js [ <start of daterange - YYYY-MM-DD> <end of daterange - YYYY-MM-DD> ] # defauls to date range including yesterday and today
 //
 // See bottom of file for sample data
 var mongodb = require('mongodb');
 var jsdom = require('jsdom');
 var util = require('util');
 var strftime = require('strftime');
+var moment = require('moment');
 
 // set database options
 //
@@ -34,12 +35,12 @@ var to;
 if(process.argv[2])
 {
   from = process.argv[2];
-  to = process.argv[2];
+  to = process.argv[3];
 }
 else
 {
-  from = strftime('%Y-%m-%d');
-  to = strftime('%Y-%m-%d');
+  from = moment().subtract(1,'day').format('YYYY-MM-DD');
+  to = moment().format('YYYY-MM-DD');
 }
 username = 'ehershey'
 
