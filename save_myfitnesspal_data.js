@@ -111,6 +111,10 @@ function handler(errors, window)
     }
   });
   console.log('summaries_to_save.length: ' + summaries_to_save.length);
+  if(summaries_to_save.length === 0)
+  {
+    process.exit();
+  }
   var saved_count = 0;
   MongoClient.connect(dburl, function(err, db) 
   {
