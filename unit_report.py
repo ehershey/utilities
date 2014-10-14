@@ -39,11 +39,6 @@ if units_today_2013_diff > 0:
 else:
     placeholder['today_class'] = "negative_diff"
 
-if units_yesterday_2013_diff > 0:
-    placeholder['yesterday_class'] = "positive_diff"
-else:
-    placeholder['yesterday_class'] = "negative_diff"
-
 if units_average_2days_2013_diff > 0:
     placeholder['2days_class'] = "positive_diff"
 else:
