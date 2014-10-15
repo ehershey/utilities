@@ -2,10 +2,22 @@
 import datetime
 import os
 import os.path
+import pymongo
 import time
 from os.path import expanduser
 from numerousapp import update_metric_value, get_metric_value
 home = expanduser("~ernie")
+
+connection = pymongo.Connection('localhost', 27017)
+db = connection.ernie_org
+
+nutrition_summary = db.nutrition_summary.find_one({ "date": datetime.datetime.now().strftime("%B %d, %Y") });
+
+today_input = 0
+
+if nutrition_summary and nutrition_summary['Calories']:
+  today_input = nutrition_summary['Calories']
+
 
 
 TEMPLATE_FILENAME = "%s/unit-report-template.html" % os.path.dirname(os.path.realpath(__file__))
@@ -75,6 +87,7 @@ placeholder['units_average_2days'] = units_average_2days
 placeholder['units_average_2days_2013_diff'] = units_average_2days_2013_diff
 placeholder['now'] = time.ctime()
 placeholder['moves_csv_modified'] = time.ctime(os.path.getmtime(MOVES_CSV_FILENAME))
+placeholder['today_input'] = today_input
 
 
 # echo "units_today: $units_today"
