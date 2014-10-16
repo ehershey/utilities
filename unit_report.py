@@ -16,7 +16,7 @@ nutrition_summary = db.nutrition_summary.find_one({ "date": datetime.datetime.no
 today_input = 0
 
 if nutrition_summary and nutrition_summary['Calories']:
-  today_input = nutrition_summary['Calories']
+  today_input = nutrition_summary['Calories'].replace(",","");
 
 
 
