@@ -118,21 +118,21 @@ var url_configs = [
     ignore_text: '',
     negated: true
   },
-  // { 
-    // url: 'http://buildbot.mongodb.org/buildslaves',
-    // cell_selector: ".offline",
-    // text_finder_from_cell_jqobj: function(jqobj) { return jqobj.parent().children(":first-child").text(); },
-    // ignore_text: '',
-    // negated: false
-  // },
-  // { 
-    // url: 'http://buildbot-special.10gen.com/buildslaves',
-    // cell_selector: ".offline",
-    // text_finder_from_cell_jqobj: function(jqobj) { return jqobj.parent().children(":first-child").text(); },
-    // // ignore_text: 'bs-e-rhel57',
-    // ignore_text: '',
-    // negated: false
-  // },
+  { 
+    url: 'http://buildbot.mongodb.org/buildslaves',
+    cell_selector: ".offline",
+    text_finder_from_cell_jqobj: function(jqobj) { return jqobj.parent().children(":first-child").text(); },
+    ignore_text: '',
+    negated: false
+  },
+  { 
+    url: 'http://buildbot-special.10gen.com/buildslaves',
+    cell_selector: ".offline",
+    text_finder_from_cell_jqobj: function(jqobj) { return jqobj.parent().children(":first-child").text(); },
+    // ignore_text: 'bs-e-rhel57',
+    ignore_text: '',
+    negated: false
+  },
   { 
     url: 'https://github.com/ehershey',
     
@@ -180,7 +180,7 @@ var url_configs = [
 
 var errors_found = 0;
 
-async.each(url_configs, check_url, done_checking_all);
+async.each(url_configs, check_url, function() { done_checking_all() });
 
 function check_url(url_config, done_checking_one) {
   var url = url_config.url;
@@ -243,7 +243,6 @@ function check_url(url_config, done_checking_one) {
 }
 
 function done_checking_all(err) {
-  if(err) throw err;
-  console.log('');
+  console.log('err: ' + err);
   console.log('Total errors found: ' + errors_found);
 }
