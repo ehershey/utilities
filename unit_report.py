@@ -3,6 +3,7 @@ import datetime
 import os
 import os.path
 import pymongo
+import re
 import time
 from os.path import expanduser
 from numerousapp import update_metric_value, get_metric_value
@@ -13,12 +14,29 @@ db = connection.ernie_org
 
 nutrition_summary = db.nutrition_summary.find_one({ "date": datetime.datetime.now().strftime("%B %d, %Y") });
 
-today_input = 0
+date_regex_2013 = re.compile(", 2013")
+date_regex_2014 = re.compile(", 2014")
+
+nutrition_2013_average = db.nutrition_summary.aggregate([ { "$match": { "date": date_regex_2013 } }, { "$group": { "_id": "2013", "Average": { "$avg": "$calories_numeric" } } } ]);
+nutrition_2014_average = db.nutrition_summary.aggregate([ { "$match": { "date": date_regex_2014 } }, { "$group": { "_id": "2014", "Average": { "$avg": "$calories_numeric" } } } ]);
+
+input_today = 0
+input_2013 = 0
+input_today_2013_diff = 0
+input_2014 = 0
+input_today_2014_diff = 0
 
 if nutrition_summary and nutrition_summary['Calories']:
-  today_input = nutrition_summary['Calories'].replace(",","");
+  input_today = round(nutrition_summary['calories_numeric'], 2)
 
+if nutrition_2013_average and nutrition_2013_average['result']:
+  input_2013 = round(nutrition_2013_average['result'][0]['Average'], 2)
 
+if nutrition_2014_average and nutrition_2014_average['result']:
+  input_2014 = round(nutrition_2014_average['result'][0]['Average'], 2)
+
+input_today_2013_diff = round(input_2013 - input_today, 2)
+input_today_2014_diff = round(input_2014 - input_today, 2)
 
 TEMPLATE_FILENAME = "%s/unit-report-template.html" % os.path.dirname(os.path.realpath(__file__))
 MOVES_CSV_FILENAME = "%s/Dropbox/Web/moves.csv" % home
@@ -50,6 +68,11 @@ if units_today_2013_diff > 0:
     placeholder['today_class'] = "positive_diff"
 else:
     placeholder['today_class'] = "negative_diff"
+
+if input_today_2013_diff > 0:
+    placeholder['input_class'] = "negative_diff"
+else:
+    placeholder['input_class'] = "positive_diff"
 
 if units_average_2days_2013_diff > 0:
     placeholder['2days_class'] = "positive_diff"
@@ -87,7 +110,11 @@ placeholder['units_average_2days'] = units_average_2days
 placeholder['units_average_2days_2013_diff'] = units_average_2days_2013_diff
 placeholder['now'] = time.ctime()
 placeholder['moves_csv_modified'] = time.ctime(os.path.getmtime(MOVES_CSV_FILENAME))
-placeholder['today_input'] = today_input
+placeholder['input_today'] = input_today
+placeholder['input_2013'] = input_2013
+placeholder['input_today_2013_diff'] = input_today_2013_diff
+placeholder['input_2014'] = input_2014
+placeholder['input_today_2014_diff'] = input_today_2014_diff
 
 
 # echo "units_today: $units_today"
