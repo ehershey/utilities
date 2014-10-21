@@ -132,6 +132,8 @@ function handler(errors, window)
     {
       summary_data = summaries_to_save[i];
       date = summary_data['date'];
+      var calories = summary_data.Calories;
+      summary_data.calories_numeric = Number(summary_data.Calories.replace(/,/g,""));
 
       collection.update({date: date}, summary_data, {upsert:true, w: 1}, function(err, result) 
       {
