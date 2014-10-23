@@ -70,9 +70,9 @@ else:
     placeholder['today_class'] = "negative_diff"
 
 if input_today_2013_diff > 0:
-    placeholder['input_class'] = "negative_diff"
-else:
     placeholder['input_class'] = "positive_diff"
+else:
+    placeholder['input_class'] = "negative_diff"
 
 if units_average_2days_2013_diff > 0:
     placeholder['2days_class'] = "positive_diff"
