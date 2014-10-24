@@ -25,6 +25,7 @@ input_2013 = 0
 input_today_2013_diff = 0
 input_2014 = 0
 input_today_2014_diff = 0
+input_2014_2013_diff = 0
 
 if nutrition_summary and nutrition_summary['Calories']:
   input_today = round(nutrition_summary['calories_numeric'], 2)
@@ -35,8 +36,10 @@ if nutrition_2013_average and nutrition_2013_average['result']:
 if nutrition_2014_average and nutrition_2014_average['result']:
   input_2014 = round(nutrition_2014_average['result'][0]['Average'], 2)
 
+
 input_today_2013_diff = round(input_2013 - input_today, 2)
 input_today_2014_diff = round(input_2014 - input_today, 2)
+input_2014_2013_diff = round(input_2013 - input_2014, 2)
 
 TEMPLATE_FILENAME = "%s/unit-report-template.html" % os.path.dirname(os.path.realpath(__file__))
 MOVES_CSV_FILENAME = "%s/Dropbox/Web/moves.csv" % home
@@ -115,6 +118,7 @@ placeholder['input_2013'] = input_2013
 placeholder['input_today_2013_diff'] = input_today_2013_diff
 placeholder['input_2014'] = input_2014
 placeholder['input_today_2014_diff'] = input_today_2014_diff
+placeholder['input_2014_2013_diff'] = input_2014_2013_diff
 
 
 # echo "units_today: $units_today"
