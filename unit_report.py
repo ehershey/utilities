@@ -20,6 +20,7 @@ date_regex_2014 = re.compile(", 2014")
 nutrition_2013_average = db.nutrition_summary.aggregate([ { "$match": { "date": date_regex_2013 } }, { "$group": { "_id": "2013", "Average": { "$avg": "$calories_numeric" } } } ]);
 nutrition_2014_average = db.nutrition_summary.aggregate([ { "$match": { "date": date_regex_2014 } }, { "$group": { "_id": "2014", "Average": { "$avg": "$calories_numeric" } } } ]);
 
+input_today_url = "#"
 input_today = 0
 input_2013 = 0
 input_today_2013_diff = 0
@@ -29,6 +30,9 @@ input_2014_2013_diff = 0
 
 if nutrition_summary and nutrition_summary['Calories']:
   input_today = round(nutrition_summary['calories_numeric'], 2)
+
+if nutrition_summary and nutrition_summary['report_url']:
+  input_today_url = nutrition_summary['report_url']
 
 if nutrition_2013_average and nutrition_2013_average['result']:
   input_2013 = round(nutrition_2013_average['result'][0]['Average'], 2)
@@ -119,6 +123,7 @@ placeholder['input_today_2013_diff'] = input_today_2013_diff
 placeholder['input_2014'] = input_2014
 placeholder['input_today_2014_diff'] = input_today_2014_diff
 placeholder['input_2014_2013_diff'] = input_2014_2013_diff
+placeholder['input_today_url'] = input_today_url
 
 
 # echo "units_today: $units_today"
