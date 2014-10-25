@@ -12,7 +12,11 @@ home = expanduser("~ernie")
 connection = pymongo.Connection('localhost', 27017)
 db = connection.ernie_org
 
-nutrition_summary = db.nutrition_summary.find_one({ "date": datetime.datetime.now().strftime("%B %d, %Y") });
+today = datetime.datetime.now();
+yesterday = datetime.datetime.now() - datetime.timedelta(days=1)
+
+today_summary = db.nutrition_summary.find_one({ "date": today.strftime("%B %d, %Y") });
+yesterday_summary = db.nutrition_summary.find_one({ "date":  yesterday.strftime("%B %d, %Y") });
 
 date_regex_2013 = re.compile(", 2013")
 date_regex_2014 = re.compile(", 2014")
@@ -21,18 +25,28 @@ nutrition_2013_average = db.nutrition_summary.aggregate([ { "$match": { "date": 
 nutrition_2014_average = db.nutrition_summary.aggregate([ { "$match": { "date": date_regex_2014 } }, { "$group": { "_id": "2014", "Average": { "$avg": "$calories_numeric" } } } ]);
 
 input_today_url = "#"
+input_yesterday_url = "#"
 input_today = 0
+input_yesterday = 0
 input_2013 = 0
 input_today_2013_diff = 0
+input_yesterday_2013_diff = 0
 input_2014 = 0
 input_today_2014_diff = 0
 input_2014_2013_diff = 0
 
-if nutrition_summary and nutrition_summary['Calories']:
-  input_today = round(nutrition_summary['calories_numeric'], 2)
+if today_summary and today_summary['Calories']:
+  input_today = round(today_summary['calories_numeric'], 2)
 
-if nutrition_summary and nutrition_summary['report_url']:
-  input_today_url = nutrition_summary['report_url']
+if today_summary and today_summary['report_url']:
+  input_today_url = today_summary['report_url']
+
+if yesterday_summary and yesterday_summary['Calories']:
+  input_yesterday = round(yesterday_summary['calories_numeric'], 2)
+
+if yesterday_summary and yesterday_summary['report_url']:
+  input_yesterday_url = yesterday_summary['report_url']
+
 
 if nutrition_2013_average and nutrition_2013_average['result']:
   input_2013 = round(nutrition_2013_average['result'][0]['Average'], 2)
@@ -42,6 +56,7 @@ if nutrition_2014_average and nutrition_2014_average['result']:
 
 
 input_today_2013_diff = round(input_2013 - input_today, 2)
+input_yesterday_2013_diff = round(input_2013 - input_yesterday, 2)
 input_today_2014_diff = round(input_2014 - input_today, 2)
 input_2014_2013_diff = round(input_2013 - input_2014, 2)
 
@@ -118,12 +133,15 @@ placeholder['units_average_2days_2013_diff'] = units_average_2days_2013_diff
 placeholder['now'] = time.ctime()
 placeholder['moves_csv_modified'] = time.ctime(os.path.getmtime(MOVES_CSV_FILENAME))
 placeholder['input_today'] = input_today
+placeholder['input_yesterday'] = input_yesterday
 placeholder['input_2013'] = input_2013
 placeholder['input_today_2013_diff'] = input_today_2013_diff
+placeholder['input_yesterday_2013_diff'] = input_yesterday_2013_diff
 placeholder['input_2014'] = input_2014
 placeholder['input_today_2014_diff'] = input_today_2014_diff
 placeholder['input_2014_2013_diff'] = input_2014_2013_diff
 placeholder['input_today_url'] = input_today_url
+placeholder['input_yesterday_url'] = input_yesterday_url
 
 
 # echo "units_today: $units_today"
