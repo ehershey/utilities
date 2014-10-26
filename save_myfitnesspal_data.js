@@ -103,6 +103,7 @@ function handler(errors, window)
     window.$("td",calorie_footer).map(function(index,footer_cell) {
       summary_data[column_names[index]] = window.$(footer_cell).text();
     });
+    summary_data['report_url'] = full_url;
     console.log('summary_data:'); console.log(summary_data);
 
     var date = window.$(calorie_header).parent().prev("#date").text();
