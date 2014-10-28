@@ -107,6 +107,9 @@ do
   elif echo "$file" | grep -q \\.txt$
   then
     echo Skipping text file
+  elif echo "$file" | grep -q \\.log$
+  then
+    echo Skipping log file
   else
     let errors=errors+1
     echo "ERROR: Unknown file type"
