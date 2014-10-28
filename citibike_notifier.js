@@ -42,7 +42,7 @@ var done = function(err) { clearTimeout(fatal_timeout); if(err) { console.log("e
 
 console.log("cookies: " + cookies);
 
-if(cookies) {
+if(cookies && typeof(cookies) === 'string') {
   browser.loadCookies(cookies);
   check_trips(null,done);
   console.log('browser.saveCookies(): ' + browser.saveCookies());
