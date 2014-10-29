@@ -9,7 +9,7 @@ var TRIPURL = "https://www.citibikenyc.com/member/trips";
 
 // Kill ourselves if we take this long
 //
-var PROCESS_TIMEOUT_MILLIS = 10000;
+var PROCESS_TIMEOUT_MILLIS = 20000;
 
 // var MAILFROM = 'Ernie Hershey <citinotifier@ernie.org>';
 // var MAILTO = 'Ernie Hershey <citinotify@ernie.org>';
