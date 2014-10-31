@@ -123,9 +123,23 @@ function check_trips(err, callback)
       var trip_tr = trip_trs[i];
       var trip_id = trip_tr.id;
       var trip_duration = trip_tr.getAttribute('data-duration-seconds');
+      var now = (new Date()).getTime()/1000;
+      var end_timestamp = trip_tr.getAttribute("data-start-timestamp");
+      var trip_age = moment.duration(now - end_timestamp, "seconds").humanize();
+
+
+
       console.log('trip_id: ' + trip_id);
+      console.log('now: ' + now);
       console.log('trip_duration: ' + trip_duration);
-      if(is_trip_new(trip_tr))
+      console.log('end_timestamp: ' + end_timestamp);
+      console.log('trip_age: ' + trip_age);
+
+      // Only notify if the trip is new and it's either a legitimate length (over 60 seconds) or older than 60 seconds - 
+      // The extra logic is to account for trips showing up as tiny amounts of time immediately after they're over
+      // then getting populated with real durations after the notification has been sent
+      //
+      if(is_trip_new(trip_tr) && (trip_duration > 60 || trip_age > 60))
       {
         notify_trip(trip_tr);
       }
@@ -144,7 +158,12 @@ function check_trips(err, callback)
 function notify_trip(trip_tr) {
   var trip_id = trip_tr.id;
   console.log("notifying for trip with id: " + trip_id);
-  var duration = moment.duration(trip_tr.getAttribute("data-duration-seconds")*1, "seconds").humanize();
+
+  
+
+  var duration_seconds = trip_tr.getAttribute("data-duration-seconds");
+  console.log('duration_seconds: ' + duration_seconds);
+  var duration = moment.duration(duration_seconds*1, "seconds").humanize();
 
   nodemailer_transport.sendMail({
       from: MAILFROM,
