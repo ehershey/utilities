@@ -77,12 +77,13 @@ function login(err,callback)
     { 
       console.log('in submit callback');
       if(err) callback(err);
-      console.log('browser.location.pathname: ' + browser.location.pathname);
+      var pathname = browser.location.pathname;
+      console.log('pathname: ' + pathname);
       console.log('browser.saveCookies(): ' + browser.saveCookies());
       storage.setItem("cookies", browser.saveCookies());
-      if(browser.location.pathname !== '/member/profile' && browser.location.pathname !== '/member/trips')
+      if(pathname.indexOf('/member/trips') === -1 && pathname !== '/member/profile')
       {
-        callback("Login error? Path after login form submit: " + browser.location.pathname + " but expected /member/profile or /member/trips");
+        callback("Login error? Path after login form submit: " + pathname + " but expected /member/profile or /member/trips");
       }
       callback();
     });
@@ -93,17 +94,24 @@ function login(err,callback)
 // can be used as a callback for login() or called directly and will
 // call login() if not logged in with itself as a callback
 //
-function check_trips(err, callback) 
+function check_trips(err, callback, page) 
 {
   if(err) { 
     callback(err);
     return;
   }
   console.log("checking for new trips");
-  browser.visit(TRIPURL, function(err, passed_browser, status, errors) {
+  var url = TRIPURL;
+  if(page)
+  {
+    url += '/' + page;
+  }
+  console.log('url: ' + url);
+  browser.visit(url, function(err, passed_browser, status, errors) {
     console.log('in trips callback');
-    console.log('browser.location.pathname: ' + browser.location.pathname);
-    if(browser.location.pathname !== '/member/trips') 
+    var pathname = browser.location.pathname;
+    console.log('pathname: ' + pathname);
+    if(pathname.indexOf('/member/trips') === -1)
     {
       console.log("location is not trip page, re-running login()");
       login(null,function(err) { check_trips(err,callback); });
@@ -114,8 +122,20 @@ function check_trips(err, callback)
     console.log('trip_trs: ' + trip_trs);
     if(trip_trs.length === 0)
     {
-      console.log("trip_trs.length === 0, re-running login()");
-      login(null,function(err) { check_trips(err,callback); });
+      console.log("trip_trs.length === 0, looking at next page");
+      var after_slash = pathname.replace(/.*\//,'');
+      var next_page;
+      if(after_slash === 'trips')
+      {
+        next_page = 2;
+      } 
+      else 
+      {
+        next_page = after_slash*1 + 1;
+      }
+      console.log('next_page: ' + next_page);
+
+      check_trips(null,callback,next_page);
       return;
     }
     for(var i = 0 ; i < trip_trs.length ; i++) 
