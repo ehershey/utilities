@@ -185,12 +185,15 @@ function notify_trip(trip_tr) {
   console.log('duration_seconds: ' + duration_seconds);
   var duration = moment.duration(duration_seconds*1, "seconds").humanize();
 
+  var title = SUBJECT; 
+  var body_text = 'Recent trip took: ' + duration;
+  console.log('body_text: ' + body_text);
   nodemailer_transport.sendMail({
       from: MAILFROM,
       to: MAILTO,
       subject: SUBJECT,
-      text: 'Recent trip took: ' + duration,
-      html: '<html><head><title>' + SUBJECT + '</title></head><body>Recent trip took: ' + duration + '</body></html>'
+      text: body_text,
+      html: '<html><head><title>' + title + '</title></head><body>' + body_text + '</body></html>'
   }, function(error, info){
     if(error){
         console.log(error);
