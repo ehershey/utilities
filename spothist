@@ -2,7 +2,8 @@
 #
 # spothist
 #
-# List spot instance price history with caching. All arguments are case-independent grep patterns to filter by.
+# List spot instance price history with caching. All arguments are case-independent grep patterns by
+# which results will be filtered.
 #
 # Depends on: 
 # 1) cache_run executable
