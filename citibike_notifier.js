@@ -144,15 +144,15 @@ function check_trips(err, callback, page)
       var trip_id = trip_tr.id;
       var trip_duration = trip_tr.getAttribute('data-duration-seconds');
       var now = (new Date()).getTime()/1000;
-      var end_timestamp = trip_tr.getAttribute("data-start-timestamp");
-      var trip_age = moment.duration(now - end_timestamp, "seconds").humanize();
+      var start_timestamp = trip_tr.getAttribute("data-start-timestamp");
+      var trip_age = moment.duration(now - start_timestamp, "seconds").humanize();
 
 
 
       console.log('trip_id: ' + trip_id);
       console.log('now: ' + now);
       console.log('trip_duration: ' + trip_duration);
-      console.log('end_timestamp: ' + end_timestamp);
+      console.log('start_timestamp: ' + start_timestamp);
       console.log('trip_age: ' + trip_age);
 
       // Only notify if the trip is new and it's either a legitimate length (over 60 seconds) or older than 60 seconds - 
