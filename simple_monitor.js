@@ -118,7 +118,8 @@ var url_configs = [
     ignore_text: '',
     negated: true
   },
-  { 
+  /* 
+   { 
     url: 'http://buildbot.mongodb.org/buildslaves',
     cell_selector: ".offline",
     text_finder_from_cell_jqobj: function(jqobj) { return jqobj.parent().children(":first-child").text(); },
@@ -133,6 +134,7 @@ var url_configs = [
     ignore_text: '',
     negated: false
   },
+  */
   { 
     url: 'https://github.com/ehershey',
     
