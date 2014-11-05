@@ -15,8 +15,8 @@ db = connection.ernie_org
 today = datetime.datetime.now();
 yesterday = datetime.datetime.now() - datetime.timedelta(days=1)
 
-today_summary = db.nutrition_summary.find_one({ "date": today.strftime("%B %d, %Y") });
-yesterday_summary = db.nutrition_summary.find_one({ "date":  yesterday.strftime("%B %d, %Y") });
+today_summary = db.nutrition_summary.find_one({ "date": today.strftime("%B %-d, %Y") });
+yesterday_summary = db.nutrition_summary.find_one({ "date":  yesterday.strftime("%B %-d, %Y") });
 
 date_regex_2013 = re.compile(", 2013")
 date_regex_2014 = re.compile(", 2014")
