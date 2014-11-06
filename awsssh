@@ -1,6 +1,9 @@
 #!/bin/bash
 #
 # Given an aws instance name, ssh to it
+#
+# Usage:
+# awssh <instance_name> [ <command> ]
 # 
 # Depends on: 
 # 1) ~/git/mci/config/distros.yml for usernames
@@ -14,6 +17,7 @@ CACHE_SECONDS=300
 . getuserbydistro.sh
 
 instance_name="$1"
+shift
 
 if echo $instance_name | grep -q @
 then
@@ -23,7 +27,7 @@ fi
 
 if [ ! "$instance_name" ] 
 then
-  echo "usage: $0 <instance_name>"
+  echo "usage: $0 <instance_name> [ <command> ]"
   exit 2
 fi
 
@@ -82,4 +86,4 @@ fi
 echo connecting to $name
 echo "$data"
 set -x
-ssh -i ~/.ssh/$key.pem $user@$dns
+ssh -i ~/.ssh/$key.pem $user@$dns "$@"
