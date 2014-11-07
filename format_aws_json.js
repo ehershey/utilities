@@ -24,7 +24,7 @@ process.stdin.on('data', function(chunk) {
 var output_tags = [ "Name", "Username", "Hostname", "started_by", "distro", "comments", "mode", "owner" ];
 
 // json fields to include in output (case sensitive) (not tags, standard ec2 metadata)
-var output_fields = [ "StateName", "InstanceId", "InstanceType", "KeyName", "PublicDnsName", "ImageId", "SpotInstanceRequestId" ]
+var output_fields = [ "State.Name", "InstanceId", "InstanceType", "KeyName", "PublicDnsName", "ImageId", "SpotInstanceRequestId", "Placement.AvailabilityZone" ]
 
 process.stdin.on('end', function() {
 
@@ -48,7 +48,7 @@ process.stdin.on('end', function() {
 
         // set StateName field to State.Name
         //
-        instance.StateName = instance.State.Name;
+        // instance.StateName = instance.State.Name;
 
         // to track whether to print a comma
         // 
@@ -59,7 +59,21 @@ process.stdin.on('end', function() {
           if(printed_field) {
             stdout_chunks[stdout_chunks.length] = ","
           }
-          stdout_chunks[stdout_chunks.length] = instance[output_field]
+
+          // object to pull field directly from
+          //
+          var field_parent = instance;
+
+          // pull different field parent out of field name (i.e. "Placement" out of "Placement.AvailabilityZone")
+          //
+          var field_parent_name = output_field.replace(/\..*/,'');
+          if(field_parent_name != output_field)
+          {
+            field_parent = field_parent[field_parent_name];
+            output_field = output_field.replace(/.*\./,'');
+          }
+
+          stdout_chunks[stdout_chunks.length] = field_parent[output_field]
           printed_field = true;
         });
 
