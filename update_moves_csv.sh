@@ -13,8 +13,23 @@ then
   echo "No \$MOVES_ACCESS_TOKEN defined."
   exit 2
 fi
+tempfile=$(mktemp /tmp/update_moves_csv.XXXXXX)
+tempfile2=$(mktemp /tmp/update_moves_csv.XXXXXX)
+csvfile=~ernie/Dropbox/Web/moves.csv
 echo update_moves_csv.sh starting
 date
-curl "https://api.moves-app.com/api/v1/user/summary/daily?pastDays=10&access_token=$MOVES_ACCESS_TOKEN" | ~ernie/git/utilities/print_moves_csv.py > /tmp/moves-new.csv ; touch ~ernie/Dropbox/Web/moves.csv ; cat ~ernie/Dropbox/Web/moves.csv >> /tmp/moves-new.csv ; cat /tmp/moves-new.csv | sort --key 5,5 --field-separator=, --reverse --numeric | sort --key=1,1 --field-separator=, --reverse --unique > ~ernie/Dropbox/Web/moves.csv
+if [ ! -e "$csvfile" ]
+then
+  touch "$csvfile"
+fi
+curl "https://api.moves-app.com/api/v1/user/summary/daily?pastDays=10&access_token=$MOVES_ACCESS_TOKEN" | ~ernie/git/utilities/print_moves_csv.py > $tempfile ; cat "$csvfile" >> $tempfile ; cat $tempfile | sort --key 5,5 --field-separator=, --reverse --numeric | sort --key=1,1 --field-separator=, --reverse --unique > $tempfile2
+ls -l $tempfile2 $csvfile
+if ! cmp -s $tempfile2 $csvfile
+then
+  cat $tempfile2 > $csvfile
+else
+  echo "No update to file content - not updating"
+fi
 echo update_moves_csv.sh finished
 date
+rm $tempfile $tempfile2
