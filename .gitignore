@@ -29,3 +29,5 @@ numerous_apikey.py
 withings_auth.py
 citibike_auth.js
 todoist_auth.py
+persist/
+temp*.js
