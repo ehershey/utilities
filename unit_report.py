@@ -86,6 +86,8 @@ units_average_7days_2013_diff = float(units_average_7days) - float(units_average
 units_average_2days_2013_diff = float(units_average_2days) - float(units_average_2013)
 units_average_2014_2013_diff = float(units_average_2014) - float(units_average_2013)
 
+minutes_since_moves_update = (datetime.datetime.now() - datetime.datetime.fromtimestamp(os.path.getmtime(MOVES_CSV_FILENAME))).seconds / 60 
+
 if units_today_2013_diff > 0:
     placeholder['today_class'] = "positive_diff"
 else:
@@ -204,3 +206,4 @@ if __name__ == '__main__':
       update_metric_value(5212351794073589044, units_today_2013_diff)
       update_metric_value(7170780739467042866, units_average_2days)
       update_metric_value(1242812163656294116, units_average_2days_2013_diff)
+      update_metric_value(3766962275739755372, minutes_since_moves_update)
