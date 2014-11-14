@@ -86,4 +86,4 @@ fi
 echo connecting to $name
 echo "$data"
 set -x
-ssh -i ~/.ssh/$key.pem $user@$dns "$@"
+ssh -o UserKnownHostsFile=/dev/null -o ConnectTimeout=5 -o KbdInteractiveAuthentication=no -o PasswordAuthentication=no -o StrictHostKeyChecking=no -i ~/.ssh/$key.pem $user@$dns "$@"
