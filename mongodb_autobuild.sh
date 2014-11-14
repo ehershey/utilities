@@ -24,5 +24,6 @@ done
 cd "$BUILD_DIR"
 git fetch --all
 git reset --hard "origin/$REV"
+find . -name \*.pyc -exec rm {} \;
 echo scons $SCONS_ARGS >> autobuild-scons-cmd.txt
 eval scons $SCONS_ARGS
