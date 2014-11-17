@@ -28,6 +28,10 @@ db = client[DB]
 training_dates = db[TRAINING_PLANS_COLLECTION].find({ "level": args.level}).sort([ ("day", DESCENDING )])
 #training_dates = db[TRAINING_PLANS_COLLECTION].find()
 
+if training_dates.count() == 0:
+    print "No training plans found (need to run nike_training_plan_to_mongodb.sh?)"
+    exit()
+
 for training_date in training_dates:
   print "training_date: %s" % training_date
   distance = training_date['distance']
