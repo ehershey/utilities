@@ -19,7 +19,7 @@ EVENT_DISTANCE = 26.2
 
 parser = argparse.ArgumentParser(description='Load Marathon Training Schedule')
 parser.add_argument('marathon_date', help='Date of marathon')
-parser.add_argument('--level', help='Training Plan Level', type=int, choices=[1,2,3])
+parser.add_argument('--level', help='Training Plan Level', type=int, choices=[1,2,3], default = 3)
 args = parser.parse_args()
 
 client = MongoClient('localhost', 27017)
@@ -32,11 +32,16 @@ if training_dates.count() == 0:
     print "No training plans found (need to run nike_training_plan_to_mongodb.sh?)"
     exit()
 
+found_event = False
 for training_date in training_dates:
-  print "training_date: %s" % training_date
   distance = training_date['distance']
-  print "distance: %s" % distance
-
+  if distance == EVENT_DISTANCE:
+    print "training_date: %s" % training_date
+    print "distance: %s" % distance
+    found_event = True
+  elif found_event:
+    print "training_date: %s" % training_date
+    print "distance: %s" % distance
 
 
 #import datetime
