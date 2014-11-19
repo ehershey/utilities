@@ -33,6 +33,8 @@ if training_dates.count() == 0:
     exit()
 
 found_event = False
+days_from_event = 0
+
 for training_date in training_dates:
   distance = training_date['distance']
   if distance == EVENT_DISTANCE:
@@ -42,6 +44,8 @@ for training_date in training_dates:
   elif found_event:
     print "training_date: %s" % training_date
     print "distance: %s" % distance
+    print "days_from_event: %s" % days_from_event
+    days_from_event = days_from_event + 1
 
 
 #import datetime
