@@ -9,6 +9,8 @@
 # 
 #
 import argparse
+import datetime
+import dateutil.parser
 from pymongo import MongoClient, DESCENDING
 
 DB = "ernie_org"
@@ -25,27 +27,30 @@ args = parser.parse_args()
 client = MongoClient('localhost', 27017)
 db = client[DB]
 
-training_dates = db[TRAINING_PLANS_COLLECTION].find({ "level": args.level}).sort([ ("day", DESCENDING )])
-#training_dates = db[TRAINING_PLANS_COLLECTION].find()
+plan_workouts = db[TRAINING_PLANS_COLLECTION].find({ "level": args.level}).sort([ ("day", DESCENDING )])
+#plan_workouts = db[TRAINING_PLANS_COLLECTION].find()
 
-if training_dates.count() == 0:
+if plan_workouts.count() == 0:
     print "No training plans found (need to run nike_training_plan_to_mongodb.sh?)"
     exit()
 
 found_event = False
 days_from_event = 0
 
-for training_date in training_dates:
-  distance = training_date['distance']
+event_date = dateutil.parser.parse(args.marathon_date)
+
+for plan_workout in plan_workouts:
+  schedule_workout = plan_workout
+  distance = plan_workout['distance']
   if distance == EVENT_DISTANCE:
-    print "training_date: %s" % training_date
-    print "distance: %s" % distance
     found_event = True
+    schedule_workout['date'] = event_date
+    print "schedule_workout: %s" % schedule_workout
   elif found_event:
-    print "training_date: %s" % training_date
-    print "distance: %s" % distance
-    print "days_from_event: %s" % days_from_event
     days_from_event = days_from_event + 1
+    schedule_date = event_date - datetime.timedelta(days=days_from_event)
+    schedule_workout['date'] = schedule_date
+    print "schedule_workout: %s" % schedule_workout
 
 
 #import datetime
