@@ -44,5 +44,6 @@ then
     #echo "did not find file $cachefile" >&2
 fi
 #echo cache miss >&2
-lwp-request -m GET -t $TIMEOUT $url | tee $cachefile
+#lwp-request -m GET -t $TIMEOUT $url | tee $cachefile
+curl --silent --connect-timeout $TIMEOUT $url | tee $cachefile
 	
