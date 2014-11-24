@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 DB=ernie_org
 COLLECTION=training_plan
