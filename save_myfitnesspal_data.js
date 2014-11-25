@@ -86,7 +86,10 @@ function handler(errors, window)
     console.log(errors);
     return;
   }
-  var calorie_headers = window.$("thead:contains(Calories)");
+
+  // contains(Calories) will get exercise tables and food tables
+  //
+  var calorie_headers = window.$("thead:contains(Foods)");
   calorie_headers.map(function(index,calorie_header) {
     var column_names = [];
     var summary_data = {};
