@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #
 # convert growlnotify command line parameters to terminal-notifier gem options
 #
