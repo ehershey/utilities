@@ -103,7 +103,7 @@ if units_today_2013_diff > 0:
 else:
     placeholder['today_class'] = "negative_diff"
 
-if input_today_2013_diff > 0:
+if input_today_2014_diff > 0:
     placeholder['input_class'] = "positive_diff"
 else:
     placeholder['input_class'] = "negative_diff"
