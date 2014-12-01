@@ -173,7 +173,7 @@ var url_configs = [
     //
     cell_selector: 'div.contrib-column:contains(Current streak):contains(' + (new Date((new Date()) - 23 * 60 * 60 * 1000)).toFormat("MMMM D") + '), ' +
                       'div.contrib-column:contains(Current streak):contains(' + (new Date()).toFormat("MMMM D") + ')',
-    text_finder_from_cell_jqobj: function(jqobj) { return "date not found in page! (" + (new date((new Date()) - 23 * 60 * 60 * 1000)).toFormat("MMMM DD") + ')'; },
+    text_finder_from_cell_jqobj: function(jqobj) { return "date not found in page! (" + (new Date((new Date()) - 23 * 60 * 60 * 1000)).toFormat("MMMM DD") + ')'; },
     ignore_text: '',
     negated: true
   },
