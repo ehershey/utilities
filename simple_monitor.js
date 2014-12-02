@@ -240,7 +240,7 @@ function check_url(url_config, done_checking_one) {
     }
     done_checking_one();
   };
-  var timeout = setTimeout(function() { handler('timed out',null); }, 10000);
+  var timeout = setTimeout(function() { handler('timed out',null); }, 20000);
   jsdom.env ( url, ["http://code.jquery.com/jquery.js"], function(errors, window) { clearTimeout(timeout); handler(errors, window); });
 }
 
