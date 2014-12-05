@@ -171,8 +171,7 @@ var url_configs = [
     // so until 11pm this will return yesterday. This can be shaky logic since most days it 
     // shouldn't trigger anyways
     //
-    cell_selector: 'div.contrib-column:contains(Current streak):contains(' + (new Date((new Date()) - 23 * 60 * 60 * 1000)).toFormat("MMMM D") + '), ' +
-                      'div.contrib-column:contains(Current streak):contains(' + (new Date()).toFormat("MMMM D") + ')',
+    cell_selector: 'div.contrib-column:contains(Current streak):contains(' + (new Date((new Date()) - 23 * 60 * 60 * 1000)).toFormat("MMMM D") + '), ' + 'div.contrib-column:contains(Current streak):contains(' + (new Date()).toFormat("MMMM D") + '), ' + 'div.contrib-column:contains(Current streak):contains(' + (new Date((new Date()).getTime() + 23 * 60 * 60 * 1000)).toFormat("MMMM D") + ')',
     text_finder_from_cell_jqobj: function(jqobj) { return "date not found in page! (" + (new Date((new Date()) - 23 * 60 * 60 * 1000)).toFormat("MMMM DD") + ')'; },
     ignore_text: '',
     negated: true
