@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #
 # 2003022100
 # added askpass/agent processing, stolen from xssh
