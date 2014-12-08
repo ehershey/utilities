@@ -23,6 +23,10 @@ var storage = require('node-persist');
 var nodemailer = require('nodemailer');
 var moment = require('moment');
 
+// Never refer to under 60 minutes as "an hour" 
+//
+moment.relativeTimeThreshold('m',60);
+
 
 var fatal_timeout = setTimeout(function() { console.log('timeout'); process.exit(); }, PROCESS_TIMEOUT_MILLIS);
 
@@ -161,7 +165,7 @@ function check_trips(err, callback, page)
       //
       if(is_trip_new(trip_tr) && (trip_duration > 60 || trip_age > 60))
       {
-        notify_trip(trip_tr);
+        notify_trip(trip_tr, trip_trs);
       }
       else
       {
@@ -175,18 +179,21 @@ function check_trips(err, callback, page)
 // <tr class="trip" id="trip-15932144" data-start-station-id="248" data-start-timestamp="1412458608" data-end-station-id="514" data-end-timestamp="1412459885" data-duration-seconds="1277">
 //
 
-function notify_trip(trip_tr) {
+function notify_trip(trip_tr, trip_trs) {
   var trip_id = trip_tr.id;
   console.log("notifying for trip with id: " + trip_id);
 
   
 
   var duration_seconds = trip_tr.getAttribute("data-duration-seconds");
+  var start_timestamp = trip_tr.getAttribute("data-start_timestamp");
+  var verbose_start_timestamp = moment(new Date(start_timestamp * 1000)).format('HH:mm MM/DD/YYYY');
   console.log('duration_seconds: ' + duration_seconds);
+  console.log('verbose_start_timestamp: ' + verbose_start_timestamp);
   var duration = moment.duration(duration_seconds*1, "seconds").humanize();
 
   var title = SUBJECT; 
-  var body_text = 'Recent trip took: ' + duration;
+  var body_text = 'Bikeshare trip took ' + duration + ' at ' + verbose_start_timestamp;
   console.log('body_text: ' + body_text);
   nodemailer_transport.sendMail({
       from: MAILFROM,
@@ -195,9 +202,9 @@ function notify_trip(trip_tr) {
       text: body_text,
       html: '<html><head><title>' + title + '</title></head><body>' + body_text + '</body></html>'
   }, function(error, info){
-    if(error){
+    if(error) {
         console.log(error);
-    }else{
+    } else{
         console.log('Message sent: ' + info.response);
     }
 });
