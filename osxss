@@ -1,1 +1,3 @@
-/Users/ernie/Dropbox/Unix/bin/osxss
+#!/usr/bin/env osascript
+tell application "ScreenSaverEngine" to activate
+
