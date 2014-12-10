@@ -31,3 +31,4 @@ citibike_auth.js
 todoist_auth.py
 persist/
 temp*.js
+monitor_iphone_env.sh
