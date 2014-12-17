@@ -186,10 +186,11 @@ function notify_trip(trip_tr, trip_trs) {
   
 
   var duration_seconds = trip_tr.getAttribute("data-duration-seconds");
-  var start_timestamp = trip_tr.getAttribute("data-start_timestamp");
+  var start_timestamp = trip_tr.getAttribute("data-start-timestamp");
   var verbose_start_timestamp = moment(new Date(start_timestamp * 1000)).format('HH:mm MM/DD/YYYY');
   console.log('duration_seconds: ' + duration_seconds);
   console.log('verbose_start_timestamp: ' + verbose_start_timestamp);
+  console.log('start_timestamp: ' + start_timestamp);
   var duration = moment.duration(duration_seconds*1, "seconds").humanize();
 
   var title = SUBJECT; 
