@@ -37,7 +37,7 @@ fi
 
 # get column numbers
 id_column="$(echo "$header"  | tr , \\n | grep -n InstanceId | cut -f1 -d: )"
-state_column="$(echo "$header"  | tr , \\n | grep -n StateName | cut -f1 -d: )"
+state_column="$(echo "$header"  | tr , \\n | grep -n State.Name | cut -f1 -d: )"
 
 id="$(echo "$data" | cut -f$id_column -d,)"
 state="$(echo "$data" | cut -f$state_column -d,)"

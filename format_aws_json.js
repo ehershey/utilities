@@ -46,9 +46,6 @@ process.stdin.on('end', function() {
           });
         });
 
-        // set StateName field to State.Name
-        //
-        // instance.StateName = instance.State.Name;
 
         // to track whether to print a comma
         // 
