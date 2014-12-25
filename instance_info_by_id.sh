@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 id="$1"
 if [ ! "$id" ] 
 then
