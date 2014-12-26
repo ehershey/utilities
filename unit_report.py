@@ -7,6 +7,9 @@ import re
 import time
 from os.path import expanduser
 from numerousapp import update_metric_value, get_metric_value
+
+resting_daily_calories = 1700
+
 home = expanduser("~ernie")
 
 connection = pymongo.Connection('localhost', 27017)
@@ -36,6 +39,9 @@ input_2014 = 0
 input_today_2014_diff = 0
 input_2014_2013_diff = 0
 input_2013_2014_diff = 0
+surplus_today = 0
+surplus_today_2014_diff = 0
+surplus_today_2013_diff = 0
 
 if today_summary and today_summary['Calories']:
   input_today = round(today_summary['calories_numeric'], 2)
@@ -57,10 +63,10 @@ if nutrition_2014_average and nutrition_2014_average['result']:
   input_2014 = round(nutrition_2014_average['result'][0]['Average'], 2)
 
 
+input_today_2014_diff = round(input_2014 - input_today, 2)
 input_today_2013_diff = round(input_2013 - input_today, 2)
 input_yesterday_2013_diff = round(input_2013 - input_yesterday, 2)
 input_yesterday_2014_diff = round(input_2014 - input_yesterday, 2)
-input_today_2014_diff = round(input_2014 - input_today, 2)
 input_2014_2013_diff = round(input_2013 - input_2014, 2)
 input_2013_2014_diff = round(input_2014 - input_2013, 2)
 
@@ -82,6 +88,11 @@ units_average_2014 = os.popen("grep ^2014- %s | cut -f5 -d, | awk '{ total += $1
 units_average_7days = os.popen("head -8 %s | tail -7 | cut -f5 -d, | awk '{ total += $1; count++ } END { print total/count }'" % MOVES_CSV_FILENAME).read().rstrip()
 units_average_2days = os.popen("head -3 %s | tail -2 | cut -f5 -d, | awk '{ total += $1; count++ } END { print total/count }'" % MOVES_CSV_FILENAME).read().rstrip()
 
+surplus_today = float(input_today) - (float(units_today) + resting_daily_calories)
+surplus_2014 = float(input_2014) - (float(units_average_2014) + resting_daily_calories)
+surplus_2013 = float(input_2013) - (float(units_average_2013) + resting_daily_calories)
+surplus_today_2014_diff = round(surplus_2014 - surplus_today, 2)
+surplus_today_2013_diff = round(surplus_2013 - surplus_today, 2)
 
 units_today_2013_diff = float(units_today) - float(units_average_2013)
 units_today_2014_diff = float(units_today) - float(units_average_2014)
@@ -102,6 +113,11 @@ if units_today_2013_diff > 0:
     placeholder['today_class'] = "positive_diff"
 else:
     placeholder['today_class'] = "negative_diff"
+
+if surplus_today_2014_diff < 0:
+    placeholder['surplus_class'] = "positive_diff"
+else:
+    placeholder['surplus_class'] = "negative_diff"
 
 if input_today_2014_diff > 0:
     placeholder['input_class'] = "positive_diff"
@@ -157,6 +173,9 @@ placeholder['input_2014_2013_diff'] = input_2014_2013_diff
 placeholder['input_2013_2014_diff'] = input_2013_2014_diff
 placeholder['input_today_url'] = input_today_url
 placeholder['input_yesterday_url'] = input_yesterday_url
+placeholder['surplus_today'] = surplus_today
+placeholder['surplus_today_2014_diff'] = surplus_today_2014_diff
+placeholder['surplus_today_2013_diff'] = surplus_today_2013_diff
 
 
 # echo "units_today: $units_today"
