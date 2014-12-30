@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #
 #
 # Take gps log data exported from the Moves api, formatted like this:
