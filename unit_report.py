@@ -40,8 +40,7 @@ input_today_2014_diff = 0
 input_2014_2013_diff = 0
 input_2013_2014_diff = 0
 surplus_today = 0
-surplus_today_2014_diff = 0
-surplus_today_2013_diff = 0
+surplus_yesterday = 0
 
 if today_summary and today_summary['Calories']:
   input_today = round(today_summary['calories_numeric'], 2)
@@ -89,10 +88,7 @@ units_average_7days = os.popen("head -8 %s | tail -7 | cut -f5 -d, | awk '{ tota
 units_average_2days = os.popen("head -3 %s | tail -2 | cut -f5 -d, | awk '{ total += $1; count++ } END { print total/count }'" % MOVES_CSV_FILENAME).read().rstrip()
 
 surplus_today = float(input_today) - (float(units_today) + resting_daily_calories)
-surplus_2014 = float(input_2014) - (float(units_average_2014) + resting_daily_calories)
-surplus_2013 = float(input_2013) - (float(units_average_2013) + resting_daily_calories)
-surplus_today_2014_diff = round(surplus_2014 - surplus_today, 2)
-surplus_today_2013_diff = round(surplus_2013 - surplus_today, 2)
+surplus_yesterday = float(input_yesterday) - (float(units_yesterday) + resting_daily_calories)
 
 units_today_2013_diff = float(units_today) - float(units_average_2013)
 units_today_2014_diff = float(units_today) - float(units_average_2014)
@@ -114,10 +110,15 @@ if units_today_2013_diff > 0:
 else:
     placeholder['today_class'] = "negative_diff"
 
-if surplus_today_2014_diff < 0:
+if surplus_today < 0:
     placeholder['surplus_class'] = "positive_diff"
 else:
     placeholder['surplus_class'] = "negative_diff"
+
+if surplus_yesterday < 0:
+    placeholder['surplus_yesterday_class'] = "positive_diff"
+else:
+    placeholder['surplus_yesterday_class'] = "negative_diff"
 
 if input_today_2014_diff > 0:
     placeholder['input_class'] = "positive_diff"
@@ -174,8 +175,7 @@ placeholder['input_2013_2014_diff'] = input_2013_2014_diff
 placeholder['input_today_url'] = input_today_url
 placeholder['input_yesterday_url'] = input_yesterday_url
 placeholder['surplus_today'] = surplus_today
-placeholder['surplus_today_2014_diff'] = surplus_today_2014_diff
-placeholder['surplus_today_2013_diff'] = surplus_today_2013_diff
+placeholder['surplus_yesterday'] = surplus_yesterday
 
 
 # echo "units_today: $units_today"
