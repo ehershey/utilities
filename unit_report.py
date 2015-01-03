@@ -41,6 +41,9 @@ input_2014_2013_diff = 0
 input_2013_2014_diff = 0
 surplus_today = 0
 surplus_yesterday = 0
+surplus_2014 = 0
+surplus_today_2014_diff = 0
+surplus_yesterday_2014_diff = 0
 
 if today_summary and today_summary['Calories']:
   input_today = round(today_summary['calories_numeric'], 2)
@@ -69,6 +72,7 @@ input_yesterday_2014_diff = round(input_2014 - input_yesterday, 2)
 input_2014_2013_diff = round(input_2013 - input_2014, 2)
 input_2013_2014_diff = round(input_2014 - input_2013, 2)
 
+
 TEMPLATE_FILENAME = "%s/unit-report-template.html" % os.path.dirname(os.path.realpath(__file__))
 MOVES_CSV_FILENAME = "%s/Dropbox/Web/moves.csv" % home
 
@@ -89,6 +93,10 @@ units_average_2days = os.popen("head -3 %s | tail -2 | cut -f5 -d, | awk '{ tota
 
 surplus_today = float(input_today) - (float(units_today) + resting_daily_calories)
 surplus_yesterday = float(input_yesterday) - (float(units_yesterday) + resting_daily_calories)
+surplus_2014 = float(input_2014) - (float(units_average_2014) + resting_daily_calories)
+
+surplus_today_2014_diff = round(surplus_2014 - surplus_today, 2)
+surplus_yesterday_2014_diff = round(surplus_2014 - surplus_yesterday, 2)
 
 units_today_2013_diff = float(units_today) - float(units_average_2013)
 units_today_2014_diff = float(units_today) - float(units_average_2014)
@@ -176,6 +184,8 @@ placeholder['input_today_url'] = input_today_url
 placeholder['input_yesterday_url'] = input_yesterday_url
 placeholder['surplus_today'] = surplus_today
 placeholder['surplus_yesterday'] = surplus_yesterday
+placeholder['surplus_today_2014_diff'] = surplus_today_2014_diff
+placeholder['surplus_yesterday_2014_diff'] = surplus_yesterday_2014_diff
 
 
 # echo "units_today: $units_today"
