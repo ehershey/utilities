@@ -183,6 +183,7 @@ placeholder['input_2013_2014_diff'] = input_2013_2014_diff
 placeholder['input_today_url'] = input_today_url
 placeholder['input_yesterday_url'] = input_yesterday_url
 placeholder['surplus_today'] = surplus_today
+placeholder['surplus_2014'] = surplus_2014
 placeholder['surplus_yesterday'] = surplus_yesterday
 placeholder['surplus_today_2014_diff'] = surplus_today_2014_diff
 placeholder['surplus_yesterday_2014_diff'] = surplus_yesterday_2014_diff
