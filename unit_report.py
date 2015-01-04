@@ -172,7 +172,6 @@ placeholder['now'] = time.ctime()
 placeholder['moves_csv_modified'] = time.ctime(os.path.getmtime(MOVES_CSV_FILENAME))
 placeholder['input_today'] = input_today
 placeholder['input_yesterday'] = input_yesterday
-placeholder['input_2013'] = input_2013
 placeholder['input_today_2013_diff'] = input_today_2013_diff
 placeholder['input_yesterday_2013_diff'] = input_yesterday_2013_diff
 placeholder['input_yesterday_2014_diff'] = input_yesterday_2014_diff
