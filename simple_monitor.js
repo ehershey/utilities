@@ -51,7 +51,7 @@ var url_configs = [
   },
  
   { 
-    url: 'http://repo.mongodb.org/repo/ubuntu-upstart/dists/dist/10gen/binary-amd64/',
+    url: 'http://repo.mongodb.org/apt/debian/dists/wheezy/mongodb-org/testing/main/binary-amd64/',
     cell_selector: "a:contains(deb)",
     text_finder_from_cell_jqobj: function(jqobj) { return "Unused"; },
     ignore_text: '',
