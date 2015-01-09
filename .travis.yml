@@ -8,4 +8,5 @@ notifications:
     on_success: aways
     on_failure: always
 
-before_install: sudo apt-get install libtext-csv-perl
+before_install: apt-get install libtext-csv-perl
+sudo: false
