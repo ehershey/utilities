@@ -7,6 +7,8 @@ notifications:
   email:
     on_success: aways
     on_failure: always
-
-before_install: cpanm Text::CSV
+before_install: 
+  - export PERL5LIB=/tmp/perllib/lib/perl5 PERL_LOCAL_LIB_ROOT=/tmp/perllib PERL_MB_OPT='--install_base /tmp/perllib' PERL_MM_OPT=INSTALL_BASE=/tmp/perllib
+  - perl -MCPAN -e 'install Text::CSV'
+  - perl -MCPAN -e 'install Date::Parse'
 sudo: false
