@@ -8,5 +8,5 @@ notifications:
     on_success: aways
     on_failure: always
 
-before_install: apt-get install libtext-csv-perl
+before_install: cpanm Text::CSV
 sudo: false
