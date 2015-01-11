@@ -23,9 +23,11 @@ yesterday_summary = db.nutrition_summary.find_one({ "date":  yesterday.strftime(
 
 date_regex_2013 = re.compile(", 2013")
 date_regex_2014 = re.compile(", 2014")
+date_regex_2015 = re.compile(", 2015")
 
 nutrition_2013_average = db.nutrition_summary.aggregate([ { "$match": { "date": date_regex_2013 } }, { "$group": { "_id": "2013", "Average": { "$avg": "$calories_numeric" } } } ]);
 nutrition_2014_average = db.nutrition_summary.aggregate([ { "$match": { "date": date_regex_2014 } }, { "$group": { "_id": "2014", "Average": { "$avg": "$calories_numeric" } } } ]);
+nutrition_2015_total = db.nutrition_summary.aggregate([ { "$match": { "date": date_regex_2015 } }, { "$group": { "_id": "2015", "Total": { "$sum": "$calories_numeric" } } } ]);
 
 input_today_url = "#"
 input_yesterday_url = "#"
@@ -44,6 +46,7 @@ surplus_yesterday = 0
 surplus_2014 = 0
 surplus_today_2014_diff = 0
 surplus_yesterday_2014_diff = 0
+surplus_2015_total = 0
 
 if today_summary and today_summary['Calories']:
   input_today = round(today_summary['calories_numeric'], 2)
@@ -63,6 +66,9 @@ if nutrition_2013_average and nutrition_2013_average['result']:
 
 if nutrition_2014_average and nutrition_2014_average['result']:
   input_2014 = round(nutrition_2014_average['result'][0]['Average'], 2)
+
+if nutrition_2015_total and nutrition_2015_total['result']:
+  input_2015_total = round(nutrition_2015_total['result'][0]['Total'], 2)
 
 
 input_today_2014_diff = round(input_2014 - input_today, 2)
@@ -186,6 +192,7 @@ placeholder['surplus_2014'] = surplus_2014
 placeholder['surplus_yesterday'] = surplus_yesterday
 placeholder['surplus_today_2014_diff'] = surplus_today_2014_diff
 placeholder['surplus_yesterday_2014_diff'] = surplus_yesterday_2014_diff
+placeholder['surplus_2015_total'] = surplus_2015_total
 
 
 # echo "units_today: $units_today"
