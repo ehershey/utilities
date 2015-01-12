@@ -34,10 +34,11 @@
     "cssstyle": "^0.2.14",
     "date-utils": "~1.2.15",
     "jq": "~1.7.2",
-    "jsdom": "~0.10.5",
+    "jsdom": "^0.10.6",
     "markdown": "~0.5.0",
     "md2html": "0.0.1",
     "moment": "^2.8.3",
+    "mongodb": "~1.4.18",
     "node-persist": "0.0.2",
     "npm": "^2.1.2",
     "phantomjs": "^1.9.10",
@@ -45,7 +46,6 @@
     "strftime": "^0.8.2",
     "uglify-js": "~2.4.12",
     "uglifyjs": "^2.3.6",
-    "zombie": "^2.0.4",
-    "mongodb": "~1.4.18"
+    "zombie": "^2.5.1"
   }
 }
