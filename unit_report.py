@@ -47,6 +47,7 @@ surplus_2014 = 0
 surplus_today_2014_diff = 0
 surplus_yesterday_2014_diff = 0
 surplus_2015_total = 0
+input_2015_total = 0
 
 if today_summary and today_summary['Calories']:
   input_today = round(today_summary['calories_numeric'], 2)
@@ -94,12 +95,15 @@ units_average = os.popen("cut -f5 -d, %s| awk '{ total += $1; count++ } END { pr
 units_yesterday = os.popen("cut -f5 -d, %s  | head -3 | tail -1" % MOVES_CSV_FILENAME).read().rstrip()
 units_average_2013 = os.popen("grep ^2013- %s | cut -f5 -d, | awk '{ total += $1; count++ } END { print total/count }'" % MOVES_CSV_FILENAME).read().rstrip()
 units_average_2014 = os.popen("grep ^2014- %s | cut -f5 -d, | awk '{ total += $1; count++ } END { print total/count }'" % MOVES_CSV_FILENAME).read().rstrip()
+units_2015_total = os.popen("grep ^2015- %s | cut -f5 -d, | awk '{ total += $1; count++ } END { print total }'" % MOVES_CSV_FILENAME).read().rstrip()
+day_count_2015 = os.popen("grep ^2015- %s | cut -f5 -d, | awk '{ total += $1; count++ } END { print count }'" % MOVES_CSV_FILENAME).read().rstrip()
 units_average_7days = os.popen("head -8 %s | tail -7 | cut -f5 -d, | awk '{ total += $1; count++ } END { print total/count }'" % MOVES_CSV_FILENAME).read().rstrip()
 units_average_2days = os.popen("head -3 %s | tail -2 | cut -f5 -d, | awk '{ total += $1; count++ } END { print total/count }'" % MOVES_CSV_FILENAME).read().rstrip()
 
 surplus_today = float(input_today) - (float(units_today) + resting_daily_calories)
 surplus_yesterday = float(input_yesterday) - (float(units_yesterday) + resting_daily_calories)
 surplus_2014 = float(input_2014) - (float(units_average_2014) + resting_daily_calories)
+surplus_2015_total = float(input_2015_total) - (float(units_2015_total) + resting_daily_calories * int(day_count_2015))
 
 surplus_today_2014_diff = round(surplus_2014 - surplus_today, 2)
 surplus_yesterday_2014_diff = round(surplus_2014 - surplus_yesterday, 2)
