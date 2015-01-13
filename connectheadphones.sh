@@ -5,7 +5,13 @@
 #
 # Use applescript to navigate bluetooth menu bar and select "Connect" 
 # in the submenu named in this variable:
+#
 DEVICE_NAME="ODT Privates"
+
+if which blueutil > /dev/null 2>&1
+then
+  blueutil power 1
+fi
 
 osascript  <<END
 -- activate application "SystemUIServer"
