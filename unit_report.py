@@ -50,6 +50,7 @@ surplus_yesterday_2014_diff = 0
 surplus_2015_total = 0
 input_2015 = 0
 input_2015_total = 0
+surplus_2015_2014_diff = 0
 
 if today_summary and today_summary['Calories']:
   input_today = round(today_summary['calories_numeric'], 2)
@@ -111,6 +112,7 @@ surplus_yesterday = float(input_yesterday) - (float(units_yesterday) + resting_d
 surplus_2014 = float(input_2014) - (float(units_average_2014) + resting_daily_calories)
 surplus_2015 = float(input_2015) - (float(units_average_2015) + resting_daily_calories)
 surplus_2015_total = float(input_2015_total) - (float(units_2015_total) + resting_daily_calories * int(day_count_2015))
+surplus_2015_2014_diff = round(surplus_2015 - surplus_2014, 2)
 
 surplus_today_2014_diff = round(surplus_2014 - surplus_today, 2)
 surplus_yesterday_2014_diff = round(surplus_2014 - surplus_yesterday, 2)
@@ -144,6 +146,11 @@ if surplus_yesterday < 0:
     placeholder['surplus_yesterday_class'] = "positive_diff"
 else:
     placeholder['surplus_yesterday_class'] = "negative_diff"
+
+if surplus_2015_2014_diff > 0:
+    placeholder['surplus_2015_class'] = "positive_diff"
+else:
+    placeholder['surplus_2015_class'] = "negative_diff"
 
 if input_today_2014_diff > 0:
     placeholder['input_class'] = "positive_diff"
@@ -204,6 +211,7 @@ placeholder['surplus_2015'] = surplus_2015
 placeholder['surplus_yesterday'] = surplus_yesterday
 placeholder['surplus_today_2014_diff'] = surplus_today_2014_diff
 placeholder['surplus_yesterday_2014_diff'] = surplus_yesterday_2014_diff
+placeholder['surplus_2015_2014_diff'] = surplus_2015_2014_diff
 placeholder['surplus_2015_total'] = surplus_2015_total
 
 
