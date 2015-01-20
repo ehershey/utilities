@@ -1,4 +1,14 @@
 #!/usr/bin/python
+#
+#
+# Post my total number of tasks from Todoist to Numerous, including overdue
+# tasks and anything due today. 
+#
+# See also:
+# http://www.todoist.com/
+# http://www.numerousapp.com/
+#
+
 from pytodoist import todoist
 import todoist_auth
 import numerousapp
