@@ -65,10 +65,7 @@ var dburl = 'mongodb://' + dbuserpass + dbserver + ':' + dbport + '/' + dbname +
 
 console.log('dburl: ' + dburl);
 
-var MongoClient = mongodb.MongoClient
-  , Server = mongodb.Server;
-
-// var mongoClient = new MongoClient(new Server(dbserver, dbport));
+var MongoClient = mongodb.MongoClient;
 
 // read json on stdin into memory
 //
