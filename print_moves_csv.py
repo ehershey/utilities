@@ -21,11 +21,25 @@ METERS_IN_ONE_MILE = 1609.34
 verbose_activity_names = {
     "wlk": "Walking",
     "run": "Running",
-    "cyc": "Cycling"
+    "cyc": "Cycling",
+    "walking": "Walking",
+    "running": "Running",
+    "cycling": "Cycling",
+    "swimming": "Swimming",
+    "car": "Car",
+    "transport": "Transport",
+    "airplane": "Airplane"
     }
 
+UNKNOWN_ACTIVITY_BUCKET_VERBOSE_NAME = "Unknown"
+
+verbose_activity_name_list = list(set(sorted(verbose_activity_names.values())))
+
+verbose_activity_name_list.append(UNKNOWN_ACTIVITY_BUCKET_VERBOSE_NAME)
+
+
 sys.stdout.write("Date")
-for activity_name, verbose_activity_name in sorted(verbose_activity_names.items()):
+for verbose_activity_name in verbose_activity_name_list:
   sys.stdout.write(",")
   sys.stdout.write(verbose_activity_name)
 sys.stdout.write(",Calories\n")
@@ -44,67 +58,27 @@ def print_workouts_from_json_stream(instream):
   for index, summary in enumerate(output):
     activities = summary['summary']
     sys.stdout.write(str(strptime(summary['date'], '%Y%m%d')))
-    activities_by_name = {}
+    activities_by_verbose_name = {}
     calories = 0
     if activities:
       for activity in activities:
-        activities_by_name[activity['activity']] = activity
-        calories += activity['calories']
-    for activity_name in sorted(verbose_activity_names):
+        verbose_activity_name = verbose_activity_names.get(activity['activity'])
+        if not verbose_activity_name:
+          verbose_activity_name = UNKNOWN_ACTIVITY_BUCKET_VERBOSE_NAME
+        activities_by_verbose_name[verbose_activity_name] = activity
+        activity_calories = activity.get('calories')
+        if activity_calories:
+          calories += activity_calories
+    for verbose_activity_name in verbose_activity_name_list:
       sys.stdout.write(",")
-      if activity_name in activities_by_name:
-        distance_meters = activities_by_name[activity_name]['distance']
-        distance_miles = distance_meters / METERS_IN_ONE_MILE
+      if verbose_activity_name in activities_by_verbose_name:
+        distance_meters = activities_by_verbose_name[verbose_activity_name].get('distance')
+        if distance_meters:
+          distance_miles = distance_meters / METERS_IN_ONE_MILE
+        else:
+          distance_miles = 0
         sys.stdout.write("%.2fmi" % distance_miles)
     sys.stdout.write(",%d" % calories)
     sys.stdout.write("\n")
 
-#  if output.has_key('workouts'):
-#    workouts = output['workouts']
-#  elif output.has_key('workout'):
-#    workouts = output['workout']['children']
-#  else:
-#    raise "Can't find workout list in results"
-#
-#  for workout in workouts:
-#    if 'run' in workout['workout_type_name'].lower() or 'run' in workout['workout_description'].lower() :
-#      # adjust date if format is weird
-#      #
-#      workout_date = re.sub(r'(\d+)/(\d+)/(\d+)',r'\3-\1-\2',workout['workout_date'])
-#      print workout_date + ',' + workout['distance']
-#    if 'multi' in workout['workout_type_name'].lower() or 'multi' in workout['workout_description'].lower() :
-#      # print 'need to get more info based on ' + workout['workout_type_name'] + ',' + workout['workout_description'] + ',' + workout['workout_id']
-#      process = subprocess.Popen([os.path.dirname(__file__) + "/mapmyfitness.py","http://api.mapmyfitness.com/3.1/workouts/get_workout_full?workout_id=" + workout['workout_id']], stdout = subprocess.PIPE);
-#
-#      print_workouts_from_json_stream(process.stdout)
-#      #print process.stdout.read()
-
 print_workouts_from_json_stream(sys.stdin)
-
-
-#str(datetime.datetime.strptime(summs[0]['date'],'%Y%m%d'))
-#Out[24]: '2013-07-29 00:00:00'
-#
-#In [25]: summs
-#Out[25]:
-#[{u'caloriesIdle': 1773,
-#  u'date': u'20130729',
-#  u'summary': [{u'activity': u'wlk',
-#    u'calories': 128,
-#    u'distance': 2079.0,
-#    u'duration': 1699.0,
-#    u'steps': 2665},
-#   {u'activity': u'run',
-#    u'calories': 1287,
-#    u'distance': 17288.0,
-#    u'duration': 6117.0,
-#    u'steps': 15641},
-#   {u'activity': u'cyc',
-#    u'calories': 416,
-#    u'distance': 15356.0,
-#    u'duration': 2812.0}]},
-# {u'caloriesIdle': 1773,
-#  u'date': u'20130730',
-#  u'summary': [{u'activity': u'wlk',
-#    u'calories': 121,
-
