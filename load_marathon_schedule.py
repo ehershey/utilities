@@ -39,7 +39,9 @@ if plan_workouts.count() == 0:
 found_event = False
 days_from_event = 0
 
-event_date = dateutil.parser.parse(args.marathon_date)
+# Set time on date object to noon to account for timezone differences
+#
+event_date = dateutil.parser.parse(args.marathon_date).replace(hour=12)
 
 insert_total = 0
 
@@ -60,6 +62,8 @@ for plan_workout in plan_workouts:
     # 
     del(schedule_workout['_id'])
     schedule_workout['activity_type'] = ACTIVITY_TYPE
+
+
     result = schedule_collection.update({ "date": schedule_workout['date'], "activity_type": ACTIVITY_TYPE }, schedule_workout, upsert = True)
     if not result['updatedExisting']:
       insert_total = insert_total +1
