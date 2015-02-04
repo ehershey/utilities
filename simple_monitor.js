@@ -6,6 +6,8 @@
 //
 //
 
+// process.exit(code=0);
+
 var async = require('async');
 var jsdom = require('jsdom');
 var fs = require('fs');
@@ -15,6 +17,7 @@ var date_utils = require('date-utils');
 var MAILTO = 'Ernie Hershey <ernie@mongodb.com>'
 var MAILFROM = 'Simple Monitor <ernie@mongodb.com>'
 var SUBJECT = 'Simple_monitor alert!'
+var TIMEOUT_MILLIS = 30000;
 
 var nodemailer_transport = nodemailer.createTransport();
 
@@ -239,7 +242,7 @@ function check_url(url_config, done_checking_one) {
     }
     done_checking_one();
   };
-  var timeout = setTimeout(function() { handler('timed out',null); }, 20000);
+  var timeout = setTimeout(function() { handler('timed out',null); }, TIMEOUT_MILLIS);
   jsdom.env ( url, ["http://code.jquery.com/jquery.js"], function(errors, window) { clearTimeout(timeout); handler(errors, window); });
 }
 
