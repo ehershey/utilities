@@ -12,6 +12,7 @@ import argparse
 import datetime
 import dateutil.parser
 from pymongo import MongoClient, DESCENDING
+import uuid
 
 DB = "ernie_org"
 TRAINING_PLANS_COLLECTION = "training_plan"
@@ -27,6 +28,8 @@ args = parser.parse_args()
 
 client = MongoClient('localhost', 27017)
 db = client[DB]
+
+load_uuid = uuid.uuid4()
 
 plan_collection = db[TRAINING_PLANS_COLLECTION]
 schedule_collection = db[TRAINING_SCHEDULES_COLLECTION]
@@ -62,6 +65,7 @@ for plan_workout in plan_workouts:
     # 
     del(schedule_workout['_id'])
     schedule_workout['activity_type'] = ACTIVITY_TYPE
+    schedule_workout['load_uuid'] = load_uuid
 
 
     result = schedule_collection.update({ "date": schedule_workout['date'], "activity_type": ACTIVITY_TYPE }, schedule_workout, upsert = True)
