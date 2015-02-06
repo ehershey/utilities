@@ -93,19 +93,19 @@ MIN_HOUR_FOR_ZERO_POST = 5
 
 placeholder = {}
 
-units_today = os.popen("cut -f5 -d, %s  | head -2 | tail -1" % MOVES_CSV_FILENAME).read().rstrip()
-biked_today = os.popen("cut -f2 -d, %s  | head -2 | tail -1 | tr -d a-z" % MOVES_CSV_FILENAME).read().rstrip()
-ran_today = os.popen("cut -f3 -d, %s  | head -2 | tail -1 | tr -d a-z" % MOVES_CSV_FILENAME).read().rstrip()
-walked_today = os.popen("cut -f4 -d, %s  | head -2 | tail -1 | tr -d a-z" % MOVES_CSV_FILENAME).read().rstrip()
-units_average = os.popen("cut -f5 -d, %s| awk '{ total += $1; count++ } END { print total/count }'" % MOVES_CSV_FILENAME).read().rstrip()
-units_yesterday = os.popen("cut -f5 -d, %s  | head -3 | tail -1" % MOVES_CSV_FILENAME).read().rstrip()
-units_average_2013 = os.popen("grep ^2013- %s | cut -f5 -d, | awk '{ total += $1; count++ } END { print total/count }'" % MOVES_CSV_FILENAME).read().rstrip()
-units_average_2014 = os.popen("grep ^2014- %s | cut -f5 -d, | awk '{ total += $1; count++ } END { print total/count }'" % MOVES_CSV_FILENAME).read().rstrip()
-units_average_2015 = os.popen("grep ^2015- %s | cut -f5 -d, | awk '{ total += $1; count++ } END { print total/count }'" % MOVES_CSV_FILENAME).read().rstrip()
-units_2015_total = os.popen("grep ^2015- %s | cut -f5 -d, | awk '{ total += $1; count++ } END { print total }'" % MOVES_CSV_FILENAME).read().rstrip()
-day_count_2015 = os.popen("grep ^2015- %s | cut -f5 -d, | awk '{ total += $1; count++ } END { print count }'" % MOVES_CSV_FILENAME).read().rstrip()
-units_average_7days = os.popen("head -8 %s | tail -7 | cut -f5 -d, | awk '{ total += $1; count++ } END { print total/count }'" % MOVES_CSV_FILENAME).read().rstrip()
-units_average_2days = os.popen("head -3 %s | tail -2 | cut -f5 -d, | awk '{ total += $1; count++ } END { print total/count }'" % MOVES_CSV_FILENAME).read().rstrip()
+units_today = os.popen("cut -f10 -d, %s  | head -2 | tail -1" % MOVES_CSV_FILENAME).read().rstrip()
+biked_today = os.popen("cut -f3 -d, %s  | head -2 | tail -1 | tr -d a-z" % MOVES_CSV_FILENAME).read().rstrip()
+ran_today = os.popen("cut -f5 -d, %s  | head -2 | tail -1 | tr -d a-z" % MOVES_CSV_FILENAME).read().rstrip()
+walked_today = os.popen("cut -f2 -d, %s  | head -2 | tail -1 | tr -d a-z" % MOVES_CSV_FILENAME).read().rstrip()
+units_average = os.popen("cut -f10 -d, %s| awk '{ total += $1; count++ } END { print total/count }'" % MOVES_CSV_FILENAME).read().rstrip()
+units_yesterday = os.popen("cut -f10 -d, %s  | head -3 | tail -1" % MOVES_CSV_FILENAME).read().rstrip()
+units_average_2013 = os.popen("grep ^2013- %s | cut -f10 -d, | awk '{ total += $1; count++ } END { print total/count }'" % MOVES_CSV_FILENAME).read().rstrip()
+units_average_2014 = os.popen("grep ^2014- %s | cut -f10 -d, | awk '{ total += $1; count++ } END { print total/count }'" % MOVES_CSV_FILENAME).read().rstrip()
+units_average_2015 = os.popen("grep ^2015- %s | cut -f10 -d, | awk '{ total += $1; count++ } END { print total/count }'" % MOVES_CSV_FILENAME).read().rstrip()
+units_2015_total = os.popen("grep ^2015- %s | cut -f10 -d, | awk '{ total += $1; count++ } END { print total }'" % MOVES_CSV_FILENAME).read().rstrip()
+day_count_2015 = os.popen("grep ^2015- %s | cut -f10 -d, | awk '{ total += $1; count++ } END { print count }'" % MOVES_CSV_FILENAME).read().rstrip()
+units_average_7days = os.popen("head -8 %s | tail -7 | cut -f10 -d, | awk '{ total += $1; count++ } END { print total/count }'" % MOVES_CSV_FILENAME).read().rstrip()
+units_average_2days = os.popen("head -3 %s | tail -2 | cut -f10 -d, | awk '{ total += $1; count++ } END { print total/count }'" % MOVES_CSV_FILENAME).read().rstrip()
 
 surplus_today = float(input_today) - (float(units_today) + resting_daily_calories)
 surplus_yesterday = float(input_yesterday) - (float(units_yesterday) + resting_daily_calories)
@@ -148,9 +148,9 @@ else:
     placeholder['surplus_yesterday_class'] = "negative_diff"
 
 if surplus_2015_2014_diff > 0:
-    placeholder['surplus_2015_class'] = "positive_diff"
-else:
     placeholder['surplus_2015_class'] = "negative_diff"
+else:
+    placeholder['surplus_2015_class'] = "positive_diff"
 
 if input_today_2014_diff > 0:
     placeholder['input_class'] = "positive_diff"
