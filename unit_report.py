@@ -8,6 +8,11 @@ import time
 from os.path import expanduser
 from numerousapp import update_metric_value, get_metric_value
 
+
+RUNNING_CALORIE_MULTIPLIER = 118
+WALKING_CALORIE_MULTIPLIER = 100
+CYCLING_CALORIE_MULTIPLIER = 43
+
 resting_daily_calories = 1700
 
 home = expanduser("~ernie")
@@ -276,3 +281,15 @@ if __name__ == '__main__':
       update_metric_value(7170780739467042866, units_average_2days)
       update_metric_value(1242812163656294116, units_average_2days_2013_diff)
       update_metric_value(3766962275739755372, minutes_since_moves_update)
+
+def get_daily_calorie_goal():
+  return float(units_average_2013)
+
+def get_running_calorie_multiplier():
+  return RUNNING_CALORIE_MULTIPLIER
+
+def get_cycling_calorie_multiplier():
+  return CYCLING_CALORIE_MULTIPLIER
+
+def get_walking_calorie_multiplier():
+  return WALKING_CALORIE_MULTIPLIER
