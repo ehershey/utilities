@@ -6,8 +6,6 @@
 //
 //
 
-// process.exit(code=0);
-
 var async = require('async');
 var jsdom = require('jsdom');
 var fs = require('fs');
@@ -53,14 +51,6 @@ var url_configs = [
     negated: true
   },
  
-  { 
-    url: 'http://repo.mongodb.org/apt/debian/dists/wheezy/mongodb-org/testing/main/binary-amd64/',
-    cell_selector: "a:contains(deb)",
-    text_finder_from_cell_jqobj: function(jqobj) { return "Unused"; },
-    ignore_text: '',
-    negated: true
-  },
-  
   { 
     url: 'http://repo.mongodb.com/yum/redhat/6/mongodb-enterprise/2.6/x86_64/repodata/',
     cell_selector: "a:contains(repomd.xml)",
@@ -179,6 +169,274 @@ var url_configs = [
     ignore_text: '',
     negated: true
   },
+
+    {
+        url: 'http://repo.mongodb.com/apt/debian/dists/wheezy/mongodb-enterprise/2.6/main/binary-amd64/',
+        cell_selector: "a:contains(~rc)",
+        text_finder_from_cell_jqobj: function(jqobj) { return jqobj.text(); },
+        ignore_text: '',
+        negated: false
+    },
+    {
+        url: 'http://repo.mongodb.com/apt/debian/dists/wheezy/mongodb-enterprise/stable/main/binary-amd64/',
+        cell_selector: "a:contains(~rc)",
+        text_finder_from_cell_jqobj: function(jqobj) { return jqobj.text(); },
+        ignore_text: '',
+        negated: false
+    },
+    {
+        url: 'http://repo.mongodb.com/apt/ubuntu/dists/precise/mongodb-enterprise/2.2/multiverse/binary-amd64/',
+        cell_selector: "a:contains(~rc)",
+        text_finder_from_cell_jqobj: function(jqobj) { return jqobj.text(); },
+        ignore_text: '',
+        negated: false
+    },
+    {
+        url: 'http://repo.mongodb.com/apt/ubuntu/dists/precise/mongodb-enterprise/2.4/multiverse/binary-amd64/',
+        cell_selector: "a:contains(~rc)",
+        text_finder_from_cell_jqobj: function(jqobj) { return jqobj.text(); },
+        ignore_text: '',
+        negated: false
+    },
+    {
+        url: 'http://repo.mongodb.com/apt/ubuntu/dists/precise/mongodb-enterprise/2.6/multiverse/binary-amd64/',
+        cell_selector: "a:contains(~rc)",
+        text_finder_from_cell_jqobj: function(jqobj) { return jqobj.text(); },
+        ignore_text: 'mongodb-enterprise-mongos_2.6.0~rc0_amd64.debmongodb-enterprise-mongos_2.6.0~rc1_amd64.debmongodb-enterprise-mongos_2.6.0~rc2_amd64.debmongodb-enterprise-mongos_2.6.0~rc3_amd64.debmongodb-enterprise-server_2.6.0~rc0_amd64.debmongodb-enterprise-server_2.6.0~rc1_amd64.debmongodb-enterprise-server_2.6.0~rc2_amd64.debmongodb-enterprise-server_2.6.0~rc3_amd64.debmongodb-enterprise-shell_2.6.0~rc0_amd64.debmongodb-enterprise-shell_2.6.0~rc1_amd64.debmongodb-enterprise-shell_2.6.0~rc2_amd64.debmongodb-enterprise-shell_2.6.0~rc3_amd64.debmongodb-enterprise-tools_2.6.0~rc0_amd64.debmongodb-enterprise-tools_2.6.0~rc1_amd64.debmongodb-enterprise-tools_2.6.0~rc2_amd64.debmongodb-enterprise-tools_2.6.0~rc3_amd64.debmongodb-enterprise_2.6.0~rc0_amd64.debmongodb-enterprise_2.6.0~rc1_amd64.debmongodb-enterprise_2.6.0~rc2_amd64.debmongodb-enterprise_2.6.0~rc3_amd64.deb',
+        negated: false
+    },
+    {
+        url: 'http://repo.mongodb.com/apt/ubuntu/dists/precise/mongodb-enterprise/stable/multiverse/binary-amd64/',
+        cell_selector: "a:contains(~rc)",
+        text_finder_from_cell_jqobj: function(jqobj) { return jqobj.text(); },
+        ignore_text: 'mongodb-enterprise-mongos_2.6.0~rc0_amd64.debmongodb-enterprise-mongos_2.6.0~rc1_amd64.debmongodb-enterprise-mongos_2.6.0~rc2_amd64.debmongodb-enterprise-mongos_2.6.0~rc3_amd64.debmongodb-enterprise-server_2.6.0~rc0_amd64.debmongodb-enterprise-server_2.6.0~rc1_amd64.debmongodb-enterprise-server_2.6.0~rc2_amd64.debmongodb-enterprise-server_2.6.0~rc3_amd64.debmongodb-enterprise-shell_2.6.0~rc0_amd64.debmongodb-enterprise-shell_2.6.0~rc1_amd64.debmongodb-enterprise-shell_2.6.0~rc2_amd64.debmongodb-enterprise-shell_2.6.0~rc3_amd64.debmongodb-enterprise-tools_2.6.0~rc0_amd64.debmongodb-enterprise-tools_2.6.0~rc1_amd64.debmongodb-enterprise-tools_2.6.0~rc2_amd64.debmongodb-enterprise-tools_2.6.0~rc3_amd64.debmongodb-enterprise_2.6.0~rc0_amd64.debmongodb-enterprise_2.6.0~rc1_amd64.debmongodb-enterprise_2.6.0~rc2_amd64.debmongodb-enterprise_2.6.0~rc3_amd64.deb',
+        negated: false
+    },
+    {
+        url: 'http://repo.mongodb.com/apt/ubuntu/dists/trusty/mongodb-enterprise/2.6/multiverse/binary-amd64/',
+        cell_selector: "a:contains(~rc)",
+        text_finder_from_cell_jqobj: function(jqobj) { return jqobj.text(); },
+        ignore_text: '',
+        negated: false
+    },
+    {
+        url: 'http://repo.mongodb.com/apt/ubuntu/dists/trusty/mongodb-enterprise/stable/multiverse/binary-amd64/',
+        cell_selector: "a:contains(~rc)",
+        text_finder_from_cell_jqobj: function(jqobj) { return jqobj.text(); },
+        ignore_text: '',
+        negated: false
+    },
+    {
+        url: 'http://repo.mongodb.com/yum/redhat/5/mongodb-enterprise/2.4/x86_64/RPMS/',
+        cell_selector: "a:contains(.rc)",
+        text_finder_from_cell_jqobj: function(jqobj) { return jqobj.text(); },
+        ignore_text: '',
+        negated: false
+    },
+    {
+        url: 'http://repo.mongodb.com/yum/redhat/5/mongodb-enterprise/2.6/x86_64/RPMS/',
+        cell_selector: "a:contains(.rc)",
+        text_finder_from_cell_jqobj: function(jqobj) { return jqobj.text(); },
+        ignore_text: 'mongodb-enterprise-2.6.0-0.1.rc0.el5.x86_64.rpmmongodb-enterprise-2.6.0-0.1.rc1.el5.x86_64.rpmmongodb-enterprise-2.6.0-0.1.rc2.el5.x86_64.rpmmongodb-enterprise-2.6.0-0.1.rc3.el5.x86_64.rpmmongodb-enterprise-mongos-2.6.0-0.1.rc0.el5.x86_64.rpmmongodb-enterprise-mongos-2.6.0-0.1.rc1.el5.x86_64.rpmmongodb-enterprise-mongos-2.6.0-0.1.rc2.el5.x86_64.rpmmongodb-enterprise-mongos-2.6.0-0.1.rc3.el5.x86_64.rpmmongodb-enterprise-server-2.6.0-0.1.rc0.el5.x86_64.rpmmongodb-enterprise-server-2.6.0-0.1.rc1.el5.x86_64.rpmmongodb-enterprise-server-2.6.0-0.1.rc2.el5.x86_64.rpmmongodb-enterprise-server-2.6.0-0.1.rc3.el5.x86_64.rpmmongodb-enterprise-shell-2.6.0-0.1.rc0.el5.x86_64.rpmmongodb-enterprise-shell-2.6.0-0.1.rc1.el5.x86_64.rpmmongodb-enterprise-shell-2.6.0-0.1.rc2.el5.x86_64.rpmmongodb-enterprise-shell-2.6.0-0.1.rc3.el5.x86_64.rpmmongodb-enterprise-tools-2.6.0-0.1.rc0.el5.x86_64.rpmmongodb-enterprise-tools-2.6.0-0.1.rc1.el5.x86_64.rpmmongodb-enterprise-tools-2.6.0-0.1.rc2.el5.x86_64.rpmmongodb-enterprise-tools-2.6.0-0.1.rc3.el5.x86_64.rpm',
+        negated: false
+    },
+    {
+        url: 'http://repo.mongodb.com/yum/redhat/5/mongodb-enterprise/stable/x86_64/RPMS/',
+        cell_selector: "a:contains(.rc)",
+        text_finder_from_cell_jqobj: function(jqobj) { return jqobj.text(); },
+        ignore_text: 'mongodb-enterprise-2.6.0-0.1.rc0.el5.x86_64.rpmmongodb-enterprise-2.6.0-0.1.rc1.el5.x86_64.rpmmongodb-enterprise-2.6.0-0.1.rc2.el5.x86_64.rpmmongodb-enterprise-2.6.0-0.1.rc3.el5.x86_64.rpmmongodb-enterprise-mongos-2.6.0-0.1.rc0.el5.x86_64.rpmmongodb-enterprise-mongos-2.6.0-0.1.rc1.el5.x86_64.rpmmongodb-enterprise-mongos-2.6.0-0.1.rc2.el5.x86_64.rpmmongodb-enterprise-mongos-2.6.0-0.1.rc3.el5.x86_64.rpmmongodb-enterprise-server-2.6.0-0.1.rc0.el5.x86_64.rpmmongodb-enterprise-server-2.6.0-0.1.rc1.el5.x86_64.rpmmongodb-enterprise-server-2.6.0-0.1.rc2.el5.x86_64.rpmmongodb-enterprise-server-2.6.0-0.1.rc3.el5.x86_64.rpmmongodb-enterprise-shell-2.6.0-0.1.rc0.el5.x86_64.rpmmongodb-enterprise-shell-2.6.0-0.1.rc1.el5.x86_64.rpmmongodb-enterprise-shell-2.6.0-0.1.rc2.el5.x86_64.rpmmongodb-enterprise-shell-2.6.0-0.1.rc3.el5.x86_64.rpmmongodb-enterprise-tools-2.6.0-0.1.rc0.el5.x86_64.rpmmongodb-enterprise-tools-2.6.0-0.1.rc1.el5.x86_64.rpmmongodb-enterprise-tools-2.6.0-0.1.rc2.el5.x86_64.rpmmongodb-enterprise-tools-2.6.0-0.1.rc3.el5.x86_64.rpm',
+        negated: false
+    },
+    {
+        url: 'http://repo.mongodb.com/yum/redhat/6/mongodb-enterprise/2.2/x86_64/RPMS/',
+        cell_selector: "a:contains(.rc)",
+        text_finder_from_cell_jqobj: function(jqobj) { return jqobj.text(); },
+        ignore_text: '',
+        negated: false
+    },
+    {
+        url: 'http://repo.mongodb.com/yum/redhat/6/mongodb-enterprise/2.4/x86_64/RPMS/',
+        cell_selector: "a:contains(.rc)",
+        text_finder_from_cell_jqobj: function(jqobj) { return jqobj.text(); },
+        ignore_text: '',
+        negated: false
+    },
+    {
+        url: 'http://repo.mongodb.com/yum/redhat/6/mongodb-enterprise/2.6/x86_64/RPMS/',
+        cell_selector: "a:contains(.rc)",
+        text_finder_from_cell_jqobj: function(jqobj) { return jqobj.text(); },
+        ignore_text: 'mongodb-enterprise-2.6.0-0.1.rc0.el6.x86_64.rpmmongodb-enterprise-2.6.0-0.1.rc1.el6.x86_64.rpmmongodb-enterprise-2.6.0-0.1.rc2.el6.x86_64.rpmmongodb-enterprise-2.6.0-0.1.rc3.el6.x86_64.rpmmongodb-enterprise-mongos-2.6.0-0.1.rc0.el6.x86_64.rpmmongodb-enterprise-mongos-2.6.0-0.1.rc1.el6.x86_64.rpmmongodb-enterprise-mongos-2.6.0-0.1.rc2.el6.x86_64.rpmmongodb-enterprise-mongos-2.6.0-0.1.rc3.el6.x86_64.rpmmongodb-enterprise-server-2.6.0-0.1.rc0.el6.x86_64.rpmmongodb-enterprise-server-2.6.0-0.1.rc1.el6.x86_64.rpmmongodb-enterprise-server-2.6.0-0.1.rc2.el6.x86_64.rpmmongodb-enterprise-server-2.6.0-0.1.rc3.el6.x86_64.rpmmongodb-enterprise-shell-2.6.0-0.1.rc0.el6.x86_64.rpmmongodb-enterprise-shell-2.6.0-0.1.rc1.el6.x86_64.rpmmongodb-enterprise-shell-2.6.0-0.1.rc2.el6.x86_64.rpmmongodb-enterprise-shell-2.6.0-0.1.rc3.el6.x86_64.rpmmongodb-enterprise-tools-2.6.0-0.1.rc0.el6.x86_64.rpmmongodb-enterprise-tools-2.6.0-0.1.rc1.el6.x86_64.rpmmongodb-enterprise-tools-2.6.0-0.1.rc2.el6.x86_64.rpmmongodb-enterprise-tools-2.6.0-0.1.rc3.el6.x86_64.rpm',
+        negated: false
+    },
+    {
+        url: 'http://repo.mongodb.com/yum/redhat/6/mongodb-enterprise/stable/x86_64/RPMS/',
+        cell_selector: "a:contains(.rc)",
+        text_finder_from_cell_jqobj: function(jqobj) { return jqobj.text(); },
+        ignore_text: 'mongodb-enterprise-2.6.0-0.1.rc0.el6.x86_64.rpmmongodb-enterprise-2.6.0-0.1.rc1.el6.x86_64.rpmmongodb-enterprise-2.6.0-0.1.rc2.el6.x86_64.rpmmongodb-enterprise-2.6.0-0.1.rc3.el6.x86_64.rpmmongodb-enterprise-mongos-2.6.0-0.1.rc0.el6.x86_64.rpmmongodb-enterprise-mongos-2.6.0-0.1.rc1.el6.x86_64.rpmmongodb-enterprise-mongos-2.6.0-0.1.rc2.el6.x86_64.rpmmongodb-enterprise-mongos-2.6.0-0.1.rc3.el6.x86_64.rpmmongodb-enterprise-server-2.6.0-0.1.rc0.el6.x86_64.rpmmongodb-enterprise-server-2.6.0-0.1.rc1.el6.x86_64.rpmmongodb-enterprise-server-2.6.0-0.1.rc2.el6.x86_64.rpmmongodb-enterprise-server-2.6.0-0.1.rc3.el6.x86_64.rpmmongodb-enterprise-shell-2.6.0-0.1.rc0.el6.x86_64.rpmmongodb-enterprise-shell-2.6.0-0.1.rc1.el6.x86_64.rpmmongodb-enterprise-shell-2.6.0-0.1.rc2.el6.x86_64.rpmmongodb-enterprise-shell-2.6.0-0.1.rc3.el6.x86_64.rpmmongodb-enterprise-tools-2.6.0-0.1.rc0.el6.x86_64.rpmmongodb-enterprise-tools-2.6.0-0.1.rc1.el6.x86_64.rpmmongodb-enterprise-tools-2.6.0-0.1.rc2.el6.x86_64.rpmmongodb-enterprise-tools-2.6.0-0.1.rc3.el6.x86_64.rpm',
+        negated: false
+    },
+    {
+        url: 'http://repo.mongodb.com/yum/redhat/7/mongodb-enterprise/stable/x86_64/RPMS/',
+        cell_selector: "a:contains(.rc)",
+        text_finder_from_cell_jqobj: function(jqobj) { return jqobj.text(); },
+        ignore_text: '',
+        negated: false
+    },
+    {
+        url: 'http://repo.mongodb.com/yum/redhat/7/mongodb-enterprise/2.6/x86_64/RPMS/',
+        cell_selector: "a:contains(.rc)",
+        text_finder_from_cell_jqobj: function(jqobj) { return jqobj.text(); },
+        ignore_text: '',
+        negated: false
+    },
+    {
+        url: 'http://repo.mongodb.com/zypper/suse/11/mongodb-enterprise/2.6/x86_64/RPMS/',
+        cell_selector: "a:contains(.rc)",
+        text_finder_from_cell_jqobj: function(jqobj) { return jqobj.text(); },
+        ignore_text: '',
+        negated: false
+    },
+    {
+        url: 'http://repo.mongodb.com/zypper/suse/11/mongodb-enterprise/stable/x86_64/RPMS/',
+        cell_selector: "a:contains(.rc)",
+        text_finder_from_cell_jqobj: function(jqobj) { return jqobj.text(); },
+        ignore_text: '',
+        negated: false
+    },
+
+    {
+        url: 'http://repo.mongodb.org/apt/debian/dists/wheezy/mongodb-org/2.6/main/binary-amd64/',
+        cell_selector: "a:contains(~rc)",
+        text_finder_from_cell_jqobj: function(jqobj) { return jqobj.text(); },
+        ignore_text: '',
+        negated: false
+    },
+    {
+        url: 'http://repo.mongodb.org/apt/debian/dists/wheezy/mongodb-org/stable/main/binary-amd64/',
+        cell_selector: "a:contains(~rc)",
+        text_finder_from_cell_jqobj: function(jqobj) { return jqobj.text(); },
+        ignore_text: '',
+        negated: false
+    },
+    {
+        url: 'http://repo.mongodb.org/apt/ubuntu/dists/precise/mongodb-org/2.2/multiverse/binary-amd64/',
+        cell_selector: "a:contains(~rc)",
+        text_finder_from_cell_jqobj: function(jqobj) { return jqobj.text(); },
+        ignore_text: '',
+        negated: false
+    },
+    {
+        url: 'http://repo.mongodb.org/apt/ubuntu/dists/precise/mongodb-org/2.4/multiverse/binary-amd64/',
+        cell_selector: "a:contains(~rc)",
+        text_finder_from_cell_jqobj: function(jqobj) { return jqobj.text(); },
+        ignore_text: '',
+        negated: false
+    },
+    {
+        url: 'http://repo.mongodb.org/apt/ubuntu/dists/precise/mongodb-org/2.6/multiverse/binary-amd64/',
+        cell_selector: "a:contains(~rc)",
+        text_finder_from_cell_jqobj: function(jqobj) { return jqobj.text(); },
+        ignore_text: 'mongodb-org-mongos_2.6.0~rc0_amd64.debmongodb-enterprise-mongos_2.6.0~rc1_amd64.debmongodb-enterprise-mongos_2.6.0~rc2_amd64.debmongodb-enterprise-mongos_2.6.0~rc3_amd64.debmongodb-enterprise-server_2.6.0~rc0_amd64.debmongodb-enterprise-server_2.6.0~rc1_amd64.debmongodb-enterprise-server_2.6.0~rc2_amd64.debmongodb-enterprise-server_2.6.0~rc3_amd64.debmongodb-enterprise-shell_2.6.0~rc0_amd64.debmongodb-enterprise-shell_2.6.0~rc1_amd64.debmongodb-enterprise-shell_2.6.0~rc2_amd64.debmongodb-enterprise-shell_2.6.0~rc3_amd64.debmongodb-enterprise-tools_2.6.0~rc0_amd64.debmongodb-enterprise-tools_2.6.0~rc1_amd64.debmongodb-enterprise-tools_2.6.0~rc2_amd64.debmongodb-enterprise-tools_2.6.0~rc3_amd64.debmongodb-enterprise_2.6.0~rc0_amd64.debmongodb-enterprise_2.6.0~rc1_amd64.debmongodb-enterprise_2.6.0~rc2_amd64.debmongodb-enterprise_2.6.0~rc3_amd64.deb',
+        negated: false
+    },
+    {
+        url: 'http://repo.mongodb.org/apt/ubuntu/dists/precise/mongodb-org/stable/multiverse/binary-amd64/',
+        cell_selector: "a:contains(~rc)",
+        text_finder_from_cell_jqobj: function(jqobj) { return jqobj.text(); },
+        ignore_text: 'mongodb-org-mongos_2.6.0~rc0_amd64.debmongodb-enterprise-mongos_2.6.0~rc1_amd64.debmongodb-enterprise-mongos_2.6.0~rc2_amd64.debmongodb-enterprise-mongos_2.6.0~rc3_amd64.debmongodb-enterprise-server_2.6.0~rc0_amd64.debmongodb-enterprise-server_2.6.0~rc1_amd64.debmongodb-enterprise-server_2.6.0~rc2_amd64.debmongodb-enterprise-server_2.6.0~rc3_amd64.debmongodb-enterprise-shell_2.6.0~rc0_amd64.debmongodb-enterprise-shell_2.6.0~rc1_amd64.debmongodb-enterprise-shell_2.6.0~rc2_amd64.debmongodb-enterprise-shell_2.6.0~rc3_amd64.debmongodb-enterprise-tools_2.6.0~rc0_amd64.debmongodb-enterprise-tools_2.6.0~rc1_amd64.debmongodb-enterprise-tools_2.6.0~rc2_amd64.debmongodb-enterprise-tools_2.6.0~rc3_amd64.debmongodb-enterprise_2.6.0~rc0_amd64.debmongodb-enterprise_2.6.0~rc1_amd64.debmongodb-enterprise_2.6.0~rc2_amd64.debmongodb-enterprise_2.6.0~rc3_amd64.deb',
+        negated: false
+    },
+    {
+        url: 'http://repo.mongodb.org/apt/ubuntu/dists/trusty/mongodb-org/2.6/multiverse/binary-amd64/',
+        cell_selector: "a:contains(~rc)",
+        text_finder_from_cell_jqobj: function(jqobj) { return jqobj.text(); },
+        ignore_text: '',
+        negated: false
+    },
+    {
+        url: 'http://repo.mongodb.org/apt/ubuntu/dists/trusty/mongodb-org/stable/multiverse/binary-amd64/',
+        cell_selector: "a:contains(~rc)",
+        text_finder_from_cell_jqobj: function(jqobj) { return jqobj.text(); },
+        ignore_text: '',
+        negated: false
+    },
+    {
+        url: 'http://repo.mongodb.org/yum/redhat/5/mongodb-org/2.4/x86_64/RPMS/',
+        cell_selector: "a:contains(.rc)",
+        text_finder_from_cell_jqobj: function(jqobj) { return jqobj.text(); },
+        ignore_text: '',
+        negated: false
+    },
+    {
+        url: 'http://repo.mongodb.org/yum/redhat/5/mongodb-org/2.6/x86_64/RPMS/',
+        cell_selector: "a:contains(.rc)",
+        text_finder_from_cell_jqobj: function(jqobj) { return jqobj.text(); },
+        ignore_text: 'mongodb-org-2.6.0-0.1.rc0.el5.x86_64.rpmmongodb-enterprise-2.6.0-0.1.rc1.el5.x86_64.rpmmongodb-enterprise-2.6.0-0.1.rc2.el5.x86_64.rpmmongodb-enterprise-2.6.0-0.1.rc3.el5.x86_64.rpmmongodb-enterprise-mongos-2.6.0-0.1.rc0.el5.x86_64.rpmmongodb-enterprise-mongos-2.6.0-0.1.rc1.el5.x86_64.rpmmongodb-enterprise-mongos-2.6.0-0.1.rc2.el5.x86_64.rpmmongodb-enterprise-mongos-2.6.0-0.1.rc3.el5.x86_64.rpmmongodb-enterprise-server-2.6.0-0.1.rc0.el5.x86_64.rpmmongodb-enterprise-server-2.6.0-0.1.rc1.el5.x86_64.rpmmongodb-enterprise-server-2.6.0-0.1.rc2.el5.x86_64.rpmmongodb-enterprise-server-2.6.0-0.1.rc3.el5.x86_64.rpmmongodb-enterprise-shell-2.6.0-0.1.rc0.el5.x86_64.rpmmongodb-enterprise-shell-2.6.0-0.1.rc1.el5.x86_64.rpmmongodb-enterprise-shell-2.6.0-0.1.rc2.el5.x86_64.rpmmongodb-enterprise-shell-2.6.0-0.1.rc3.el5.x86_64.rpmmongodb-enterprise-tools-2.6.0-0.1.rc0.el5.x86_64.rpmmongodb-enterprise-tools-2.6.0-0.1.rc1.el5.x86_64.rpmmongodb-enterprise-tools-2.6.0-0.1.rc2.el5.x86_64.rpmmongodb-enterprise-tools-2.6.0-0.1.rc3.el5.x86_64.rpm',
+        negated: false
+    },
+    {
+        url: 'http://repo.mongodb.org/yum/redhat/5/mongodb-org/stable/x86_64/RPMS/',
+        cell_selector: "a:contains(.rc)",
+        text_finder_from_cell_jqobj: function(jqobj) { return jqobj.text(); },
+        ignore_text: 'mongodb-org-2.6.0-0.1.rc0.el5.x86_64.rpmmongodb-enterprise-2.6.0-0.1.rc1.el5.x86_64.rpmmongodb-enterprise-2.6.0-0.1.rc2.el5.x86_64.rpmmongodb-enterprise-2.6.0-0.1.rc3.el5.x86_64.rpmmongodb-enterprise-mongos-2.6.0-0.1.rc0.el5.x86_64.rpmmongodb-enterprise-mongos-2.6.0-0.1.rc1.el5.x86_64.rpmmongodb-enterprise-mongos-2.6.0-0.1.rc2.el5.x86_64.rpmmongodb-enterprise-mongos-2.6.0-0.1.rc3.el5.x86_64.rpmmongodb-enterprise-server-2.6.0-0.1.rc0.el5.x86_64.rpmmongodb-enterprise-server-2.6.0-0.1.rc1.el5.x86_64.rpmmongodb-enterprise-server-2.6.0-0.1.rc2.el5.x86_64.rpmmongodb-enterprise-server-2.6.0-0.1.rc3.el5.x86_64.rpmmongodb-enterprise-shell-2.6.0-0.1.rc0.el5.x86_64.rpmmongodb-enterprise-shell-2.6.0-0.1.rc1.el5.x86_64.rpmmongodb-enterprise-shell-2.6.0-0.1.rc2.el5.x86_64.rpmmongodb-enterprise-shell-2.6.0-0.1.rc3.el5.x86_64.rpmmongodb-enterprise-tools-2.6.0-0.1.rc0.el5.x86_64.rpmmongodb-enterprise-tools-2.6.0-0.1.rc1.el5.x86_64.rpmmongodb-enterprise-tools-2.6.0-0.1.rc2.el5.x86_64.rpmmongodb-enterprise-tools-2.6.0-0.1.rc3.el5.x86_64.rpm',
+        negated: false
+    },
+    {
+        url: 'http://repo.mongodb.org/yum/redhat/6/mongodb-org/2.2/x86_64/RPMS/',
+        cell_selector: "a:contains(.rc)",
+        text_finder_from_cell_jqobj: function(jqobj) { return jqobj.text(); },
+        ignore_text: '',
+        negated: false
+    },
+    {
+        url: 'http://repo.mongodb.org/yum/redhat/6/mongodb-org/2.4/x86_64/RPMS/',
+        cell_selector: "a:contains(.rc)",
+        text_finder_from_cell_jqobj: function(jqobj) { return jqobj.text(); },
+        ignore_text: '',
+        negated: false
+    },
+    {
+        url: 'http://repo.mongodb.org/yum/redhat/6/mongodb-org/2.6/x86_64/RPMS/',
+        cell_selector: "a:contains(.rc)",
+        text_finder_from_cell_jqobj: function(jqobj) { return jqobj.text(); },
+        ignore_text: 'mongodb-org-2.6.0-0.1.rc0.el6.x86_64.rpmmongodb-enterprise-2.6.0-0.1.rc1.el6.x86_64.rpmmongodb-enterprise-2.6.0-0.1.rc2.el6.x86_64.rpmmongodb-enterprise-2.6.0-0.1.rc3.el6.x86_64.rpmmongodb-enterprise-mongos-2.6.0-0.1.rc0.el6.x86_64.rpmmongodb-enterprise-mongos-2.6.0-0.1.rc1.el6.x86_64.rpmmongodb-enterprise-mongos-2.6.0-0.1.rc2.el6.x86_64.rpmmongodb-enterprise-mongos-2.6.0-0.1.rc3.el6.x86_64.rpmmongodb-enterprise-server-2.6.0-0.1.rc0.el6.x86_64.rpmmongodb-enterprise-server-2.6.0-0.1.rc1.el6.x86_64.rpmmongodb-enterprise-server-2.6.0-0.1.rc2.el6.x86_64.rpmmongodb-enterprise-server-2.6.0-0.1.rc3.el6.x86_64.rpmmongodb-enterprise-shell-2.6.0-0.1.rc0.el6.x86_64.rpmmongodb-enterprise-shell-2.6.0-0.1.rc1.el6.x86_64.rpmmongodb-enterprise-shell-2.6.0-0.1.rc2.el6.x86_64.rpmmongodb-enterprise-shell-2.6.0-0.1.rc3.el6.x86_64.rpmmongodb-enterprise-tools-2.6.0-0.1.rc0.el6.x86_64.rpmmongodb-enterprise-tools-2.6.0-0.1.rc1.el6.x86_64.rpmmongodb-enterprise-tools-2.6.0-0.1.rc2.el6.x86_64.rpmmongodb-enterprise-tools-2.6.0-0.1.rc3.el6.x86_64.rpm',
+        negated: false
+    },
+    {
+        url: 'http://repo.mongodb.org/yum/redhat/6/mongodb-org/stable/x86_64/RPMS/',
+        cell_selector: "a:contains(.rc)",
+        text_finder_from_cell_jqobj: function(jqobj) { return jqobj.text(); },
+        ignore_text: 'mongodb-org-2.6.0-0.1.rc0.el6.x86_64.rpmmongodb-enterprise-2.6.0-0.1.rc1.el6.x86_64.rpmmongodb-enterprise-2.6.0-0.1.rc2.el6.x86_64.rpmmongodb-enterprise-2.6.0-0.1.rc3.el6.x86_64.rpmmongodb-enterprise-mongos-2.6.0-0.1.rc0.el6.x86_64.rpmmongodb-enterprise-mongos-2.6.0-0.1.rc1.el6.x86_64.rpmmongodb-enterprise-mongos-2.6.0-0.1.rc2.el6.x86_64.rpmmongodb-enterprise-mongos-2.6.0-0.1.rc3.el6.x86_64.rpmmongodb-enterprise-server-2.6.0-0.1.rc0.el6.x86_64.rpmmongodb-enterprise-server-2.6.0-0.1.rc1.el6.x86_64.rpmmongodb-enterprise-server-2.6.0-0.1.rc2.el6.x86_64.rpmmongodb-enterprise-server-2.6.0-0.1.rc3.el6.x86_64.rpmmongodb-enterprise-shell-2.6.0-0.1.rc0.el6.x86_64.rpmmongodb-enterprise-shell-2.6.0-0.1.rc1.el6.x86_64.rpmmongodb-enterprise-shell-2.6.0-0.1.rc2.el6.x86_64.rpmmongodb-enterprise-shell-2.6.0-0.1.rc3.el6.x86_64.rpmmongodb-enterprise-tools-2.6.0-0.1.rc0.el6.x86_64.rpmmongodb-enterprise-tools-2.6.0-0.1.rc1.el6.x86_64.rpmmongodb-enterprise-tools-2.6.0-0.1.rc2.el6.x86_64.rpmmongodb-enterprise-tools-2.6.0-0.1.rc3.el6.x86_64.rpm',
+        negated: false
+    },
+    {
+        url: 'http://repo.mongodb.org/yum/redhat/7/mongodb-org/stable/x86_64/RPMS/',
+        cell_selector: "a:contains(.rc)",
+        text_finder_from_cell_jqobj: function(jqobj) { return jqobj.text(); },
+        ignore_text: '',
+        negated: false
+    },
+    {
+        url: 'http://repo.mongodb.org/yum/redhat/7/mongodb-org/2.6/x86_64/RPMS/',
+        cell_selector: "a:contains(.rc)",
+        text_finder_from_cell_jqobj: function(jqobj) { return jqobj.text(); },
+        ignore_text: '',
+        negated: false
+    },
+    {
+        url: 'http://repo.mongodb.org/zypper/suse/11/mongodb-org/2.6/x86_64/RPMS/',
+        cell_selector: "a:contains(.rc)",
+        text_finder_from_cell_jqobj: function(jqobj) { return jqobj.text(); },
+        ignore_text: '',
+        negated: false
+    },
+    {
+        url: 'http://repo.mongodb.org/zypper/suse/11/mongodb-org/stable/x86_64/RPMS/',
+        cell_selector: "a:contains(.rc)",
+        text_finder_from_cell_jqobj: function(jqobj) { return jqobj.text(); },
+        ignore_text: '',
+        negated: false
+    },
 
 ];
 
