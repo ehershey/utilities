@@ -53,11 +53,8 @@ then
   exit 2
 fi
 
-
-
-
 url="$1"
 
 title="$(get_race_title "$url")"
-year=
-gcalcli add --cal "$CAL" --title "$title ($year)"
+date="$(get_race_date "$url")"
+addrace.sh "$title" "$date" "$url" 
