@@ -20,7 +20,7 @@ echo "CURL: $CURL"
 
 # Validate selectors
 #
-expected_title="NYRR Al Gordon 4-Mile"
+expected_title="NYRR Al Gordon 4M"
 
 get_race_title() {
   url="$1"
@@ -57,4 +57,15 @@ url="$1"
 
 title="$(get_race_title "$url")"
 date="$(get_race_date "$url")"
+
+if [ ! "$title" ]
+then
+  echo "Can't determine title"
+  exit 3
+fi
+if [ ! "$date" ]
+then
+  echo "Can't determine date"
+  exit 4
+fi
 addrace.sh "$title" "$date" "$url" 
