@@ -68,6 +68,7 @@ get_race_date() {
   returned_date="$(echo -n "$returned_date" | tr \\n \ )"
   returned_date="$(echo -n "$returned_date" | sed 's/half marathon starts at//g')"
   returned_date="$(echo -n "$returned_date" | sed 's/full marathon starts at//g')"
+  returned_date="$(echo -n "$returned_date" | sed 's/5k start//g')"
   returned_date="$(echo -n "$returned_date" | sed 's/[ 	][ 	]*/ /g'; )"
   returned_date="$(echo -n "$returned_date" | sed 's/;.*//g')"
   returned_date="$(echo -n "$returned_date" | sed 's/^[ 	]*//'; )"
@@ -123,6 +124,16 @@ then
   echo "Test command failed! Got $returned_date, expected $expected_date"
   exit 2
 fi
+
+
+expected_date="march 28, 2015 8:00 am"
+returned_date="$(get_race_date "https://nycruns.com/races/?race=ladies-first-2015")"
+if [ "$returned_date" != "$expected_date" ]
+then
+  echo "Test command failed! Got $returned_date, expected $expected_date"
+  exit 2
+fi
+
 
 
 
