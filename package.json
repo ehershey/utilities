@@ -45,7 +45,6 @@
     "request": "^2.40.0",
     "strftime": "^0.8.2",
     "uglify-js": "~2.4.12",
-    "uglifyjs": "^2.3.6",
     "zombie": "^2.5.1"
   }
 }
