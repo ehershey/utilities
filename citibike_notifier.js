@@ -23,7 +23,7 @@ var storage = require('node-persist');
 var nodemailer = require('nodemailer');
 var moment = require('moment');
 
-// Never refer to under 60 minutes as "an hour" 
+// Never refer to under 60 minutes as "an hour"
 //
 moment.relativeTimeThreshold('m',60);
 
@@ -77,8 +77,8 @@ function login(err,callback)
     console.log('passwordinput: ' + passwordinput);
     browser.fill("#subscriberUsername", citibike_auth.username);
     browser.fill("#subscriberPassword", citibike_auth.password);
-    browser.pressButton("#login_submit", function(err) 
-    { 
+    browser.pressButton("#login_submit", function(err)
+    {
       console.log('in submit callback');
       if(err) callback(err);
       var pathname = browser.location.pathname;
@@ -98,9 +98,9 @@ function login(err,callback)
 // can be used as a callback for login() or called directly and will
 // call login() if not logged in with itself as a callback
 //
-function check_trips(err, callback, page) 
+function check_trips(err, callback, page)
 {
-  if(err) { 
+  if(err) {
     callback(err);
     return;
   }
@@ -132,8 +132,8 @@ function check_trips(err, callback, page)
       if(after_slash === 'trips')
       {
         next_page = 2;
-      } 
-      else 
+      }
+      else
       {
         next_page = after_slash*1 + 1;
       }
@@ -142,7 +142,7 @@ function check_trips(err, callback, page)
       check_trips(null,callback,next_page);
       return;
     }
-    for(var i = 0 ; i < trip_trs.length ; i++) 
+    for(var i = 0 ; i < trip_trs.length ; i++)
     {
       var trip_tr = trip_trs[i];
       var trip_id = trip_tr.id;
@@ -159,7 +159,7 @@ function check_trips(err, callback, page)
       console.log('start_timestamp: ' + start_timestamp);
       console.log('trip_age: ' + trip_age);
 
-      // Only notify if the trip is new and it's either a legitimate length (over 60 seconds) or older than 60 seconds - 
+      // Only notify if the trip is new and it's either a legitimate length (over 60 seconds) or older than 60 seconds -
       // The extra logic is to account for trips showing up as tiny amounts of time immediately after they're over
       // then getting populated with real durations after the notification has been sent
       //
@@ -183,7 +183,7 @@ function notify_trip(trip_tr, trip_trs) {
   var trip_id = trip_tr.id;
   console.log("notifying for trip with id: " + trip_id);
 
-  
+
 
   var duration_seconds = trip_tr.getAttribute("data-duration-seconds");
   var start_timestamp = trip_tr.getAttribute("data-start-timestamp");
@@ -193,7 +193,7 @@ function notify_trip(trip_tr, trip_trs) {
   console.log('start_timestamp: ' + start_timestamp);
   var duration = moment.duration(duration_seconds*1, "seconds").humanize();
 
-  var title = SUBJECT; 
+  var title = SUBJECT;
   var body_text = 'Bikeshare trip took ' + duration + ' at ' + verbose_start_timestamp;
   console.log('body_text: ' + body_text);
   nodemailer_transport.sendMail({
@@ -209,7 +209,7 @@ function notify_trip(trip_tr, trip_trs) {
         console.log('Message sent: ' + info.response);
     }
 });
- 
+
 
 
   var trip_notify_info = { notified_at: new Date() };
@@ -218,7 +218,7 @@ function notify_trip(trip_tr, trip_trs) {
 }
 
 // if we have notification info, it's not new
-// 
+//
 function is_trip_new(trip_tr) {
   var trip_id = trip_tr.id;
   var key = "trip_notify_info_" + trip_id;
