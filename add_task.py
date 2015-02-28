@@ -5,6 +5,8 @@
 #
 # See also:
 # http://www.todoist.com/
+# https://github.com/Garee/pytodoist
+# http://pytodoist.readthedocs.org/en/latest/
 #
 
 import argparse
