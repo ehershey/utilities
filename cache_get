@@ -37,11 +37,10 @@ fi
 
 cachefile=$cachedir/`echo "$url" | sed 's/[^0-9a-zA-Z_-]/_/g' | $md5`
 
-if [ -e $cachefile ]
+if [ -e "$cachefile" ]
 then
-    #echo "found file $cachefile" >&2
 	# check if content has expired
-	# 
+	#
 	#file_mtime=`stat -f %m $cachefile`
 	file_mtime=`perl -MFile::stat -e 'print stat("'$cachefile'")->mtime'`
 
