@@ -35,7 +35,7 @@ else
   md5=cat
 fi
 
-cachefile=$cachedir/`echo "$url" | sed 's/[^0-9a-zA-Z_-]/_/g' | $md5`
+cachefile=$cachedir/`echo "$url" | sed 's/[^0-9a-zA-Z_-]/_/g' | $md5 | tr -d \ -`
 
 if [ -e "$cachefile" ]
 then
