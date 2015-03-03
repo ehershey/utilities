@@ -1,12 +1,12 @@
 #!/usr/bin/env python
-# 
-# Given the date of a marathon, backfill a training schedule with training plan
-# culminating on the date of the marathon. 
 #
-# This depends on having a "training_plans" collection populated by the populating 
-# script, available here: 
+# Given the date of a marathon, backfill a training schedule with training plan
+# culminating on the date of the marathon.
+#
+# This depends on having a "training_plans" collection populated by the populating
+# script, available here:
 # https://github.com/ehershey/utilities/blob/master/nike_training_plan_to_mongodb.sh
-# 
+#
 #
 import argparse
 import datetime
@@ -62,7 +62,7 @@ for plan_workout in plan_workouts:
     schedule_workout['date'] = schedule_date
   if schedule_workout:
     # Remove _id from plan document
-    # 
+    #
     del(schedule_workout['_id'])
     schedule_workout['activity_type'] = ACTIVITY_TYPE
     schedule_workout['load_uuid'] = load_uuid
