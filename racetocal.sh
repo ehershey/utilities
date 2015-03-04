@@ -28,10 +28,6 @@ else
   exit 3
 fi
 
-# Validate selectors
-#
-expected_title="NYRR Al Gordon 4M"
-
 get_race_title() {
   url="$1"
   returned_title="$($CURL "$url" | $PUP "$NYRR_TITLE_SELECTOR" text{})"
@@ -49,13 +45,6 @@ get_race_title() {
   returned_title="$(echo -n "$returned_title" | head -1 )"
   echo "$returned_title"
 }
-returned_title="$(get_race_title "http://www.nyrr.org/races-and-events/2015/nyrr-al-gordon-4-mile")"
-if [ "$returned_title" != "$expected_title" ]
-then
-  echo "Test command failed! Got $returned_title, expected $expected_title"
-  exit 2
-fi
-
 
 get_race_date() {
   url="$1"
@@ -75,6 +64,20 @@ get_race_date() {
   returned_date="$(echo -n "$returned_date" | sed 's/[ 	]*$//'; )"
   echo "$returned_date"
 }
+
+
+
+# Validate selectors and scraping logic
+#
+expected_title="NYRR Al Gordon 4M"
+
+returned_title="$(get_race_title "http://www.nyrr.org/races-and-events/2015/nyrr-al-gordon-4-mile")"
+if [ "$returned_title" != "$expected_title" ]
+then
+  echo "Test command failed! Got $returned_title, expected $expected_title"
+  exit 2
+fi
+
 expected_date="saturday, february 21, 2015 8:00am"
 returned_date="$(get_race_date "http://www.nyrr.org/races-and-events/2015/nyrr-al-gordon-4-mile")"
 if [ "$returned_date" != "$expected_date" ]
