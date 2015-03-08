@@ -9,7 +9,7 @@
 DEFAULT_DEVICE_NAME="ODT Privates"
 DEVICE_NAME=${1:-$DEFAULT_DEVICE_NAME}
 
-if [[ "$DEVICE_NAME" = "-h" ]
+if [[ "$DEVICE_NAME" = "-h" ]]
 then
   echo "Usage: $0 [ <device name (default: $DEFAULT_DEVICE_NAME)> ]"
 else
