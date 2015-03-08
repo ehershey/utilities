@@ -3,10 +3,18 @@
 # Connect bluetooth audio device in osx
 #
 #
-# Use applescript to navigate bluetooth menu bar and select "Connect" 
+# Use applescript to navigate bluetooth menu bar and select "Connect"
 # in the submenu named in this variable:
 #
-DEVICE_NAME="ODT Privates"
+DEFAULT_DEVICE_NAME="ODT Privates"
+DEVICE_NAME=${1:-$DEFAULT_DEVICE_NAME}
+
+if [[ "$DEVICE_NAME" = "-h" ]
+then
+  echo "Usage: $0 [ <device name (default: $DEFAULT_DEVICE_NAME)> ]"
+else
+  echo "Connecting to $DEVICE_NAME"
+fi
 
 if which blueutil > /dev/null 2>&1
 then
