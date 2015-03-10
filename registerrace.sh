@@ -23,7 +23,11 @@ tempfile="$(mktemp /tmp/registerrace.XXXXX)"
 echo $tempfile
 
 gcalcli --cache --cal "$CALENDAR" search --nolineart --nocolor --detail_description_width 200 "$TITLE (registered) $YEAR" --details all > "$tempfile"
-if [ -s $tempfile -a ! "$(grep 'No Events Found...' "$tempfile" )" ]
+
+title=$(grep ^$YEAR $tempfile | awk '{print $3,$4,$5,$6,$7,$8,$9,$10}')
+echo "title: $title"
+
+if [[ -s $tempfile && ! "$(grep 'No Events Found...' "$tempfile" )" && $title == *registered* ]]
 then
   echo "Already registered:"
   cat "$tempfile"
