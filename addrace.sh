@@ -29,7 +29,7 @@ else
   DURATION="$DEFAULT_DURATION"
 fi
 
-if [ "$4" ]
+if [ "$5" ]
 then
   LOCATION="$5"
 else
