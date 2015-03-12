@@ -6,8 +6,9 @@ NYRR_TITLE_SELECTOR="h2.title"
 NYCRUNS_TITLE_SELECTOR=".race-display-name"
 NYRR_DATE_SELECTOR="p.full-width span"
 NYCRUNS_DATE_SELECTOR=".race-display-date"
+NYCRUNS_ADDRESS_SELECTOR=".race-display-address"
 
-
+set -o nounset
 
 # Use cache_get if available, else curl
 #
@@ -65,6 +66,21 @@ get_race_date() {
   echo "$returned_date"
 }
 
+get_race_address() {
+  url="$1"
+  returned_address="$($CURL "$url" | $PUP "$NYCRUNS_ADDRESS_SELECTOR" text{})"
+
+  # Trim trailing whitespace
+  #
+  returned_address="$(echo -n "$returned_address" | sed 's/[ 	]*$//' )"
+
+  # Grab only last line
+  #
+  returned_address="$(echo -n "$returned_address" | tail -1 )"
+
+  returned_address="$(echo -n "$returned_address" | sed 's/^[ 	]*//'; )"
+  echo "$returned_address"
+}
 
 
 # Validate selectors and scraping logic
@@ -138,6 +154,15 @@ then
 fi
 
 
+expected_address="9215 4th Avenue Brooklyn, NY"
+returned_address="$(get_race_address "https://nycruns.com/races/?race=harbor-fitness-race-for-autism")"
+if [ "$returned_address" != "$expected_address" ]
+then
+  echo "Test command failed! Got $returned_address, expected $expected_address"
+  exit 2
+fi
+
+
 
 
 
@@ -146,6 +171,7 @@ url="$1"
 
 title="$(get_race_title "$url")"
 date="$(get_race_date "$url")"
+address="$(get_race_address "$url")"
 
 if [ ! "$title" ]
 then
@@ -157,4 +183,4 @@ then
   echo "Can't determine date"
   exit 4
 fi
-addrace.sh "$title" "$date" "$url" 
+addrace.sh "$title" "$date" "$url" "" "$address"
