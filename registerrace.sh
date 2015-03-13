@@ -55,13 +55,13 @@ fi
 description=$(grep -A 20 Description $tempfile | tail +3 | grep -v -- +----------------- | sed 's/^ *| //' | sed 's/  *|$//')
 echo "description: >$description<"
 
-title=$(grep ^$YEAR $tempfile | awk '{print $3,$4,$5,$6,$7,$8,$9,$10}')
+title=$(grep ^$YEAR $tempfile | awk '{print $3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13}')
 echo "title: $title"
 
 new_title=$(echo "$title" | sed "s/$YEAR/(registered) $YEAR/")
 echo "new_title: $new_title"
 
-new_description="$(echo "$description" | sed "s#Not registered as of ......[0-9]*#\Registered on $DATE#" | grep .)"
+new_description="$(echo "$description" | sed "s#Not registered as of ......[0-9]*#Registered on $DATE#" | grep . | tr \\n \ )"
 echo "new_description: $new_description"
 
 echo -e "t\n$new_title\nd\n$new_description\ns\nq" 
