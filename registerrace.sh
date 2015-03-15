@@ -58,6 +58,12 @@ echo "description: >$description<"
 title=$(grep ^$YEAR $tempfile | awk '{print $3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13}')
 echo "title: $title"
 
+if [[ ! "$title" ]]
+then
+  echo "Couldn't find title in tempfile: $tempfile"
+  exit 5
+fi
+
 new_title=$(echo "$title" | sed "s/$YEAR/(registered) $YEAR/")
 echo "new_title: $new_title"
 
