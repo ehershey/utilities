@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #
 # Add Race to calendar
 # Usage: 
@@ -70,7 +70,9 @@ then
 fi
 
 
-output="$(gcalcli add --cal "$CALENDAR" --title "$TITLE" --when "$DATE" --duration "$DURATION" --description "$URLNot registered as of $TODAY" --where "$LOCATION" --reminder "$REMINDER" --details url)"
+output="$(gcalcli add --cal "$CALENDAR" --title "$TITLE" --when "$DATE" --duration "$DURATION" --description "$URL
+
+Not registered as of $TODAY" --where "$LOCATION" --reminder "$REMINDER" --details url)"
 
 url="$(echo "$output" | tr \ \\t \\n | grep http | head -1)"
 if [ ! "$url" ]
