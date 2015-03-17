@@ -18,6 +18,12 @@ then
   exit 2
 fi
 
+if ! echo "$DATE" | grep -q "$YEAR"
+then
+  echo "Date is not in current year, unsupported ($DATE / $YEAR)"
+  exit 2
+fi
+
 DEFAULT_DURATION=120
 DEFAULT_LOCATION="NYC"
 DEFAULT_REMINDER=10080 # week
@@ -78,6 +84,6 @@ url="$(echo "$output" | tr \ \\t \\n | grep http | head -1)"
 if [ ! "$url" ]
 then
   echo "Can't find url. output: $output"
-  exit 5
+  exit 2
 fi
 open $url
