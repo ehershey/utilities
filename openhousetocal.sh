@@ -4,7 +4,8 @@
 #
 ZILLOW_TITLE_SELECTOR="h1"
 ZILLOW_DATE_SELECTOR="span[itemprop=\"date\"]"
-ZILLOW_PRICE_SELECTOR=""
+ZILLOW_PRICE_SELECTOR="div.main-row"
+ZILLOW_DESCRIPTION_SELECTOR="span.addr_bbs"
 STREETEASY_TITLE_SELECTOR=".building-title"
 STREETEASY_DATE_SELECTOR="span.clearfix"
 STREETEASY_PRICE_SELECTOR=""
@@ -71,13 +72,31 @@ get_date() {
   echo "$returned_date"
 }
 
+
+get_description() {
+  url="$1"
+  returned_description="$($CURL "$url" | $PUP "$ZILLOW_DESCRIPTION_SELECTOR" text{})" 
+  returned_description="$(echo -n "$returned_description" |  tr \\n , | sed 's/,/, /g')"
+  echo "$returned_description"
+}
+
+get_price() {
+  url="$1"
+  returned_price="$($CURL "$url" | $PUP "$ZILLOW_PRICE_SELECTOR" text{})" 
+  returned_price="$(echo -n "$returned_price" | tr \\n \ )"
+  returned_price="$(echo -n "$returned_price" | sed 's/^[ 	]*//'; )"
+  returned_price="$(echo -n "$returned_price" | sed 's/[ 	]*$//'; )"
+  echo "$returned_price"
+}
+
+
 # Validate selectors and scraping logic
 #
 expected_title="270 Jay St APT 2A Brooklyn, NY 11201"
 returned_title="$(get_address "http://www.zillow.com/homedetails/270-Jay-St-APT-2A-Brooklyn-NY-11201/79724917_zpid/")"
 if [ "$returned_title" != "$expected_title" ]
 then
-  echo "Test command failed! Got >$returned_title<, expected >$expected_title<"
+  echo "Test command failed (get_title)! Got >$returned_title<, expected >$expected_title<"
   exit 2
 fi
 
@@ -93,7 +112,23 @@ expected_date="Sun, Mar 15 (1:00 PM - 3:00 PM)"
 returned_date="$(get_date "http://streeteasy.com/building/concord-village-235-adams-street-brooklyn/7b")"
 if [ "$returned_date" != "$expected_date" ]
 then
-  echo "Test command failed! Got $returned_date, expected $expected_date"
+  echo "Test command failed (get_date)! Got $returned_date, expected $expected_date"
+  exit 2
+fi
+
+expected_description="Studio, 1 bath, 468 sqft"
+returned_description="$(get_description "http://www.zillow.com/homedetails/225-Adams-St-APT-14E-Brooklyn-NY-11201/2111123696_zpid/")"
+if [ "$returned_description" != "$expected_description" ]
+then
+  echo "Test command failed (get_description)! Got $returned_description, expected $expected_description"
+  exit 2
+fi
+
+expected_price='$315,000'
+returned_price="$(get_price "http://www.zillow.com/homedetails/225-Adams-St-APT-14E-Brooklyn-NY-11201/2111123696_zpid/")"
+if [ "$returned_price" != "$expected_price" ]
+then
+  echo "Test command failed (get_price)! Got $returned_price, expected $expected_price"
   exit 2
 fi
 
@@ -113,6 +148,8 @@ url="$1"
 location="$(get_address "$url" | perl -p -e 's/ apt \S+//i')"
 title="$(echo "$location" | head -1)"
 date="$(get_date "$url")"
+description="$(get_description "$url")"
+price="$(get_price "$url")"
 
 if [ ! "$title" ]
 then
@@ -146,4 +183,4 @@ then
 fi
 
 
-addopenhouse.sh "$title" "$daymonth $starttime" "$url" "$duration" "$location"
+addopenhouse.sh "$title" "$daymonth $starttime" "$description$price$url" "$duration" "$location"
