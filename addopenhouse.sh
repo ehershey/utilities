@@ -1,20 +1,20 @@
 #!/bin/bash
 #
 # Add open house to calendar
-# Usage: 
-# 
-# addopenhouse.sh <title> <date> <url> <duration - minutes> <location>
+# Usage:
+#
+# addopenhouse.sh <title> <date> <description> <duration - minutes> <location>
 CALENDAR="Personal"
 
 TITLE="$1"
 DATE="$2"
-URL="$3"
+DESCRIPTION="$3"
 DURATION="$4"
 LOCATION="$5"
 
 if [ ! "$LOCATION" ]
 then
-  echo "Usage: addopenhouse.sh <title> <date> <url> <duration> <location>"
+  echo "Usage: addopenhouse.sh <title> <date> <description> <duration> <location>"
   exit 2
 fi
 
@@ -41,7 +41,7 @@ then
 fi
 
 set -x
-output="$(gcalcli add --cal "$CALENDAR" --title "$TITLE" --when "$DATE" --duration "$DURATION" --description "$URL" --where "$LOCATION" --reminder "$REMINDER" --details url)"
+output="$(gcalcli add --cal "$CALENDAR" --title "$TITLE" --when "$DATE" --duration "$DURATION" --description "$DESCRIPTION" --where "$LOCATION" --reminder "$REMINDER" --details url)"
 
 url="$(echo "$output" | tr \ \\t \\n | grep http | head -1)"
 if [ ! "$url" ]
