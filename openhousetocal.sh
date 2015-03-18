@@ -108,14 +108,6 @@ fi
   #exit 2
 #fi
 
-expected_date="Sun, Mar 15 (1:00 PM - 3:00 PM)"
-returned_date="$(get_date "http://streeteasy.com/building/concord-village-235-adams-street-brooklyn/7b")"
-if [ "$returned_date" != "$expected_date" ]
-then
-  echo "Test command failed (get_date)! Got $returned_date, expected $expected_date"
-  exit 2
-fi
-
 expected_description="Studio, 1 bath, 468 sqft"
 returned_description="$(get_description "http://www.zillow.com/homedetails/225-Adams-St-APT-14E-Brooklyn-NY-11201/2111123696_zpid/")"
 if [ "$returned_description" != "$expected_description" ]
@@ -131,6 +123,13 @@ then
   echo "Test command failed (get_price)! Got $returned_price, expected $expected_price"
   exit 2
 fi
+#expected_date="Sun, Mar 15 (1:00 PM - 3:00 PM)"
+#returned_date="$(get_date "http://streeteasy.com/building/concord-village-235-adams-street-brooklyn/7b")"
+#if [ "$returned_date" != "$expected_date" ]
+#then
+  #echo "Test command failed! Got $returned_date, expected $expected_date"
+  #exit 2
+#fi
 
 expected_address="235 Adams Street #7B"
 returned_address="$(get_address "http://streeteasy.com/building/concord-village-235-adams-street-brooklyn/7b")"
