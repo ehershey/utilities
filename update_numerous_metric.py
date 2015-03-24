@@ -5,7 +5,7 @@
 #
 
 import argparse
-import numerousapp 
+import numerousapp
 
 
 parser = argparse.ArgumentParser(description='Update Numerous metric')

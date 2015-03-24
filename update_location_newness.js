@@ -1,6 +1,6 @@
 #!/usr/bin/env mongo
 db = db.getSiblingDB('ernie_org');
-// update gps_log data with the number of nearby points that occurred before it 
+// update gps_log data with the number of nearby points that occurred before it
 //
 //
 // usage :
@@ -10,9 +10,9 @@ db = db.getSiblingDB('ernie_org');
 var criteria = { previous_point_count: { "$exists": false } };
 var distance_required_to_be_new_meters = 25;
 
-var update_previous_nearby = function(item) { 
-  var earlier_criteria = 
-  { 
+var update_previous_nearby = function(item) {
+  var earlier_criteria =
+  {
     entry_date: { "$lt": item.entry_date },
     loc: { "$nearSphere": { "$geometry": item.loc, "$maxDistance": distance_required_to_be_new_meters } }
   };

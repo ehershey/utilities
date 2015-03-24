@@ -1,6 +1,6 @@
 #!/bin/bash
 # Update moves.csv with values from Moves Service
-# 
+#
 # Requires $MOVES_ACCESS_TOKEN environment variable
 # or crontab.env in same directory
 #
