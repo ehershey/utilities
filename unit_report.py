@@ -135,7 +135,7 @@ units_average_2days_2014_diff = float(units_average_2days) - float(units_average
 units_average_2014_2013_diff = float(units_average_2014) - float(units_average_2013)
 units_average_2013_2014_diff = float(units_average_2013) - float(units_average_2014)
 
-minutes_since_moves_update = (datetime.datetime.now() - datetime.datetime.fromtimestamp(os.path.getmtime(MOVES_CSV_FILENAME))).seconds / 60 
+minutes_since_moves_update = (datetime.datetime.now() - datetime.datetime.fromtimestamp(os.path.getmtime(MOVES_CSV_FILENAME))).seconds / 60
 
 if units_today_2013_diff > 0:
     placeholder['today_class'] = "positive_diff"

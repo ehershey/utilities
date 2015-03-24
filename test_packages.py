@@ -29,7 +29,7 @@ security_group = 'default'
 
 # ubuntu 12.04
 #
-label = 'ubuntu1404' 
+label = 'ubuntu1404'
 ami_id = 'ami-1d8c9574'
 env['user'] = 'ubuntu'
 
@@ -67,7 +67,7 @@ else:
   print("Creating server\n")
   conn = boto.ec2.connect_to_region(region)
   dev_sdb = BlockDeviceType()
-  dev_sdb.ephemeral_name = 'ephemeral0' 
+  dev_sdb.ephemeral_name = 'ephemeral0'
   bdm = BlockDeviceMapping()
   bdm['/dev/sdb'] = dev_sdb
   # bdm = boto.ec2.blockdevicemapping.BlockDeviceMapping({'/dev/xvdb': 'ephemeral0', '/dev/xvdc': 'ephemeral1'})
@@ -147,12 +147,12 @@ if not args.skip_enterprise:
 
 
 
-# done - spin up ubuntu machine 
+# done - spin up ubuntu machine
 # done install pre-req packages
 # done install gpg key
 # done - clone repo
 # done tag repo
-# done run packager.py 
+# done run packager.py
 # copy repo into place
 # run packager-enterprise.py into /tmp
 # copy repo into place
