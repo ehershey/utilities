@@ -75,14 +75,14 @@ get_date() {
 
 get_description() {
   url="$1"
-  returned_description="$($CURL "$url" | $PUP "$ZILLOW_DESCRIPTION_SELECTOR" text{})" 
+  returned_description="$($CURL "$url" | $PUP "$ZILLOW_DESCRIPTION_SELECTOR" text{})"
   returned_description="$(echo -n "$returned_description" |  tr \\n , | sed 's/,/, /g')"
   echo "$returned_description"
 }
 
 get_price() {
   url="$1"
-  returned_price="$($CURL "$url" | $PUP "$ZILLOW_PRICE_SELECTOR" text{})" 
+  returned_price="$($CURL "$url" | $PUP "$ZILLOW_PRICE_SELECTOR" text{})"
   returned_price="$(echo -n "$returned_price" | tr \\n \ )"
   returned_price="$(echo -n "$returned_price" | sed 's/^[ 	]*//'; )"
   returned_price="$(echo -n "$returned_price" | sed 's/[ 	]*$//'; )"
@@ -140,12 +140,10 @@ then
 fi
 
 
-
-
 url="$1"
 
 location="$(get_address "$url" | perl -p -e 's/ apt \S+//i')"
-title="$(echo "$location" | head -1)"
+title="$(get_address "$url" | head -1 | perl -p -e 's/ *brooklyn.*//i')"
 date="$(get_date "$url")"
 description="$(get_description "$url")"
 price="$(get_price "$url")"
