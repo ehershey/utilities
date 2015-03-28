@@ -1,10 +1,10 @@
 #!/usr/bin/env node
 //
 //
-// Hit the My Fitness Pal diary page and pull data out of it that isn't available anywhere else. 
-// Specifically this includes: 
+// Hit the My Fitness Pal diary page and pull data out of it that isn't available anywhere else.
+// Specifically this includes:
 // Daily total calorie intake
-// Daily total macronutrient intake (ideally carbs/fat/protein, but dynamic based on report 
+// Daily total macronutrient intake (ideally carbs/fat/protein, but dynamic based on report
 // configuration)
 //
 // Usage: save_myfitnesspal_data.js [ [ <from> ] <to> ] # Defauls to one previous day, ending today; format is YYYY-MM-DD
@@ -55,7 +55,7 @@ var full_url = util.format(url,username,from,to)
 console.log('full_url: ' + full_url);
 
 // process database options
-// 
+//
 
 var dbuserpass = '';
 
@@ -64,7 +64,7 @@ if(dbuser && dbpass)
   dbuserpass = dbuser + ':' + dbpass + '@';
 }
 
-if(dboptions) { 
+if(dboptions) {
   dboptions = '?' + dboptions;
 }
 
@@ -80,7 +80,7 @@ var summaries_to_save = [];
 
 jsdom.env ( full_url, ["http://code.jquery.com/jquery.js"], function(errors, window) { handler(errors, window); });
 
-function handler(errors, window) 
+function handler(errors, window)
 {
   if(errors) {
     console.log(errors);
@@ -116,9 +116,9 @@ function handler(errors, window)
 
     // for exercise summaries, date is ""
     //
-    if(date) 
+    if(date)
     {
-      summaries_to_save[summaries_to_save.length] = summary_data; 
+      summaries_to_save[summaries_to_save.length] = summary_data;
     }
   });
   console.log('summaries_to_save.length: ' + summaries_to_save.length);
@@ -127,19 +127,19 @@ function handler(errors, window)
     process.exit();
   }
   var saved_count = 0;
-  MongoClient.connect(dburl, function(err, db) 
+  MongoClient.connect(dburl, function(err, db)
   {
     if (err) throw err;
     var collection = db.collection("nutrition_summary");
-  
-    for(var i = 0 ; i < summaries_to_save.length ; i++) 
+
+    for(var i = 0 ; i < summaries_to_save.length ; i++)
     {
       summary_data = summaries_to_save[i];
       date = summary_data['date'];
       var calories = summary_data.Calories;
       summary_data.calories_numeric = Number(summary_data.Calories.replace(/,/g,""));
 
-      collection.update({date: date}, summary_data, {upsert:true, w: 1}, function(err, result) 
+      collection.update({date: date}, summary_data, {upsert:true, w: 1}, function(err, result)
       {
         if (err) throw err;
         console.log("saved summary");
@@ -150,7 +150,7 @@ function handler(errors, window)
         }
       }); // collection.update
     } // for each summary to save
- 
+
   }); // connect
 
 
@@ -158,7 +158,7 @@ function handler(errors, window)
 } // handler()
 
 //
-// 
+//
 // Sample Data:
 // <h2 class="main-title-2" id="date">January 11, 2014</h2>
 // <table class="table0" id="food" width="800">
@@ -173,7 +173,7 @@ function handler(errors, window)
 // 		<col class="col-2">
 // 		<col class="col-2">
 // 	</colgroup>
-// 
+//
 // 	<thead>
 // 		<tr>
 // 			<td class="first">Foods</td>
@@ -187,9 +187,9 @@ function handler(errors, window)
 // 			<td class="last">Fiber</td>
 // 		</tr>
 // 	</thead>
-// 	
+//
 // 	<tbody>
-// 
+//
 // 		  <tr class="title">
 //   			<td class="first last" colspan="9">Breakfast</td>
 //   		</tr>
@@ -353,9 +353,9 @@ function handler(errors, window)
 // 				<td>14g</td>
 // 				<td class="last">1g</td>
 // 			</tr>
-// 		
+//
 // 	</tbody>
-// 	
+//
 // 	<tfoot>
 // 	  <tr>
 //   		<td class="first">TOTAL:</td>
@@ -369,10 +369,10 @@ function handler(errors, window)
 //   		<td class="last">59g</td>
 //   	</tr>
 // 	</tfoot>
-// 		
+//
 // </table>
 // <table class="table0" id="excercise">
-// 	
+//
 // 	<colgroup>
 // 		<col class="col-1">
 // 		<col class="col-2">
@@ -381,7 +381,7 @@ function handler(errors, window)
 // 		<col class="col-2">
 // 		<col class="col-2">
 // 	</colgroup>
-// 
+//
 // 	<thead>
 // 		<tr>
 // 			<td class="first">Exercises</td>
@@ -392,9 +392,9 @@ function handler(errors, window)
 // 			<td class="last">Weight</td>
 // 		</tr>
 // 	</thead>
-// 	
+//
 // 	<tbody>
-// 	  
+//
 //   		<tr class="title">
 //   			<td class="first last" colspan="6">Cardiovascular</td>
 //   		</tr>
@@ -488,9 +488,9 @@ function handler(errors, window)
 //   			<td>57</td>
 //   			<td class="last" colspan="3">&nbsp;</td>
 //   		</tr>
-//   	
+//
 // 	</tbody>
-// 	
+//
 // 	<tfoot>
 // 		<tr>
 //   		<td class="first">TOTALS:</td>
@@ -501,7 +501,7 @@ function handler(errors, window)
 //   		<td class="last">0</td>
 // 		</tr>
 // 	</tfoot>
-// 	
+//
 // </table>
 
 
