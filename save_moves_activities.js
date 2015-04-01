@@ -2,7 +2,7 @@
 'use strict';
 // Save moves json on stdin to mongodb
 //
-// Entities: 
+// Entities:
 // 1) A day worth of activity
 //    Collection: dates
 //    Key: date
@@ -18,16 +18,16 @@
 //
 //
 //
-// Example usage in crontab: 
+// Example usage in crontab:
 // */5 * * * * curl --silent "https://api.moves-app.com/api/v1/user/activities/daily?pastDays=7&access_token=$MOVES_ACCESS_TOKEN"  | ~ernie/git/utilities/save_moves_activities.js > /tmp/save_moves_activities.log 2>&1
 
 
 var mongodb = require('mongodb');
 var request = require('request');
 
-var moves_access_token = process.env.MOVES_ACCESS_TOKEN; 
+var moves_access_token = process.env.MOVES_ACCESS_TOKEN;
 
-if(!moves_access_token) { 
+if(!moves_access_token) {
   console.error("Environment variable not set: MOVES_ACCESS_TOKEN");
   process.exit(2);
 }
@@ -48,7 +48,7 @@ var dboptions = '';
 
 
 // process database options
-// 
+//
 
 var dbuserpass = '';
 
@@ -57,7 +57,7 @@ if(dbuser && dbpass)
   dbuserpass = dbuser + ':' + dbpass + '@';
 }
 
-if(dboptions) { 
+if(dboptions) {
   dboptions = '?' + dboptions;
 }
 
@@ -100,13 +100,13 @@ process.stdin.on('end', function() {
   // connect to db and store data
   //
 
-  MongoClient.connect(dburl, function(err, db) 
+  MongoClient.connect(dburl, function(err, db)
   {
     if (err) throw err;
 
     console.log("incoming_json.length: " + incoming_json.length);
-    
-    for(var i = 0 ; i < incoming_json.length; i++) { 
+
+    for(var i = 0 ; i < incoming_json.length; i++) {
 
       var entry = incoming_json[i];
 
@@ -114,7 +114,7 @@ process.stdin.on('end', function() {
       total_entry_count++;
 
 
-      request('https://api.moves-app.com/api/v1/user/storyline/daily/' + entry.date + '?trackPoints=true&access_token=' + moves_access_token, 
+      request('https://api.moves-app.com/api/v1/user/storyline/daily/' + entry.date + '?trackPoints=true&access_token=' + moves_access_token,
         function (error, response, body) {
           if (!error && response.statusCode == 200) {
             var storyline = JSON.parse(body)[0];
@@ -124,17 +124,17 @@ process.stdin.on('end', function() {
 
             if(!segments) { segments = [] }
 
-              for(var j = 0 ; j < segments.length ; j++) 
+              for(var j = 0 ; j < segments.length ; j++)
               {
                 total_segment_count++;
                 var segment = segments[j];
                 save_segment(db, segment);
-        
+
                 var activities = segment.activities;
 
                 if(!activities) { activities = [] }
-        
-                for(var k = 0 ; k < activities.length ; k++) 
+
+                for(var k = 0 ; k < activities.length ; k++)
                 {
                   total_activity_count++;
                   var activity = activities[k];
@@ -143,17 +143,17 @@ process.stdin.on('end', function() {
                }
           }
         });
-      
+
       }
   });
 });
 
-function save_day_entry(db,entry) 
+function save_day_entry(db,entry)
 {
 
   var collection = db.collection("dates");
 
-  collection.find({ date: entry.date}, function(err, cursor) 
+  collection.find({ date: entry.date}, function(err, cursor)
   {
     if (err) throw err;
 
@@ -169,7 +169,7 @@ function save_day_entry(db,entry)
     cursor.toArray(function(err, result)
     {
       if (err) throw err;
-    
+
 
       console.log('result.length: ' + result.length);
 
@@ -192,7 +192,7 @@ function save_day_entry(db,entry)
         console.log(result[0].application_metadata);
         first_seen = result[0].application_metadata.first_seen;
         seen_count = result[0].application_metadata.seen_count + 1;
-      } 
+      }
 
       console.log('first_seen: ' + first_seen);
       console.log('last_seen: ' + last_seen);
@@ -203,7 +203,7 @@ function save_day_entry(db,entry)
 
       console.log('attempting to save entry: ' + entry);
 
-      collection.update({date: entry.date}, entry, {upsert:true, w: 1}, function(err, result) 
+      collection.update({date: entry.date}, entry, {upsert:true, w: 1}, function(err, result)
       {
         if (err) throw err;
         // collection.insert(entry, {upsert:true, w: 1}, function(err, result) {
@@ -217,12 +217,12 @@ function save_day_entry(db,entry)
   });
 }
 
-function save_segment(db,segment) 
+function save_segment(db,segment)
 {
 
   var collection = db.collection("segments");
 
-  collection.find({ startTime: segment.startTime}, function(err, cursor) 
+  collection.find({ startTime: segment.startTime}, function(err, cursor)
   {
     if (err) throw err;
 
@@ -258,7 +258,7 @@ function save_segment(db,segment)
         console.log(result[0].application_metadata);
         first_seen = result[0].application_metadata.first_seen;
         seen_count = result[0].application_metadata.seen_count + 1;
-      } 
+      }
 
       console.log('first_seen: ' + first_seen);
       console.log('last_seen: ' + last_seen);
@@ -268,7 +268,7 @@ function save_segment(db,segment)
 
       console.log('attempting to save segment: ' + segment);
 
-      collection.update({startTime: segment.startTime}, segment, {upsert:true, w: 1}, function(err, result) 
+      collection.update({startTime: segment.startTime}, segment, {upsert:true, w: 1}, function(err, result)
       {
         if (err) throw err;
         // collection.insert(segment, {upsert:true, w: 1}, function(err, result) {
@@ -281,12 +281,12 @@ function save_segment(db,segment)
   });
 }
 
-function save_activity(db,activity) 
+function save_activity(db,activity)
 {
 
   var collection = db.collection("activities");
 
-  collection.find({ startTime: activity.startTime}, function(err, cursor) 
+  collection.find({ startTime: activity.startTime}, function(err, cursor)
   {
     if (err) throw err;
 
@@ -322,7 +322,7 @@ function save_activity(db,activity)
         console.log(result[0].application_metadata);
         first_seen = result[0].application_metadata.first_seen;
         seen_count = result[0].application_metadata.seen_count + 1;
-      } 
+      }
 
       console.log('first_seen: ' + first_seen);
       console.log('last_seen: ' + last_seen);
@@ -332,7 +332,7 @@ function save_activity(db,activity)
 
       console.log('attempting to save activity: ' + activity);
 
-      collection.update({startTime: activity.startTime}, activity, {upsert:true, w: 1}, function(err, result) 
+      collection.update({startTime: activity.startTime}, activity, {upsert:true, w: 1}, function(err, result)
       {
         if (err) throw err;
         // collection.insert(activity, {upsert:true, w: 1}, function(err, result) {
@@ -346,8 +346,8 @@ function save_activity(db,activity)
 }
 
 function cleanup_db_connection(db) {
-  setTimeout(function() { 
-    if(wrote_activity_count === total_activity_count && wrote_entry_count === total_entry_count && wrote_segment_count === total_segment_count) 
+  setTimeout(function() {
+    if(wrote_activity_count === total_activity_count && wrote_entry_count === total_entry_count && wrote_segment_count === total_segment_count)
     {
       console.log('calling db.close()');
       db.close();
