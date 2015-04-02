@@ -47,8 +47,8 @@ def main():
 
   daily_calorie_goal = get_daily_calorie_goal()
   running_calorie_multiplier = get_running_calorie_multiplier()
-  walking_calorie_multiplier = get_walking_calorie_multiplier() 
-  cycling_calorie_multiplier = get_cycling_calorie_multiplier() 
+  walking_calorie_multiplier = get_walking_calorie_multiplier()
+  cycling_calorie_multiplier = get_cycling_calorie_multiplier()
   running_calorie_goal = running_goal_distance * running_calorie_multiplier
   walking_calorie_goal = walking_goal_distance * walking_calorie_multiplier
   covered_calorie_goal = running_calorie_goal + walking_calorie_goal
