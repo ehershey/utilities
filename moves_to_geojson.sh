@@ -37,7 +37,7 @@
 #              },
 #
 #
-# Import it into mongodb to look like (trackPoints only): 
+# Import it into mongodb to look like (trackPoints only):
 # {
 #   _id: blah,
 #   loc : { type : "Point" ,
@@ -48,10 +48,10 @@
 #   entry_source: "latitude",
 #   accuracy: 5,
 # }
-# 
+#
 # curl --silent "https://api.moves-app.com/api/v1/user/storyline/daily?pastDays=1&trackPoints=true&access_token=$MOVES_ACCESS_TOKEN" | moves_to_geojson.sh "Moves API" |  mongoimport --db ernie_org --collection gps_log
 
-if [ "$1" ] 
+if [ "$1" ]
 then
   entry_source_sed="sed 's/^}$/, entry_source: \"$1\"}/g'"
 else
