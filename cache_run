@@ -29,7 +29,7 @@ cachefile=$cachedir/`echo "$key_extra$cmd" | sed 's/[^0-9a-zA-Z_-]/_/g'`
 if [ -e $cachefile ]
 then
 	# check if content has expired
-	# 
+	#
 	file_mtime=`perl -MFile::stat -e 'print stat("'$cachefile'")->mtime'`
 
 	current_time=`date +%s`
