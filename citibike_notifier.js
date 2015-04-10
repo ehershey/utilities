@@ -4,8 +4,11 @@
 //
 //
 
-var STARTURL = "https://www.citibikenyc.com/login";
-var TRIPURL = "https://www.citibikenyc.com/member/trips";
+var STARTURL = "https://member.citibikenyc.com/profile/login";
+var TRIPURL = "https://member.citibikenyc.com/profile/trips/00002139-1";
+var USERNAME_SELECTOR = ".ed-popup-form_login__form-input_username";
+var PASSWORD_SELECTOR = ".ed-popup-form_login__form-input_password";
+var SUBMIT_BUTTON_SELECTOR = "button.ed-popup-form_login__form-btn";
 
 // Kill ourselves if we take this long
 //
@@ -71,13 +74,13 @@ function login(err,callback)
     console.log('status: ' + status);
     console.log('errors: ' + errors);
     if(err) throw(err);
-    var usernameinput =   browser.query("#subscriberUsername");
+    var usernameinput =   browser.query(USERNAME_SELECTOR);
     console.log('usernameinput: ' + usernameinput);
-    var passwordinput =   browser.query("#subscriberPassword");
+    var passwordinput =   browser.query(PASSWORD_SELECTOR);
     console.log('passwordinput: ' + passwordinput);
-    browser.fill("#subscriberUsername", citibike_auth.username);
-    browser.fill("#subscriberPassword", citibike_auth.password);
-    browser.pressButton("#login_submit", function(err)
+    browser.fill(USERNAME_SELECTOR, citibike_auth.username);
+    browser.fill(PASSWORD_SELECTOR, citibike_auth.password);
+    browser.pressButton(SUBMIT_BUTTON_SELECTOR, function(err)
     {
       console.log('in submit callback');
       if(err) callback(err);
@@ -85,9 +88,9 @@ function login(err,callback)
       console.log('pathname: ' + pathname);
       console.log('browser.saveCookies(): ' + browser.saveCookies());
       storage.setItem("cookies", browser.saveCookies());
-      if(pathname.indexOf('/member/trips') === -1 && pathname !== '/member/profile')
+      if(pathname.indexOf('/profile/trips') === -1 && pathname !== '/profile/login')
       {
-        callback("Login error? Path after login form submit: " + pathname + " but expected /member/profile or /member/trips");
+        callback("Login error? Path after login form submit: " + pathname + " but expected /profile/trips or /profile/login");
       }
       callback();
     });
@@ -111,11 +114,14 @@ function check_trips(err, callback, page)
     url += '/' + page;
   }
   console.log('url: ' + url);
+  browser.visit(url, function() {
+    console.log("IN CALLBACK");
+  });
   browser.visit(url, function(err, passed_browser, status, errors) {
     console.log('in trips callback');
     var pathname = browser.location.pathname;
     console.log('pathname: ' + pathname);
-    if(pathname.indexOf('/member/trips') === -1)
+    if(pathname.indexOf('/profile/trips') === -1)
     {
       console.log("location is not trip page, re-running login()");
       login(null,function(err) { check_trips(err,callback); });
