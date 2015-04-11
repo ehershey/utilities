@@ -125,12 +125,53 @@ table,tr,td,th {{
   cellspacing='0'>
     <tr>
       <td>HTML generated:</td>
-      <td><!--diffignore-->{now}</td>
+      <td><!--diffignore-->{now} (<span id="html_age"></span>)</td>
     </tr>
     <tr>
       <td>Moves data updated:</td>
-      <td>{moves_csv_modified}</td>
+      <td>{moves_csv_modified} (<span id="moves_age"></span>)</td>
     </tr>
   </table>
+  <a href="?">Refresh</a><br/>
+  <a href="moves://">Launch Moves App</a><br/>
+  <script type="text/javascript">
+    setInterval(function() {{
+      document.getElementById("html_age").innerHTML = get_date_age("{now}"); // diffignore (ignore comparing against previous html)
+      document.getElementById("moves_age").innerHTML = get_date_age("{moves_csv_modified}");
+    }}, 1000);
+
+    // Double curly brace everywhere for python templating
+    //
+    function get_date_age(date_string)
+    {{
+      var return_string = '';
+      var old_date = new Date(date_string);
+      var now = new Date();
+      var diff_ms = now - old_date;
+      var diff_s = Math.floor(diff_ms / 1000);
+      var diff_m = Math.floor(diff_s / 60);
+      var diff_h = Math.floor(diff_m / 60);
+      var diff_d = Math.floor(diff_h / 24);
+
+      diff_s = diff_s % 60;
+      diff_m = diff_m % 60;
+      diff_h = diff_h % 24;
+
+      if(diff_d) if(return_string) return_string += ', ';
+      if(diff_d) return_string += diff_d + ' day';
+      if(diff_d && diff_d > 1) return_string += 's';
+      if(diff_h) if(return_string) return_string += ', ';
+      if(diff_h) return_string += diff_h + ' hour';
+      if(diff_h && diff_h > 1) return_string += 's';
+      if(diff_m) if(return_string) return_string += ', ';
+      if(diff_m) return_string += diff_m + ' minute';
+      if(diff_m && diff_m > 1) return_string += 's';
+      if(diff_s) if(return_string) return_string += ', ';
+      if(diff_s) return_string += diff_s + ' second';
+      if(diff_s && diff_s > 1) return_string += 's';
+      return return_string;
+    }}
+
+  </script>
 </body>
 </html>
