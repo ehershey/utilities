@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+import argparse
 import datetime
 import os
 import os.path
@@ -8,6 +9,10 @@ import time
 from os.path import expanduser
 from numerousapp import update_metric_value, get_metric_value
 
+
+parser = argparse.ArgumentParser(description='Generate calorie report')
+parser.add_argument('-s', '--skip-numerous', action='store_true', help="Don't post to Numerous")
+args = parser.parse_args()
 
 RUNNING_CALORIE_MULTIPLIER = 118
 WALKING_CALORIE_MULTIPLIER = 100
@@ -243,7 +248,7 @@ if __name__ == '__main__':
 
     # Only post if we have data for today or it's been long enough that we should have data for today
     #
-    if units_today > 0 or datetime.datetime.now().hour > MIN_HOUR_FOR_ZERO_POST:
+    if not args.skip_numerous and (units_today > 0 or datetime.datetime.now().hour > MIN_HOUR_FOR_ZERO_POST):
       running_goal = get_metric_value(5818738672989877729)
       walking_goal = get_metric_value(7758304728227275179)
       biking_goal = get_metric_value(5595761423440323786)
