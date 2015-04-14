@@ -4,17 +4,27 @@
 #
 # Usage:
 # awssh <instance_name> [ <command> ]
-# 
-# Depends on: 
+#
+# Depends on:
 # 1) ~/git/mci/config/distros.yml for usernames
 # 2) ~/.ssh/<key name>.pem with ssh private keys named after amazon key name
 # 3) cache_run executable
 # 4) instance_info_by_name.sh executable
 
-# how long to cache aws info 
+set -o nounset
+
+# how long to cache aws info
 CACHE_SECONDS=300
 
 . getuserbydistro.sh
+
+if [[ "$1" == "-t" ]]
+then
+  extra_args=" -t"
+  shift
+else
+  extra_args=""
+fi
 
 instance_name="$1"
 shift
@@ -25,13 +35,13 @@ then
   instance_name=$(echo $instance_name | cut -f2 -d@)
 fi
 
-if [ ! "$instance_name" ] 
+if [ ! "$instance_name" ]
 then
   echo "usage: $0 <instance_name> [ <command> ]"
   exit 2
 fi
 
-if [ ! "$AWS_SECRET_ACCESS_KEY" -o ! "$AWS_ACCESS_KEY_ID" ]
+if [ ! "${AWS_SECRET_ACCESS_KEY:-}" -o ! "${AWS_ACCESS_KEY_ID:-}" ]
 then
   . ~/amazon-build.sh
 fi
@@ -73,12 +83,12 @@ then
   exit 3
 fi
 
-if [ ! "$user" ]
+if [ ! "${user:-}" ]
 then
   user=$(getuserbydistro "$distro")
 fi
 
-if [ ! "$user" ] 
+if [ ! "$user" ]
 then
   user=root
 fi
@@ -86,4 +96,4 @@ fi
 echo connecting to $name
 echo "$data"
 set -x
-ssh -o UserKnownHostsFile=/dev/null -o ConnectTimeout=5 -o KbdInteractiveAuthentication=no -o PasswordAuthentication=no -o StrictHostKeyChecking=no -i ~/.ssh/$key.pem $user@$dns "$@"
+ssh $extra_args -o UserKnownHostsFile=/dev/null -o ConnectTimeout=5 -o KbdInteractiveAuthentication=no -o PasswordAuthentication=no -o StrictHostKeyChecking=no -i ~/.ssh/$key.pem $user@$dns "$@"
