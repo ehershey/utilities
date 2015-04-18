@@ -5,12 +5,18 @@
 // fields in url_configs objects.
 //
 //
+// Usage:
+// simple_monitor.js [ <url substring match> ]
+//
+// If a URL substring match is passed in, only monitors of URL's containing the substring
+// will be checked. Otherwise all will be checked. 
+//
 
 var async = require('async');
-var jsdom = require('jsdom');
-var fs = require('fs');
-var nodemailer = require('nodemailer');
 var date_utils = require('date-utils');
+var fs = require('fs');
+var jsdom = require('jsdom');
+var nodemailer = require('nodemailer');
 
 var MAILTO = 'Ernie Hershey <ernie@mongodb.com>'
 var MAILFROM = 'Simple Monitor <ernie@mongodb.com>'
@@ -23,6 +29,7 @@ var nodemailer_transport = nodemailer.createTransport();
 // if anything is matched and "negated" is not true (or if nothing matches and "negated" is true),
 // and the detail text (return value of text_finder_from_cell_jqobj($(cell_selector)) !==
 // "ignore_text", send email from MAILFROM to MAILTO with details on the error
+//
 //
 //
 
@@ -158,6 +165,13 @@ var url_configs = [
     negated: true
   },
 
+  {
+    url: 'http://goeverywhere.ernie.org/get_stats.cgi',
+    cell_selector: "body:contains(oldest_point_timestamp)",
+    text_finder_from_cell_jqobj: function(jqobj) { return jqobj.text(); },
+    ignore_text: '',
+    negated: true
+  },
   {
     url: 'http://goeverywhere.ernie.org/get_points.cgi?from=09/15/2014&to=09/15/2014&min_lon=-80&max_lon=80&min_lat=-90&max_lat=90&bound_string=%28%2840.661127887535734%2C%20-74.28702794525663%29%2C%20%2840.77718145714685%2C%20-73.68380986664334%29%29&rind=1/1',
     cell_selector: "body:contains(point)",
@@ -453,10 +467,17 @@ var errors_found = 0;
 async.each(url_configs, check_url, function() { done_checking_all() });
 
 function check_url(url_config, done_checking_one) {
+
   var url = url_config.url;
   var cell_selector = url_config.cell_selector;
   var ignore_text = url_config.ignore_text;
   var negated = url_config.negated;
+
+  if(process.argv[2] && url.toLowerCase().indexOf(process.argv[2].toLowerCase()) === -1)
+  {
+    done_checking_one();
+    return;
+  }
 
   var text_finder_from_cell_jqobj = url_config.text_finder_from_cell_jqobj;
 
