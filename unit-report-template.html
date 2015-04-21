@@ -4,7 +4,13 @@
   <meta name="generator" content=
   "HTML Tidy for Linux (vers 14 June 2007), see www.w3.org">
   <style type="text/css">
-    table {{
+    .right {{
+        float: right;
+    }}
+    .left {{
+        float: left;
+    }}
+    table,body {{
         width: 100%;
         font-size: 32pt;
     }}
@@ -132,8 +138,8 @@ table,tr,td,th {{
       <td>{moves_csv_modified} (<span id="moves_age"></span>)</td>
     </tr>
   </table>
-  <a href="?">Refresh</a><br/>
-  <a href="moves://">Launch Moves App</a><br/>
+  <a class="left" href="?">Refresh</a>
+  <a class="right" href="moves://">Launch Moves App</a><br/>
   <script type="text/javascript">
     setInterval(function() {{
       document.getElementById("html_age").innerHTML = get_date_age("{now}"); // diffignore (ignore comparing against previous html)
