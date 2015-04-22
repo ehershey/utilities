@@ -25,6 +25,14 @@ var Browser = require("zombie");
 var storage = require('node-persist');
 var nodemailer = require('nodemailer');
 var moment = require('moment');
+var jsdom = require("jsdom");
+var window = jsdom.jsdom().defaultView;
+
+jsdom.jQueryify(window, "http://code.jquery.com/jquery-2.1.1.js", function () {
+    window.$("body").append('<div class="testing">Hello World, It works</div>');
+
+      console.log(window.$(".testing").text());
+});
 
 // Never refer to under 60 minutes as "an hour"
 //
@@ -128,33 +136,25 @@ function check_trips(err, callback, page)
       return;
     }
 
-    var trip_trs = browser.querySelectorAll("tr.trip");
-    console.log('trip_trs: ' + trip_trs);
-    if(trip_trs.length === 0)
+    var trip_elements = browser.querySelectorAll("div.ed-table__item_trip");
+    console.log('trip_elements: ' + trip_elements);
+    console.log('trip_elements.length: ' + trip_elements.length);
+    if(trip_elements.length === 0)
     {
-      console.log("trip_trs.length === 0, looking at next page");
-      var after_slash = pathname.replace(/.*\//,'');
-      var next_page;
-      if(after_slash === 'trips')
-      {
-        next_page = 2;
-      }
-      else
-      {
-        next_page = after_slash*1 + 1;
-      }
-      console.log('next_page: ' + next_page);
-
-      check_trips(null,callback,next_page);
+      console.log("trip_elements.length === 0");
+      callback();
       return;
     }
-    for(var i = 0 ; i < trip_trs.length ; i++)
+    for(var i = 0 ; i < trip_elements.length ; i++)
     {
-      var trip_tr = trip_trs[i];
-      var trip_id = trip_tr.id;
-      var trip_duration = trip_tr.getAttribute('data-duration-seconds');
+      var trip_element = trip_elements[i];
+      console.log('trip_element: ' + trip_element);
+      console.log('window.$(trip_element).text(): ' + window.$(trip_element).text());
+      var trip_id = window.$(trip_element).text().replace(/[^0-9a-zA-Z]/g,"");
       var now = (new Date()).getTime()/1000;
-      var start_timestamp = trip_tr.getAttribute("data-start-timestamp");
+      var start_timestamp = moment(window.$(".ed-table__item__info__sub-info_trip-start-date",trip_element).text())/1000;
+      var end_timestamp = moment(window.$(".ed-table__item__info__sub-info_trip-end-date",trip_element).text())/1000;
+      var trip_duration = end_timestamp - start_timestamp;
       var trip_age = moment.duration(now - start_timestamp, "seconds").humanize();
 
 
@@ -163,15 +163,16 @@ function check_trips(err, callback, page)
       console.log('now: ' + now);
       console.log('trip_duration: ' + trip_duration);
       console.log('start_timestamp: ' + start_timestamp);
+      console.log('end_timestamp: ' + end_timestamp);
       console.log('trip_age: ' + trip_age);
 
       // Only notify if the trip is new and it's either a legitimate length (over 60 seconds) or older than 60 seconds -
       // The extra logic is to account for trips showing up as tiny amounts of time immediately after they're over
       // then getting populated with real durations after the notification has been sent
       //
-      if(is_trip_new(trip_tr) && (trip_duration > 60 || trip_age > 60))
+      if(is_trip_new(trip_element) && (trip_duration > 60 || trip_age > 60))
       {
-        notify_trip(trip_tr, trip_trs);
+        notify_trip(trip_element, trip_elements);
       }
       else
       {
@@ -185,14 +186,16 @@ function check_trips(err, callback, page)
 // <tr class="trip" id="trip-15932144" data-start-station-id="248" data-start-timestamp="1412458608" data-end-station-id="514" data-end-timestamp="1412459885" data-duration-seconds="1277">
 //
 
-function notify_trip(trip_tr, trip_trs) {
-  var trip_id = trip_tr.id;
+function notify_trip(trip_element, trip_elements) {
+  var trip_id = window.$(trip_element).text().replace(/[^0-9a-zA-Z]/g,"");
   console.log("notifying for trip with id: " + trip_id);
 
 
 
-  var duration_seconds = trip_tr.getAttribute("data-duration-seconds");
-  var start_timestamp = trip_tr.getAttribute("data-start-timestamp");
+  var start_timestamp = moment(window.$(".ed-table__item__info__sub-info_trip-start-date",trip_element).text())/1000;
+  var end_timestamp = moment(window.$(".ed-table__item__info__sub-info_trip-end-date",trip_element).text())/1000;
+  var duration_seconds = end_timestamp - start_timestamp;
+
   var verbose_start_timestamp = moment(new Date(start_timestamp * 1000)).format('HH:mm MM/DD/YYYY');
   console.log('duration_seconds: ' + duration_seconds);
   console.log('verbose_start_timestamp: ' + verbose_start_timestamp);
@@ -225,8 +228,8 @@ function notify_trip(trip_tr, trip_trs) {
 
 // if we have notification info, it's not new
 //
-function is_trip_new(trip_tr) {
-  var trip_id = trip_tr.id;
+function is_trip_new(trip_element) {
+  var trip_id = window.$(trip_element).text().replace(/[^0-9a-zA-Z]/g,"");
   var key = "trip_notify_info_" + trip_id;
   var trip_notify_info = storage.getItem(key);
   if(trip_notify_info)
