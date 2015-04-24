@@ -93,17 +93,17 @@ var url_configs = [
     ignore_text: '',
     negated: true
   },
-  {
-    url: 'http://mci.10gen.com/hosts/',
-    cell_selector: "script:contains(unreachable)",
-    // Crazy jquery magic to get a delimited string of all the unreachable hostnames
-    //
-    // Mostly from http://bugs.jquery.com/ticket/5858
-    //
-    text_finder_from_cell_jqobj: function(jqobj) { return "Unused" },
-    ignore_text: '',
-    negated: false
-  },
+  // {
+    // url: 'http://mci.10gen.com/hosts/',
+    // cell_selector: "script:contains(unreachable)",
+    // // Crazy jquery magic to get a delimited string of all the unreachable hostnames
+    // //
+    // // Mostly from http://bugs.jquery.com/ticket/5858
+    // //
+    // text_finder_from_cell_jqobj: function(jqobj) { return "Unused" },
+    // ignore_text: '',
+    // negated: false
+  // },
   {
     url: 'http://www.mongodb.org/downloads',
     cell_selector: ".release-version",
