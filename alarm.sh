@@ -1,8 +1,8 @@
 #!/bin/bash
-# 
+#
 # Sound alarm in X minutes
-# 
-# Usage: 
+#
+# Usage:
 # alarm.sh [ <minutes> ]
 #
 # Requires:
@@ -13,10 +13,10 @@
 #
 AUDIOFILE=~/Dropbox/Misc/ascending.mp3
 
-MINUTES_DEFAULT=20 
+MINUTES_DEFAULT=20
 
 minutes="$1"
-if [ ! "$minutes" ] 
+if [ ! "$minutes" ]
 then
   minutes=$MINUTES_DEFAULT
 fi
@@ -30,4 +30,4 @@ fi
 
 echo "Will alarm in $minutes minutes"
 #echo "(afplay "$AUDIOFILE" ; afplay "$AUDIOFILE" ) & killall PandoraJam iTunes iTunesHelper mdworker" | at now + $minutes minutes
-echo "(afplay "$AUDIOFILE" ; afplay "$AUDIOFILE" ) & killall PandoraJam ; osxstop & osxnotify 'Move!'" | at now + $minutes minutes
+echo "(afplay "$AUDIOFILE" ; afplay "$AUDIOFILE" ) & killall PandoraJam ; osxstop & osxnotify 'Move!'" | sudo at now + $minutes minutes
