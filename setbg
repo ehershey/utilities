@@ -14,7 +14,6 @@ fi
 if [ "`uname`" = "Darwin" ]
 then
   command="osascript -e \"tell application \\\"Finder\\\" to set desktop picture to POSIX file \\\"$filename\\\"\""
-  
 else
   command="gconftool-2 --type string --set /desktop/gnome/background/picture_filename \"$filename\""
 fi
