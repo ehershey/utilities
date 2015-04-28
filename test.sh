@@ -39,7 +39,7 @@ for file in $filelist
 do
   let filecount=filecount+1
   echo "Testing file: $file"
-  if [ -d "$file" ] 
+  if [ -d "$file" ]
   then
     echo Skipping directory
   elif [ "$file" = "gpgexport" ]
@@ -81,12 +81,12 @@ do
     fi
   elif echo "$file" | grep -q \\.html$
   then
-    if ! tidy -error "$file" 
+    if ! tidy -error "$file"
     then
       let errors=errors+1
       echo ERROR: syntax check failed
     fi
- 
+
   elif echo "$file" | grep -q \\.md$
   then
     if ! cat "$file" | md2html > /dev/null
@@ -118,7 +118,7 @@ done
 
 echo "Examined $filecount filecount"
 echo "Found $errors errors"
-if [ $errors -gt 0 ] 
+if [ $errors -gt 0 ]
 then
   exit $errors
 else
