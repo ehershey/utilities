@@ -131,13 +131,13 @@ fi
   #exit 2
 #fi
 
-expected_address="235 Adams Street #7B"
-returned_address="$(get_address "http://streeteasy.com/building/concord-village-235-adams-street-brooklyn/7b")"
-if [ "$returned_address" != "$expected_address" ]
-then
-  echo "Test command failed! Got $returned_address, expected $expected_address"
-  exit 2
-fi
+#expected_address="235 Adams Street #7B"
+#returned_address="$(get_address "http://streeteasy.com/building/concord-village-235-adams-street-brooklyn/7b")"
+#if [ "$returned_address" != "$expected_address" ]
+#then
+  #echo "Test command failed! Got $returned_address, expected $expected_address"
+  #exit 2
+#fi
 
 
 url="$1"
