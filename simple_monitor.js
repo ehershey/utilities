@@ -9,7 +9,7 @@
 // simple_monitor.js [ <url substring match> ]
 //
 // If a URL substring match is passed in, only monitors of URL's containing the substring
-// will be checked. Otherwise all will be checked. 
+// will be checked. Otherwise all will be checked.
 //
 
 var async = require('async');
@@ -118,7 +118,6 @@ var url_configs = [
     ignore_text: '',
     negated: true
   },
-  /*
    {
     url: 'http://buildbot.mongodb.org/buildslaves',
     cell_selector: ".offline",
@@ -134,8 +133,6 @@ var url_configs = [
     ignore_text: '',
     negated: false
   },
-  */
-
   {
     url: 'http://frau.ernie.org/',
     cell_selector: "body:contains(frau.ernie.org)",
@@ -164,7 +161,6 @@ var url_configs = [
     ignore_text: '',
     negated: true
   },
-
   {
     url: 'http://goeverywhere.ernie.org/get_stats.cgi',
     cell_selector: "body:contains(oldest_point_timestamp)",
