@@ -14,7 +14,7 @@ http://wiki.10gen.com/
 tempfile_pattern=/tmp/temp_monitor.tempfile
 
 for url in $urls
-do 
+do
   safeurl="`echo \"$url\" | sed 's/[^a-zA-Z0-9]/_/g'`"
   tempfile=$tempfile_pattern-$safeurl
   tempfile_last=$tempfile_pattern-$safeurl.last
@@ -26,7 +26,7 @@ do
 
     if [ $md5 != $md5_last ]
     then
-      subject="CONTENT DIFFERENCE DETECTED FOR URL $url" 
+      subject="CONTENT DIFFERENCE DETECTED FOR URL $url"
       echo $subject
       mail_tempfile=`mktemp $tempfile_patterh.XXXXX`
       echo -n > $mail_tempfile
@@ -38,7 +38,7 @@ do
       cat $tempfile_last >> $mail_tempfile
       echo -e "EOM" >> $mail_tempfile
       cat $mail_tempfile
-      mail -s "$subject" $mailto < $mail_tempfile 
+      mail -s "$subject" $mailto < $mail_tempfile
     fi
   fi
 
