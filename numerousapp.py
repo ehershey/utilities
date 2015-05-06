@@ -5,6 +5,7 @@ import sys
 import urllib2
 import numerous_apikey
 
+base_url = "https://api.numerousapp.com/v1"
 
 def make_auth_request(url=None, data=None, headers=None):
     auth_handler = urllib2.HTTPBasicAuthHandler()
@@ -22,7 +23,7 @@ def make_auth_request(url=None, data=None, headers=None):
 
 def delete_metric(metric_id):
 
-    url="https://api.numerousapp.com/v1/metrics/%s" % metric_id
+    url="%s/metrics/%s" % (base_url, metric_id)
 
     request=make_auth_request(url)
     request.get_method=lambda: 'DELETE'
@@ -32,7 +33,7 @@ def delete_metric(metric_id):
 
 def get_metric(metric_id):
 
-    url="https://api.numerousapp.com/v1/metrics/%s" % metric_id
+    url="%s/metrics/%s" % (base_url, metric_id)
 
     request=make_auth_request(url)
 
@@ -44,7 +45,7 @@ def get_metric(metric_id):
 
 def get_metrics(labelsearch=''):
 
-    url="https://api.numerousapp.com/v1/users/%s/metrics" % numerous_apikey.userid
+    url="%s/users/%s/metrics" % (base_url, numerous_apikey.userid)
 
     request=make_auth_request(url)
 
@@ -58,7 +59,7 @@ def get_metrics(labelsearch=''):
 
 def update_metric_value(metric_id, value, updated=None):
 
-  url="https://api.numerousapp.com/v1/metrics/%s/events" % metric_id
+  url="%s/metrics/%s/events" % (base_url, metric_id)
 
   values={ "value": value }
 
@@ -80,7 +81,7 @@ def update_metric_value(metric_id, value, updated=None):
 
 def get_metric_values(metric_id):
 
-  url="https://api.numerousapp.com/v1/metrics/%s/events" % metric_id
+  url="%s/metrics/%s/events" % (base_url, metric_id)
 
   request=make_auth_request(url)
 
