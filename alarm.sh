@@ -28,6 +28,7 @@ then
   exit 1
 fi
 
-echo "Will alarm in $minutes minutes"
+echo "Will alarm in $minutes minutes" | osxnotify
 #echo "(afplay "$AUDIOFILE" ; afplay "$AUDIOFILE" ) & killall PandoraJam iTunes iTunesHelper mdworker" | at now + $minutes minutes
 echo "(afplay "$AUDIOFILE" ; afplay "$AUDIOFILE" ) & killall PandoraJam ; osxstop & osxnotify 'Move!'" | sudo at now + $minutes minutes
+osxnotify $(sudo atq | cut -f2-)
