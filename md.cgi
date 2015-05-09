@@ -1,8 +1,8 @@
 #!/bin/bash
 # Markdown processor CGI script for OS X
 #
-# To install: 
-# 1) Copy to cgi-bin or equivalent - e.g. 
+# To install:
+# 1) Copy to cgi-bin or equivalent - e.g.
 #    sudo cp /Users/ernie/git/utilities/md.cgi /Library/WebServer/CGI-Executables/
 #    OR - run md.cgi --install
 # 2) Create shell alias for opening markdown files - see openmd() below
@@ -52,7 +52,7 @@ then
   echo "Can only serve files to localhost (REMOTE_ADDR=$REMOTE_ADDR)"
 # look for different parsers
 #
-elif which -s markdown_py 
+elif which -s markdown_py
 then
   markdown_py < "$file"
 elif which -s markdown2
