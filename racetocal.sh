@@ -49,10 +49,10 @@ get_race_title() {
 
 get_race_date() {
   url="$1"
-  returned_date="$($CURL "$url" | $PUP "$NYRR_DATE_SELECTOR" text{})" 
+  returned_date="$($CURL "$url" | $PUP "$NYRR_DATE_SELECTOR" text{})"
   if [ ! "$returned_date" ]
   then
-    returned_date="$($CURL "$url" | $PUP "$NYCRUNS_DATE_SELECTOR" text{})" 
+    returned_date="$($CURL "$url" | $PUP "$NYCRUNS_DATE_SELECTOR" text{})"
   fi
   returned_date="$(echo -n "$returned_date" | tr A-Z a-z | sed 's/start time://g' | sed 's/start\.//g')"
   returned_date="$(echo -n "$returned_date" | tr \\n \ )"
