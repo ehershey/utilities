@@ -1,11 +1,12 @@
 #!/bin/bash
+#
 # Automatically build MongoDB every night
 #
 #
 
 BUILD_DIR=/Users/ernie/git/mongo.autobuild
 REV=master
-SCONS_ARGS="-j8 --ssl all" 
+SCONS_ARGS="-j8 --ssl all"
 
 
 export PATH=$PATH:/usr/local/bin
