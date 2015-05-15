@@ -42,13 +42,13 @@ var url_configs = [
     negated: false
   },
 
-  {
+  /* {
     url: 'http://buildbot.mongodb.org:8081/builders/Windows%2032-bit/builds/-1',
     cell_selector: "div.success:contains('( 0 secs )')",
     text_finder_from_cell_jqobj: function(jqobj) { return "Windows 32-bit builder in zombie state"; },
     ignore_text: '',
     negated: false
-  },
+  },*/
 
   {
     url: 'http://downloads-distro.mongodb.org/repo/ubuntu-upstart/dists/dist/10gen/binary-amd64/',
@@ -118,12 +118,12 @@ var url_configs = [
     ignore_text: '',
     negated: true
   },
-   {
+  {
     url: 'http://buildbot.mongodb.org/buildslaves',
     cell_selector: ".offline",
     text_finder_from_cell_jqobj: function(jqobj) { return jqobj.parent().children(":first-child").text(); },
     ignore_text: '',
-    negated: false
+    negated: true
   },
   {
     url: 'http://buildbot-special.10gen.com/buildslaves',
@@ -131,8 +131,23 @@ var url_configs = [
     text_finder_from_cell_jqobj: function(jqobj) { return jqobj.parent().children(":first-child").text(); },
     // ignore_text: 'bs-e-rhel57',
     ignore_text: '',
-    negated: false
+    negated: true
   },
+  // {
+    // url: 'http://buildbot.mongodb.org/buildslaves',
+    // cell_selector: ".offline",
+    // text_finder_from_cell_jqobj: function(jqobj) { return jqobj.parent().children(":first-child").text(); },
+    // ignore_text: '',
+    // negated: false
+  // },
+  // {
+    // url: 'http://buildbot-special.10gen.com/buildslaves',
+    // cell_selector: ".offline",
+    // text_finder_from_cell_jqobj: function(jqobj) { return jqobj.parent().children(":first-child").text(); },
+    // // ignore_text: 'bs-e-rhel57',
+    // ignore_text: '',
+    // negated: false
+  // },
   {
     url: 'http://frau.ernie.org/',
     cell_selector: "body:contains(frau.ernie.org)",
