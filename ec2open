@@ -1,0 +1,5 @@
+#!/bin/bash
+REGION=us-east-1
+SORT=desc:Name
+SEARCH="$1"
+open https://console.aws.amazon.com/ec2/v2/home?region=$REGION#Instances:search=$SEARCH;sort=$SORT
