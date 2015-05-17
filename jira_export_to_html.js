@@ -7,21 +7,21 @@ var fs = require('fs');
 
 jsdom.env ( "/dev/stdin", ["http://code.jquery.com/jquery.js"], function(errors, window) {
   var td;
-  var tds = window.document.getElementsByTagName('td'); 
-  for(var i = 0 ; i < tds.length ; i++) { 
+  var tds = window.document.getElementsByTagName('td');
+  for(var i = 0 ; i < tds.length ; i++) {
     td = tds[i];
     check_adjust_cell(window,td);
   }
 
   var th;
-  var ths = window.document.getElementsByTagName('th'); 
-  for(var i = 0 ; i < ths.length ; i++) { 
+  var ths = window.document.getElementsByTagName('th');
+  for(var i = 0 ; i < ths.length ; i++) {
     th = ths[i];
     check_adjust_cell(window,th);
   }
 
   console.log(window.document.innerHTML);
-}); 
+});
 
 
 // check if a cell is a header or normal table cell for a jira ticket description.
