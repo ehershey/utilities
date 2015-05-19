@@ -54,9 +54,11 @@ input_2014_2013_diff = 0
 input_2013_2014_diff = 0
 surplus_today = 0
 surplus_yesterday = 0
+surplus_2days = 0
 surplus_2014 = 0
 surplus_today_2014_diff = 0
 surplus_yesterday_2014_diff = 0
+surplus_2days_2014_diff = 0
 surplus_2015_total = 0
 input_2015 = 0
 input_2015_total = 0
@@ -119,6 +121,7 @@ units_average_2days = os.popen("head -3 %s | tail -2 | cut -f10 -d, | awk '{ tot
 
 surplus_today = float(input_today) - (float(units_today) + resting_daily_calories)
 surplus_yesterday = float(input_yesterday) - (float(units_yesterday) + resting_daily_calories)
+surplus_2days = (surplus_today + surplus_yesterday ) / 2
 surplus_2014 = float(input_2014) - (float(units_average_2014) + resting_daily_calories)
 surplus_2015 = float(input_2015) - (float(units_average_2015) + resting_daily_calories)
 surplus_2015_total = float(input_2015_total) - (float(units_2015_total) + resting_daily_calories * int(day_count_2015))
@@ -126,6 +129,7 @@ surplus_2015_2014_diff = round(surplus_2015 - surplus_2014, 2)
 
 surplus_today_2014_diff = round(surplus_2014 - surplus_today, 2)
 surplus_yesterday_2014_diff = round(surplus_2014 - surplus_yesterday, 2)
+surplus_2days_2014_diff = round(surplus_2014 - surplus_2days, 2)
 
 units_today_2013_diff = float(units_today) - float(units_average_2013)
 units_today_2014_diff = float(units_today) - float(units_average_2014)
@@ -147,15 +151,20 @@ if units_today_2013_diff > 0:
 else:
     placeholder['today_class'] = "negative_diff"
 
-if surplus_today < 0:
+if surplus_today < surplus_2014:
     placeholder['surplus_class'] = "positive_diff"
 else:
     placeholder['surplus_class'] = "negative_diff"
 
-if surplus_yesterday < 0:
+if surplus_yesterday < surplus_2014:
     placeholder['surplus_yesterday_class'] = "positive_diff"
 else:
     placeholder['surplus_yesterday_class'] = "negative_diff"
+
+if surplus_2days < surplus_2014:
+    placeholder['surplus_2days_class'] = "positive_diff"
+else:
+    placeholder['surplus_2days_class'] = "negative_diff"
 
 if surplus_2015_2014_diff > 0:
     placeholder['surplus_2015_class'] = "negative_diff"
@@ -219,8 +228,10 @@ placeholder['surplus_today'] = surplus_today
 placeholder['surplus_2014'] = surplus_2014
 placeholder['surplus_2015'] = surplus_2015
 placeholder['surplus_yesterday'] = surplus_yesterday
+placeholder['surplus_2days'] = surplus_2days
 placeholder['surplus_today_2014_diff'] = surplus_today_2014_diff
 placeholder['surplus_yesterday_2014_diff'] = surplus_yesterday_2014_diff
+placeholder['surplus_2days_2014_diff'] = surplus_2days_2014_diff
 placeholder['surplus_2015_2014_diff'] = surplus_2015_2014_diff
 placeholder['surplus_2015_total'] = surplus_2015_total
 
