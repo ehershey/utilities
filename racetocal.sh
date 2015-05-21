@@ -3,10 +3,14 @@
 # Add Race to calendar
 #
 NYRR_TITLE_SELECTOR="h2.title"
-NYCRUNS_TITLE_SELECTOR=".race-display-name"
 NYRR_DATE_SELECTOR="p.full-width span"
+
+NYCRUNS_TITLE_SELECTOR=".race-display-name"
 NYCRUNS_DATE_SELECTOR=".race-display-date"
 NYCRUNS_ADDRESS_SELECTOR=".race-display-address"
+
+RNR_DATE_SELECTOR="h2:contains(\"General Info\") + p + p"
+RNR_TITLE_SELECTOR="h2:contains(\"General Info\") + p"
 
 set -o nounset
 
@@ -37,6 +41,11 @@ get_race_title() {
     returned_title="$($CURL "$url" | $PUP "$NYCRUNS_TITLE_SELECTOR" text{})"
   fi
 
+  if [ ! "$returned_title" ]
+  then
+    returned_title="$($CURL "$url" | $PUP "$RNR_TITLE_SELECTOR" text{})"
+  fi
+
   # Trim trailing whitespace
   #
   returned_title="$(echo -n "$returned_title" | sed 's/[ 	]*$//' )"
@@ -54,6 +63,12 @@ get_race_date() {
   then
     returned_date="$($CURL "$url" | $PUP "$NYCRUNS_DATE_SELECTOR" text{})"
   fi
+
+  if [ ! "$returned_date" ]
+  then
+    returned_date="$($CURL "$url" | $PUP "$RNR_DATE_SELECTOR" text{})"
+  fi
+
   returned_date="$(echo -n "$returned_date" | tr A-Z a-z | sed 's/start time://g' | sed 's/start\.//g')"
   returned_date="$(echo -n "$returned_date" | tr \\n \ )"
   returned_date="$(echo -n "$returned_date" | sed 's/half marathon starts at//g')"
