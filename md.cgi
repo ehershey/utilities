@@ -12,6 +12,7 @@ if [ "$1" -a "$1" = "--install" ]
 then
   set -x
   sudo cp $0 /Library/WebServer/CGI-Executables/
+  sudo apachectl start
   set +x
   tempfile=$(mktemp /tmp/openmd.XXXXXX)
   cat >>$tempfile <<-'EOF'
