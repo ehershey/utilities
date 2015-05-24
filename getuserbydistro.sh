@@ -1,5 +1,5 @@
-getuserbydistro () 
-{ 
+getuserbydistro ()
+{
     distro="$1";
     if echo $distro | grep windows > /dev/null 2>&1
     then
