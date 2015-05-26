@@ -20,7 +20,13 @@ OPENSENSORSDEVICEID=1378
 OPENSENSORSPASSWORD="$(cat $(dirname $0)/pi-opensensors-password.txt)"
 OPENSENSORSTOPIC="/users/ehershey/my/big/red/button"
 
-HOSTNAME="$1"
+HOSTNAME=${1:-""}
+
+if [ ! "$HOSTNAME" ]
+then
+  echo "Usage: $0 <pi hostname or ip address>"
+  exit 2
+fi
 
 ssh-copy-id pi@$HOSTNAME
 
