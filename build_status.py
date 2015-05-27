@@ -1,14 +1,22 @@
 #!/usr/bin/python
 
+import argparse
 import requests
 import sys
 
-URL = 'https://evergreen.mongodb.com/json/timeline/mongodb-mongo-master?limit=1&skip=0'
+URL = 'https://evergreen.mongodb.com/json/timeline/mongodb-mongo-master?limit=1&skip=%s'
 
-response = requests.get(URL)
-data = response.json()
 
 def main():
+    parser = argparse.ArgumentParser(description='Build Status')
+    parser.add_argument('--skip-commits','-s', default = 0, help='Commits to skip');
+    args = parser.parse_args()
+
+    skip = args.skip_commits
+
+    response = requests.get(URL % skip)
+    data = response.json()
+
     colorprint(bcolors.BOLD, "Build Variant,Status, Total, Success Count, Failed count")
     for version in data['Versions']:
         builds = version['Builds']
