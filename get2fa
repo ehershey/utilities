@@ -1,0 +1,28 @@
+#!/bin/bash
+
+set -o nounset
+
+LAST_ENTRY_FILE=~/.2fa-last.txt
+source ~/.secret_2fa
+
+if [ -e "$LAST_ENTRY_FILE" ]
+then
+  last_entry=$(cat $LAST_ENTRY_FILE)
+  echo "Found last entry..."
+else
+  last_entry=""
+fi
+
+new_entry=""
+
+echo -n "Generating new 2fa password"
+while [[ "$new_entry" == "$last_entry" || ! "$new_entry" ]]
+do
+  echo -n "."
+  new_entry=$(oathtool --totp -b $SECRET_2FA)
+done
+echo
+
+echo $new_entry
+echo $new_entry > $LAST_ENTRY_FILE
+echo $new_entry | pbcopy
