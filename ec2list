@@ -15,7 +15,13 @@ fi
 
 tempfile=$(mktemp /tmp/ec2list.XXXXXX)
 tempfile2=$(mktemp /tmp/ec2list.XXXXXX)
-cache_run 300 "aws ec2 describe-instances | format_aws_json.js" $AWS_ACCESS_KEY_ID > $tempfile
+
+regions=$(cache_run 9999999 "aws ec2 describe-regions  --query Regions[*].RegionName --output text" $AWS_ACCESS_KEY_ID)
+for region in $regions
+do
+  cache_run 300 "aws --region $region ec2 describe-instances | format_aws_json.js" $AWS_ACCESS_KEY_ID >> $tempfile &
+done
+wait
 while [ "$1" ]
 do
   cat "$tempfile" | grep -i "$1" > "$tempfile2"
