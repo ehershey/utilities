@@ -66,7 +66,7 @@ def main():
                 elif task['status'] == 'failed':
                     build_variant_info['failed_count'] = build_variant_info['failed_count'] + 1
 
-    for build_variant in build_variant_map.keys():
+    for build_variant in sorted(build_variant_map.keys()):
 
         build_variant_info = build_variant_map[build_variant]
 

@@ -37,6 +37,12 @@ color_map = {
     'white': (255, 255, 255),
 }
 
+def adjust_color(color, dim_factor=0.10):
+    r, g, b = color
+    h, s, v = colorsys.rgb_to_hsv(r / 256.0, g / 256.0, b / 256.0)
+    r, g, b = colorsys.hsv_to_rgb(h, s, v * dim_factor)
+    return int(r * 256), int(g * 256), int(b * 256)
+
 
 if __name__ == "__main__":
 
@@ -44,6 +50,12 @@ if __name__ == "__main__":
 
     for color in sys.argv[1:]:
         print("sending color: %s" % color)
-        r, g, b = color_map[color]
+        c = color_map[color]
+        print("c: ")
+        print(c)
+        c = adjust_color(c)
+        print("c: ")
+        print(c)
+	r, g, b = c
         bt.sendPixel(r, g, b)
     bt.show()
