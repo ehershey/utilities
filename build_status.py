@@ -22,8 +22,8 @@ def main():
     parser = argparse.ArgumentParser(description='Build Status')
     parser.add_argument('--verbose','-v', default = False, action='store_true', help='Display info about processing');
     parser.add_argument('--push-only','-p', default = False, action='store_true', help='Only display builds with push tasks');
-    parser.add_argument('--skip-commits','-s', default = 0, help='Commits to skip');
-    parser.add_argument('--include-commits','-i', default = 1, help='Commits to include');
+    parser.add_argument('--skip-commits','-s', default = 0, help='How many commits to skip');
+    parser.add_argument('--include-commits','-i', default = 1, help='How many commits to include');
     args = parser.parse_args()
 
     skip = args.skip_commits
