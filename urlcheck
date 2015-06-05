@@ -3,7 +3,7 @@
 # Pull URL's out of input and verify them with HEAD HTTP requests
 #
 #
-# Usage: 
+# Usage:
 #
 # cat <file> | urlcheck
 #
