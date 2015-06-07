@@ -2,21 +2,21 @@ Setting up access to the Moves API (https://dev.moves-app.com/)
 
 1) Set $CLIENT_ID and $CLIENT_SECRET from https://dev.moves-app.com/apps/8fIA4X85c3PUf5a4szvc9t7A3pvhU0O8/edit
 
-2) Visit in a browser: 
+2) Visit in a browser:
 #https://api.moves-app.com/oauth/v1/authorize?response_type=code&client_id=<client_id>&scope=<scope>
 open "https://api.moves-app.com/oauth/v1/authorize?response_type=code&client_id=$CLIENT_ID&scope=activity%20location"
 
 3) User will see code and enter it into app
 
-4) They'll get redirected to URL like this: 
+4) They'll get redirected to URL like this:
 
 http://moves.ernie.org/redirect?code=xxxxxxxxxxx&state=
 
-5) Pull code out, set to $AUTH_CODE and run: 
+5) Pull code out, set to $AUTH_CODE and run:
 
 curl  --data "grant_type=authorization_code&code=$AUTH_CODE&client_id=$CLIENT_ID&client_secret=$CLIENT_SECRET&redirect_uri=http://moves.ernie.org/redirect" "https://api.moves-app.com/oauth/v1/access_token"
 
-# response looks like: 
+# response looks like:
 {"access_token":"xxxxx","token_type":"bearer","expires_in":15551999,"refresh_token":"yyyyy","user_id":zzzzzzzzz}
 
 6) Set access token to $MOVES_ACCESS_TOKEN
