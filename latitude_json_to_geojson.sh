@@ -23,7 +23,7 @@
 #    "altitude" : 1
 #  }
 #
-# Import it into mongodb to look like: 
+# Import it into mongodb to look like:
 # {
 #   _id: blah,
 #   loc : { type : "Point" ,
@@ -34,10 +34,10 @@
 #   entry_source: "latitude",
 #   accuracy: 5,
 # }
-# 
+#
 # latitude_json_to_geojson.sh "Latitude import" <~/Dropbox/Misc/LocationHistory.json | mongoimport --db ernie_org --collection gps_log --drop --stopOnError
 
-if [ "$1" ] 
+if [ "$1" ]
 then
   entry_source_sed="sed 's/}$/, entry_source: \"$1\"}/g'"
 else
