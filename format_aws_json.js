@@ -4,7 +4,7 @@
 // Example usage:
 // aws ec2 describe-instances --filters '[{"name":"tag:Name","values":["*test_rhel*"]}, { "name": "tag:username", "values": ["Ernie Hershey"]}]'    | ./format_aws_json.js
 //
-// aws ec2 describe-instances --filters "Name=instance-state-name,Values=running" | ~/git/utilities/format_aws_json.js  
+// aws ec2 describe-instances --filters "Name=instance-state-name,Values=running" | ~/git/utilities/format_aws_json.js
 
 // read json on stdin into memory
 //
@@ -31,14 +31,14 @@ process.stdin.on('end', function() {
   var incoming_string = stdin_chunks.join("");
   var incoming_json = JSON.parse(incoming_string);
 
-  incoming_json.Reservations.forEach(function(reservation) { 
-      reservation.Instances.forEach(function(instance) { 
+  incoming_json.Reservations.forEach(function(reservation) {
+      reservation.Instances.forEach(function(instance) {
 
         var instance_tags = {};
         if(!instance.Tags) { instance.Tags = [] }
 
-        instance.Tags.forEach(function(tag) { 
-          output_tags.forEach(function(output_tag) { 
+        instance.Tags.forEach(function(tag) {
+          output_tags.forEach(function(output_tag) {
             output_tag = output_tag.toLowerCase();
             if(tag.Key.toLowerCase() === output_tag) {
               instance_tags[output_tag] = tag.Value;
@@ -48,10 +48,10 @@ process.stdin.on('end', function() {
 
 
         // to track whether to print a comma
-        // 
-        var printed_field = false; 
+        //
+        var printed_field = false;
 
-        output_fields.forEach(function(output_field) { 
+        output_fields.forEach(function(output_field) {
           if(!instance[output_field]) { instance[output_field] = ''; }
           if(printed_field) {
             stdout_chunks[stdout_chunks.length] = ","
@@ -74,7 +74,7 @@ process.stdin.on('end', function() {
           printed_field = true;
         });
 
-        output_tags.forEach(function(output_tag) { 
+        output_tags.forEach(function(output_tag) {
           output_tag = output_tag.toLowerCase();
           if(!instance_tags[output_tag]) { instance_tags[output_tag] = ''; }
           stdout_chunks[stdout_chunks.length] = ","
@@ -87,24 +87,24 @@ process.stdin.on('end', function() {
 });
 
 // to track whether to print a comma
-// 
-var printed_field = false; 
-output_fields.forEach(function(output_field) { 
+//
+var printed_field = false;
+output_fields.forEach(function(output_field) {
   if(printed_field) {
     process.stdout.write(",");
   }
   process.stdout.write(output_field);
-  printed_field = true; 
+  printed_field = true;
 });
 
-output_tags.forEach(function(output_tag) { 
+output_tags.forEach(function(output_tag) {
   process.stdout.write(",");
   process.stdout.write(output_tag);
 });
 process.stdout.write("\n");
 
 var signals = ['SIGINT', 'SIGPIPE','SIGHUP','SIGTERM' ]
-for(var i = 0 ; i < signals.length ; i++) { 
+for(var i = 0 ; i < signals.length ; i++) {
   process.on(signals[i], function() {
     console.log('Got ' + signal);
   });
