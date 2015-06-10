@@ -2,7 +2,7 @@
 // Format aws ec2 describe-images output into csv data - image_name, name, description
 //
 // Example usage:
-// aws ec2 describe-images --owner self | ./format_aws_json.js 
+// aws ec2 describe-images --owner self | ./format_aws_json.js
 //
 
 var stdin_chunks = []
@@ -24,13 +24,13 @@ process.stdin.on('end', function() {
   var incoming_string = stdin_chunks.join("");
   var incoming_json = JSON.parse(incoming_string);
 
-  incoming_json.Images.forEach(function(image) { 
+  incoming_json.Images.forEach(function(image) {
 
     // to track whether to print a comma
-    // 
-    var printed_field = false; 
+    //
+    var printed_field = false;
 
-    output_fields.forEach(function(output_field) { 
+    output_fields.forEach(function(output_field) {
       if(!image[output_field]) { image[output_field] = ''; }
       if(printed_field) {
         stdout_chunks[stdout_chunks.length] = ","
@@ -45,20 +45,20 @@ process.stdin.on('end', function() {
 });
 
 // to track whether to print a comma
-// 
-var printed_field = false; 
-output_fields.forEach(function(output_field) { 
+//
+var printed_field = false;
+output_fields.forEach(function(output_field) {
   if(printed_field) {
     process.stdout.write(",");
   }
   process.stdout.write(output_field);
-  printed_field = true; 
+  printed_field = true;
 });
 
 process.stdout.write("\n");
 
 var signals = ['SIGINT', 'SIGPIPE','SIGHUP','SIGTERM' ]
-for(var i = 0 ; i < signals.length ; i++) { 
+for(var i = 0 ; i < signals.length ; i++) {
   process.on(signals[i], function() {
     console.log('Got ' + signal);
   });
