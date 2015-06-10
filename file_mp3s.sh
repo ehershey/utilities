@@ -2,7 +2,7 @@
 # usage: file_mp3s.sh <source> <target>
 #
 #
-# for example: 
+# for example:
 #
 # file_mp3s.sh [ --nocache ] "/cygdrive/x/LCD Soundsystem" /cygdrive/x
 #
@@ -56,8 +56,8 @@ echo "total_files: $total_files"
 
 i=0
 while read file
-do 
-  echo "examining $file" 
+do
+  echo "examining $file"
   i=`expr $i + 1`
   echo "($i of $total_files)"
   newfile="`cache_run 86400 \"generate_normalized_mp3_path.sh  \\\"$file\\\"\"`"
@@ -71,11 +71,11 @@ do
   lcnewfile="`echo \"$newfile\" | tr A-Z a-z | sed 's#//#/#g'`"
   echo "file: >$file<"
   echo "newfile: >$newfile<"
-  if [ "$lcfile" = "$lcnewfile" ] 
-  then 
+  if [ "$lcfile" = "$lcnewfile" ]
+  then
     echo "file is already in generated path"
     continue
-  else  
+  else
     ls -l "$file" "$newfile"  2>/dev/null
     newdir="`dirname \"$newfile\"`"
     if [ ! -e "$newdir" ]
@@ -85,10 +85,10 @@ do
     if [ ! -e "$newfile" ]
     then
       echo moving file
-      echo mv "$file" "$newfile" 
-      if [ ! "$dryrun" ] 
+      echo mv "$file" "$newfile"
+      if [ ! "$dryrun" ]
       then
-        mv "$file" "$newfile" 
+        mv "$file" "$newfile"
       fi
     else
       oldsize="`ls -l \"$file\" | awk '{print $5}'`"
@@ -97,7 +97,7 @@ do
       then
         echo "files are same size, deleting old version"
         echo rm "$file"
-        if [ ! "$dryrun" ] 
+        if [ ! "$dryrun" ]
         then
           rm "$file"
         fi
@@ -107,7 +107,7 @@ do
         then
           echo "deleting smaller file ($file)"
           echo rm "$file"
-          if [ ! "$dryrun" ] 
+          if [ ! "$dryrun" ]
           then
             rm "$file"
           fi
@@ -116,12 +116,12 @@ do
         then
           echo "deleting smaller file ($newfile)"
           echo rm "$newfile"
-          if [ ! "$dryrun" ] 
+          if [ ! "$dryrun" ]
           then
               rm "$newfile"
           fi
           echo mv "$file" "$newfile"
-          if [ ! "$dryrun" ] 
+          if [ ! "$dryrun" ]
           then
             mv "$file" "$newfile"
           fi
