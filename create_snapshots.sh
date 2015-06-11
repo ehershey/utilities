@@ -2,7 +2,7 @@
 # create snapshots for every volume on every ec2 instance based on the instance name
 #
 # Requires the AWS CLI tools: http://aws.amazon.com/cli/
-# 
+#
 
 # e.g. dev-apache-*.ernie.com
 namefilter="$1"
@@ -22,7 +22,7 @@ do
         script=$(basename $0)
         user="$USER"
         host=$(hostname)
-        description="Created with $script by $user on host $host for ec2 instance $instance_id" 
+        description="Created with $script by $user on host $host for ec2 instance $instance_id"
         aws ec2 create-snapshot --volume-id $volume_id --description "$description" | tee "$tempfile"
 
         snapshot_id=$(grep '"SnapshotId": "snap-' "$tempfile" | cut -f4 -d\")
