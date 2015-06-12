@@ -3,6 +3,11 @@
 INTERFACE=en0
 WIFIDOC=~/Dropbox//PlainText/wifi.txt
 network=$(networksetup -getairportnetwork $INTERFACE | cut -f2- -d: | sed 's/^ *//')
+echo "Adding to $WIFIDOC"
+if grep -q "$network" "$WIFIDOC"
+then
+  echo "WARNING: Appears to be duplicate"
+fi
 echo "Network appears to be: $network"
 echo -n "Enter password: "
 read password
