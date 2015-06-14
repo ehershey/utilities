@@ -2,7 +2,7 @@
 #
 #
 # Post my total number of tasks from Todoist to Numerous, including overdue
-# tasks and anything due today. 
+# tasks and anything due today.
 #
 # See also:
 # http://www.todoist.com/
