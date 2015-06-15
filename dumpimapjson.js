@@ -42,10 +42,10 @@ imap.once('ready', function() {
       if (err) die(err);
       var index = 0;
       var f = imap.fetch(results, { headers: true, bodies: 'HEADER.FIELDS (FROM TO SUBJECT DATE)', struct: true });
-      f.on('message', function(msg, seqno) { 
+      f.on('message', function(msg, seqno) {
         index++;
         var this_index = index;
-        var message_output = {msg: msg, seqno: seqno, index: this_index}; 
+        var message_output = {msg: msg, seqno: seqno, index: this_index};
         process.stderr.write('.');
         // process.stderr.write('starting message no. ' + this_index + "\n");
         msg.on('body', function(stream, info) {
