@@ -1,4 +1,8 @@
 #!/bin/bash
+#
+# Open the ec2 instance list page of the AWS console in a web browser, optionally searching
+# for the first argument to the script
+#
 REGION=us-east-1
 SORT=desc:Name
 SEARCH="$1"
