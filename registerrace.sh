@@ -70,7 +70,7 @@ echo "new_title: $new_title"
 new_description="$(echo "$description" | sed "s#Not registered as of ......[0-9]*#Registered on $DATE#" | grep . | tr \\n \ )"
 echo "new_description: $new_description"
 
-echo -e "t\n$new_title\nd\n$new_description\ns\nq" 
+echo -e "t\n$new_title\nd\n$new_description\ns\nq"
 echo -e "t\n$new_title\nd\n$new_description\ns\nq" | gcalcli --cal "$CALENDAR" edit "\"$title\""
 
 #output="$(gcalcli add --cal "$CALENDAR" --title "$TITLE" --when "$DATE" --duration "$DURATION" --description "$URLNot registered as of $TODAY" --where "$LOCATION" --reminder "$REMINDER" --details url)"
