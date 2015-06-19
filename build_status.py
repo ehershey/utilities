@@ -21,50 +21,95 @@ URL = 'https://evergreen.mongodb.com/json/timeline/mongodb-mongo-master?limit=%s
 def main():
     parser = argparse.ArgumentParser(description='Build Status')
     parser.add_argument('--verbose','-v', default = False, action='store_true', help='Display info about processing');
-    parser.add_argument('--push-only','-p', default = False, action='store_true', help='Only display builds with push tasks');
+    parser.add_argument('--push-only','-p', default = False, action='store_true', help='Only display information from builds with push tasks');
     parser.add_argument('--skip-commits','-s', default = 0, help='How many commits to skip');
-    parser.add_argument('--include-commits','-i', default = 1, help='How many commits to include');
+    parser.add_argument('--ignore-inactive','-I', default = False, action='store_true', help='Ignore any inactive versions');
+    parser.add_argument('--include-commits','-i', default = 1, type=int, help='How many commits to include');
     args = parser.parse_args()
 
-    skip = args.skip_commits
-    include = args.include_commits
+    total_to_skip = args.skip_commits
+    total_to_include = args.include_commits
 
-    url = URL % (include, skip)
+    ignore_inactive = args.ignore_inactive
 
-    if args.verbose:
-        print("Requesting %s" % url)
+    # track how many unignored versions we have information for
+    #
+    unignored_versions_seen = 0
 
-    response = requests.get(url)
-
-    data = response.json()
+    versions_skipped = 0
+    versions_included = 0
 
     build_variant_map = {}
 
     colorprint(bcolors.BOLD, "Build Variant,Status, Total, Success Count, Failed count, Incomplete count")
 
-    for version in data['Versions']:
-        builds = version['Builds']
-        for build in builds:
-            build = build['Build']
+    limit = 10
+    skip = 0
 
-            if build['display_name'] in build_variant_map:
-                build_variant_info = build_variant_map[build['display_name']]
-            else:
-                build_variant_info = { "success_count": 0, "failed_count": 0, "task_count": 0, "contains_push_task": False}
-                build_variant_map[build['display_name']] = build_variant_info
+    while versions_included < total_to_include:
 
-            tasks = build['tasks']
-            tasks = build['tasks']
-            build_variant_info['task_count'] += len(tasks)
+      url = URL % (limit, skip)
 
-            for task in tasks:
+      skip += limit
 
-                if task['display_name'] == 'push':
-                    build_variant_info['contains_push_task'] = True
-                if task['status'] == 'success':
-                    build_variant_info['success_count'] = build_variant_info['success_count'] + 1
-                elif task['status'] == 'failed':
-                    build_variant_info['failed_count'] = build_variant_info['failed_count'] + 1
+      if args.verbose:
+          print("Requesting %s" % url)
+
+      response = requests.get(url)
+
+      data = response.json()
+      for version in data['Versions']:
+          if args.verbose:
+            print("versions_included: %s" % versions_included)
+            print("total_to_include: %s" % total_to_include)
+            print("versions_included < total_to_include: %s" % (versions_included < total_to_include))
+          is_version_active = False
+          builds = version['Builds']
+
+          if versions_included >= total_to_include:
+            break
+
+          # Iterate through all builds once to determine if the version is active
+          #
+          for build in builds:
+              build = build['Build']
+
+              if "activated" in build and build['activated'] != False:
+                is_version_active = True
+
+          if ignore_inactive and not is_version_active:
+            # ignore this versions
+            next
+
+          if versions_skipped < total_to_skip:
+            versions_skipped += 1
+            next
+
+          versions_included += 1
+
+
+          for build in builds:
+              build = build['Build']
+
+
+              if build['display_name'] in build_variant_map:
+                  build_variant_info = build_variant_map[build['display_name']]
+              else:
+                  build_variant_info = { "success_count": 0, "failed_count": 0, "task_count": 0, "contains_push_task": False}
+                  build_variant_map[build['display_name']] = build_variant_info
+
+              tasks = build['tasks']
+              tasks = build['tasks']
+              build_variant_info['task_count'] += len(tasks)
+
+              for task in tasks:
+
+                  if task['display_name'] == 'push':
+                      build_variant_info['contains_push_task'] = True
+                  if task['status'] == 'success':
+                      build_variant_info['success_count'] = build_variant_info['success_count'] + 1
+                  elif task['status'] == 'failed':
+                      build_variant_info['failed_count'] = build_variant_info['failed_count'] + 1
 
     for build_variant in sorted(build_variant_map.keys()):
 
