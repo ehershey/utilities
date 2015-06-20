@@ -22,7 +22,7 @@ def main():
     parser = argparse.ArgumentParser(description='Build Status')
     parser.add_argument('--verbose','-v', default = False, action='store_true', help='Display info about processing');
     parser.add_argument('--push-only','-p', default = False, action='store_true', help='Only display information from builds with push tasks');
-    parser.add_argument('--skip-commits','-s', default = 0, help='How many commits to skip');
+    parser.add_argument('--skip-commits','-s', default = 0, type=int, help='How many commits to skip');
     parser.add_argument('--ignore-inactive','-I', default = False, action='store_true', help='Ignore any inactive versions');
     parser.add_argument('--include-commits','-i', default = 1, type=int, help='How many commits to include');
     args = parser.parse_args()
@@ -79,11 +79,18 @@ def main():
 
           if ignore_inactive and not is_version_active:
             # ignore this versions
-            next
+            continue
+
+          if args.verbose:
+            print("versions_skipped: %s" % versions_skipped)
+            print("total_to_skip: %s" % total_to_skip)
+            print("versions_skipped < total_to_skip: %s" % (versions_skipped < total_to_skip))
 
           if versions_skipped < total_to_skip:
             versions_skipped += 1
-            next
+            if args.verbose:
+                print("Skipping one version")
+            continue
 
           versions_included += 1
 
