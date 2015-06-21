@@ -1,3 +1,10 @@
+# numerousapp.py
+#
+# Python interface to Numerous App metrics
+#
+#
+# By Ernie Hershey
+#
 import datetime
 import json
 import re
