@@ -7,7 +7,7 @@
 set nounset
 
 colors=""
-$(dirname $0)/build_status.py | (while read build
+$(dirname $0)/build_status.py --ignore-inactive| (while read build
 do
 	status=$(echo "$build" | cut -f2 -d,)
 	build_variant_name=$(echo "$build" | cut -f1 -d,)
