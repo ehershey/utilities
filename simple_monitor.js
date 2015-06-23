@@ -119,6 +119,14 @@ var url_configs = [
     negated: false
   },
   {
+    url: 'https://logkeeper.mongodb.org/build/557b4c96ead33c12e0040eeb/test/557b4cddead33c12e004161e',
+    cell_selector: "body:contains({})",
+    text_finder_from_cell_jqobj: function(jqobj) { return "Unused"; },
+    ignore_text: '',
+    negated: false
+  },
+
+  {
     url: 'http://buildlogs.mongodb.org/',
     cell_selector: "body",
     text_finder_from_cell_jqobj: function(jqobj) { return "Unused"; },
