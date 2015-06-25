@@ -2,6 +2,7 @@
 #
 # Update BlinkyTape LED's on the command line
 #
+# Usage: python display_color_led.py {red/green/blue/blank/white} [ {red/green/blue/blank/white}  [ {red/green/blue/blank/white} ... ] ]
 #
 import time
 import urllib
