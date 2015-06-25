@@ -2,7 +2,7 @@
 #
 # Update BlinkyTape LED's on the command line
 #
-# Usage: python display_color_led.py {red/green/blue/blank/white} [ {red/green/blue/blank/white}  [ {red/green/blue/blank/white} ... ] ]
+# Usage: python display_color_led.py {red/green/yellow/blue/blank/white} [ {red/green/yellow/blue/blank/white}  [ {red/green/yellow/blue/blank/white} ... ] ]
 #
 import time
 import urllib
@@ -33,6 +33,7 @@ def connect():
 color_map = {
     'red': (255, 0, 0),
     'green': (0, 255, 0),
+    'yellow': (255, 255, 0),
     'blue': (0, 0, 255),
     'blank': (0, 0, 0),
     'white': (255, 255, 255),
