@@ -41,7 +41,7 @@ def main():
 
     build_variant_map = {}
 
-    colorprint(bcolors.BOLD, "Build Variant,Status, Total, Success Count, Failed count, Incomplete count")
+    colorprint(bcolors.BOLD, "Build Variant,Status, Total, Success Count, Failed count, Started count, Incomplete count")
 
     limit = 10
     skip = 0
@@ -102,21 +102,35 @@ def main():
               if build['display_name'] in build_variant_map:
                   build_variant_info = build_variant_map[build['display_name']]
               else:
-                  build_variant_info = { "success_count": 0, "failed_count": 0, "task_count": 0, "contains_push_task": False}
+                  build_variant_info = { "success_count": 0,
+                                         "failed_count": 0,
+                                         "started_count": 0,
+                                         "task_count": 0,
+                                         "contains_push_task": False}
+
                   build_variant_map[build['display_name']] = build_variant_info
 
               tasks = build['tasks']
-              tasks = build['tasks']
               build_variant_info['task_count'] += len(tasks)
 
-              for task in tasks:
+              # Task status can be:
+              # * failed
+              # * started
+              # * dispatched
+              # * success
 
-                  if task['display_name'] == 'push':
-                      build_variant_info['contains_push_task'] = True
-                  if task['status'] == 'success':
-                      build_variant_info['success_count'] = build_variant_info['success_count'] + 1
-                  elif task['status'] == 'failed':
-                      build_variant_info['failed_count'] = build_variant_info['failed_count'] + 1
+              for task in tasks:
+                if args.verbose:
+                  print("task['status']: %s" % task['status'])
+
+                if task['display_name'] == 'push':
+                    build_variant_info['contains_push_task'] = True
+                if task['status'] == 'success':
+                    build_variant_info['success_count'] = build_variant_info['success_count'] + 1
+                elif task['status'] == 'failed':
+                    build_variant_info['failed_count'] = build_variant_info['failed_count'] + 1
+                elif task['status'] == 'started':
+                    build_variant_info['started_count'] = build_variant_info['started_count'] + 1
 
     for build_variant in sorted(build_variant_map.keys()):
 
@@ -134,16 +148,28 @@ def main():
 
         failed_count = build_variant_info['failed_count']
         success_count = build_variant_info['success_count']
+        started_count = build_variant_info['started_count']
         task_count = build_variant_info['task_count']
 
-        incomplete_count = task_count - failed_count - success_count
+        incomplete_count = task_count - failed_count - success_count - started_count
 
         build_status = ''
+
+        # bubbling status up from tasks to the whole build consists of:
+        #
+        # 1) If any tasks are failed, status is failed (red)
+        # 2) If any tasks are started, status is started (yellow)
+        # 3) If any tasks are green, status is success (green)
+        # 4) status is incomplete (white)
+
 
         if failed_count > 0:
             build_status = 'failed'
             line_start = bcolors.RED
-        elif success_count == task_count:
+        elif started_count > 0:
+            build_status = 'started'
+            line_start = bcolors.YELLOW
+        elif success_count > 0:
             build_status = 'success'
             line_start = bcolors.GREEN
         else:
@@ -160,12 +186,15 @@ def main():
         line += ','
         line += str(failed_count)
         line += ','
+        line += str(started_count)
+        line += ','
         line += str(incomplete_count)
         colorprint(line_start, line)
 
 class bcolors:
     GREEN = '\033[92m'
     RED = '\033[91m'
+    YELLOW = '\033[93m'
     ENDC = '\033[0m'
     BOLD = '\033[1m'
     UNDERLINE = '\033[4m'
