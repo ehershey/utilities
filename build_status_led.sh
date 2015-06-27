@@ -20,6 +20,9 @@ do
 	elif [[ $status == "success" ]]
 	then
 		color=green
+	elif [[ $status == "started" ]]
+	then
+		color=yellow
 	elif [[ $status == "incomplete" ]]
 	then
 		color="white"
