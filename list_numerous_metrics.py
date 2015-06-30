@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# List user metrics from Numerous 
+# List user metrics from Numerous
 #
 import argparse
 import codecs
