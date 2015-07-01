@@ -1,18 +1,18 @@
 #!/bin/bash
 #
 # Given an aws instance name or other identifying information from format_aws_json.js, stop it
-# 
-# Depends on: 
+#
+# Depends on:
 # 1) cache_run executable
 # 2) ec2list executable
 # 3) awscli python package and "aws" executable
 
-# how long to cache aws info 
+# how long to cache aws info
 CACHE_SECONDS=300
 
 instance_name="$1"
 
-if [ ! "$instance_name" ] 
+if [ ! "$instance_name" ]
 then
   echo "usage: $0 <instance_name_or_info>"
   exit 2
