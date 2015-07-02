@@ -205,7 +205,7 @@ var url_configs = [
     ignore_text: '',
     negated: true
   },
-  {
+  /*{
     url: 'https://github.com/ehershey',
 
     // Date logic to get the full month name and day number of the day that was 23 hours ago,
@@ -217,7 +217,7 @@ var url_configs = [
     ignore_text: '',
     negated: true
   },
-
+*/
     {
         url: 'http://repo.mongodb.com/apt/debian/dists/wheezy/mongodb-enterprise/2.6/main/binary-amd64/',
         cell_selector: "a:contains(~rc)",
