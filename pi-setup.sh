@@ -1,13 +1,13 @@
 #!/bin/sh
 #
 #
-# Set up new Raspberry pi
+# Set up new Raspberry Pi
 #
 #
 # Usage: pi-setup.sh <hostname>
 #
-# Put wifi password in wifi-password.txt in the same directory as the script
-# Put opensensors password in pi-opensensors-password.txt in the same directory as the script
+# Requires wifi password in wifi-password.txt in the same directory as the script
+# Requires opensensors password in pi-opensensors-password.txt in the same directory as the script
 #
 
 set -o nounset
