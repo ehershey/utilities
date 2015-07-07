@@ -1,14 +1,11 @@
-ll#!/usr/bin/python
+#!/usr/bin/python
 #
 # Display Evergreen patches and patch info
 #
 # Usage:
-# show_patches.py [ --verbose ] [ --push-only ] [ --skip-commits <N> ] [ --include-commits <N> ]
+# show_patches.py [ --verbose ]
 #
-# --skip-commits is how many most recent commits to skip
-# --include-commits is how many commits to include in success/failed status
 # --verbose includes extra information like the URL being requested
-# --push-only only displays build variants containing push tasks
 #
 
 import argparse
@@ -21,15 +18,9 @@ URL = 'https://evergreen.mongodb.com/json/patches/user/ernie.hershey%4010gen.com
 def main():
     parser = argparse.ArgumentParser(description='Show Patches')
     parser.add_argument('--verbose','-v', default = False, action='store_true', help='Display info about processing');
-    parser.add_argument('--push-only','-p', default = False, action='store_true', help='Only display builds with push tasks');
-    parser.add_argument('--skip-commits','-s', default = 0, help='Commits to skip');
-    parser.add_argument('--include-commits','-i', default = 1, help='Commits to include');
     args = parser.parse_args()
 
-    skip = args.skip_commits
-    include = args.include_commits
-
-    url = URL % (include, skip)
+    url = URL
 
     if args.verbose:
         print("Requesting %s" % url)
@@ -38,7 +29,8 @@ def main():
 
     data = response.json()
 
-    build_variant_map = {}
+    print(data)
+    exit
 
     colorprint(bcolors.BOLD, "Build Variant,Status, Total, Success Count, Failed count, Incomplete count")
 
