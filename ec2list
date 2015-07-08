@@ -17,9 +17,16 @@ tempfile=$(mktemp /tmp/ec2list.XXXXXX)
 tempfile2=$(mktemp /tmp/ec2list.XXXXXX)
 
 regions=$(cache_run 9999999 "aws ec2 describe-regions  --query Regions[*].RegionName --output text" $AWS_ACCESS_KEY_ID)
+printed_header=""
 for region in $regions
 do
-  cache_run 300 "aws --region $region ec2 describe-instances | format_aws_json.js" $AWS_ACCESS_KEY_ID >> $tempfile &
+  if [ ! "$printed_header" ]
+    then
+      cache_run 300 "aws --region $region ec2 describe-instances | format_aws_json.js" $AWS_ACCESS_KEY_ID >> $tempfile &
+      printed_header=1
+    else
+      cache_run 300 "aws --region $region ec2 describe-instances | format_aws_json.js" $AWS_ACCESS_KEY_ID | tail -n +2 >> $tempfile &
+    fi
 done
 wait
 while [ "$1" ]
