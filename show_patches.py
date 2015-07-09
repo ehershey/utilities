@@ -29,92 +29,13 @@ def main():
 
     data = response.json()
 
-    print(data)
-    exit
-
-    colorprint(bcolors.BOLD, "Build Variant,Status, Total, Success Count, Failed count, Incomplete count")
-
-    for version in data['Versions']:
-        builds = version['Builds']
-        for build in builds:
-            build = build['Build']
-
-            if build['display_name'] in build_variant_map:
-                build_variant_info = build_variant_map[build['display_name']]
-            else:
-                build_variant_info = { "success_count": 0, "failed_count": 0, "task_count": 0, "contains_push_task": False}
-                build_variant_map[build['display_name']] = build_variant_info
-
-            tasks = build['tasks']
-            tasks = build['tasks']
-            build_variant_info['task_count'] += len(tasks)
-
-            for task in tasks:
-
-                if task['display_name'] == 'push':
-                    build_variant_info['contains_push_task'] = True
-                if task['status'] == 'success':
-                    build_variant_info['success_count'] = build_variant_info['success_count'] + 1
-                elif task['status'] == 'failed':
-                    build_variant_info['failed_count'] = build_variant_info['failed_count'] + 1
-
-    for build_variant in build_variant_map.keys():
-
-        build_variant_info = build_variant_map[build_variant]
-
-        if args.push_only and not build_variant_info['contains_push_task']:
-            continue
-
-        line=""
-        line += build_variant
-        line += ","
-
-        line_start = ''
-
-
-        failed_count = build_variant_info['failed_count']
-        success_count = build_variant_info['success_count']
-        task_count = build_variant_info['task_count']
-
-        incomplete_count = task_count - failed_count - success_count
-
-        build_status = ''
-
-        if failed_count > 0:
-            build_status = 'failed'
-            line_start = bcolors.RED
-        elif success_count == task_count:
-            build_status = 'success'
-            line_start = bcolors.GREEN
-        else:
-            build_status = 'incomplete'
-
-        if build_variant_info['contains_push_task'] and not args.push_only:
-            line_start += bcolors.BOLD
-
-        line += build_status
-        line += ','
-        line += str(task_count)
-        line += ','
-        line += str(success_count)
-        line += ','
-        line += str(failed_count)
-        line += ','
-        line += str(incomplete_count)
-        colorprint(line_start, line)
-
-class bcolors:
-    GREEN = '\033[92m'
-    RED = '\033[91m'
-    ENDC = '\033[0m'
-    BOLD = '\033[1m'
-    UNDERLINE = '\033[4m'
-
-def colorprint(color, text):
-    if color and sys.stdout.isatty():
-        sys.stdout.write(color)
-    print(text)
-    if color and sys.stdout.isatty():
-        sys.stdout.write(bcolors.ENDC)
-
+    print "Status, Time, Project, Base, Description"
+    for patch in data['UIPatches']:
+      patch=patch['Patch']
+      if patch['Activated']:
+        status = "Activated"
+      else:
+        status = "Inactive"
+      print("%s, %s, %s, %s, %s" % (status, patch['CreateTime'], patch['Project'], patch['Githash'], patch['Description']))
+    exit()
 main()
