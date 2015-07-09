@@ -163,7 +163,7 @@ var url_configs = [
     // ignore_text: '',
     // negated: false
   // },
-  {
+  /* {
     url: 'http://frau.ernie.org/',
     cell_selector: "body:contains(frau.ernie.org)",
     text_finder_from_cell_jqobj: function(jqobj) { return jqobj.text(); },
@@ -184,6 +184,7 @@ var url_configs = [
     ignore_text: '',
     negated: true
   },
+  */
   {
     url: 'http://cov1.bci.10gen.cc:8080/',
     cell_selector: "body:contains(Coverity)",
