@@ -163,7 +163,8 @@ var url_configs = [
     // ignore_text: '',
     // negated: false
   // },
-  /* {
+  /* 
+  {
     url: 'http://frau.ernie.org/',
     cell_selector: "body:contains(frau.ernie.org)",
     text_finder_from_cell_jqobj: function(jqobj) { return jqobj.text(); },
@@ -192,6 +193,7 @@ var url_configs = [
     ignore_text: '',
     negated: true
   },
+  /*
   {
     url: 'http://goeverywhere.ernie.org/get_stats.cgi',
     cell_selector: "body:contains(oldest_point_timestamp)",
@@ -206,6 +208,7 @@ var url_configs = [
     ignore_text: '',
     negated: true
   },
+  */
   {
     url: 'https://github.com/ehershey',
 
