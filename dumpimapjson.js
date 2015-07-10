@@ -1,19 +1,29 @@
 #!/usr/bin/env node
+//
+//
+//
+// Dump imap data in JSON format
+//
+// Requires "authdata.js" file exporting username and password fields.
+//
+//
+var SERVER = 'imap.gmail.com';
+
 var util = require('util');
 
 var Imap = require('imap');
 
-var since = 'January 01, 2013';
-var folder = 'UNSEEN';
-//var since = 'January 01, 2012';
-//var folder = 'ALL';
+//var since = 'January 01, 2013';
+//var folder = 'UNSEEN';
+var since = 'January 01, 2010';
+var folder = 'ALL';
 
 var authdata = require('authdata');
 
 var imap = new Imap({
   user: authdata.username,
   password: authdata.password,
-  host: 'imap.gmail.com',
+  host: SERVER,
   port: 993,
   tls: true,
   tlsOptions: { rejectUnauthorized: false }
