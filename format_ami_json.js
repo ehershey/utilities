@@ -17,7 +17,7 @@ process.stdin.on('data', function(chunk) {
 
 // json fields to include in output (case sensitive) (not tags, standard ec2 metadata)
 //
-var output_fields = [ "State", "ImageId", "Name", "State", "Architecture", "OwnerId", "KernelId" ]
+var output_fields = [ "State", "ImageId", "Name", "State", "Architecture", "OwnerId", "KernelId", "VirtualizationType" ]
 
 process.stdin.on('end', function() {
 
