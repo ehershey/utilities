@@ -4,7 +4,7 @@
 # Post weight from one year ago to Numerous
 #
 # If there's no measurement from exactly one year ago, post
-# the latest previous measurement up to <MARGIN_PREVIOUS_WEIGHT> 
+# the latest previous measurement up to <MARGIN_PREVIOUS_WEIGHT>
 # days back in time
 
 
@@ -12,8 +12,8 @@
 #
 MARGIN_PREVIOUS_WEIGHT = 14
 
-METRIC_ID = 2541720541413967188
-DIFF_METRIC_ID = 414939844104127128
+METRIC_ID = 2541720541413967188 # Weight One Year Ago
+DIFF_METRIC_ID = 414939844104127128 # Weight Today Vs. 2013
 
 import datetime
 from numerousapp import update_metric_value
@@ -24,7 +24,7 @@ def main():
   today = datetime.date.today()
 
   # Use 52 weeks ago (364 days) so days of the week match
-  # 
+  #
   one_year_ago = today - datetime.timedelta(days=364)
 
   one_year_ago_minus_margin = one_year_ago - datetime.timedelta(days = MARGIN_PREVIOUS_WEIGHT)
