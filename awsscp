@@ -1,8 +1,8 @@
 #!/bin/bash
 #
 # Given an aws instance name, scp to/from it
-# 
-# Depends on: 
+#
+# Depends on:
 # 1) ~/git/mci/config/distros.yml for usernames
 # 2) ~/.ssh/<key name>.pem with ssh private keys named after amazon key name
 # 3) cache_run executable
@@ -16,12 +16,12 @@
 # Does not support instance names with spaces in them
 #
 
-# how long to cache aws info 
+# how long to cache aws info
 CACHE_SECONDS=300
 
 . getuserbydistro.sh
 
-if [ ! "$2" ] 
+if [ ! "$2" ]
 then
   echo "usage: "
   echo "1) instance name in last arg: awsscp <localpath(s)> instance_name:[<remote_path>]"
@@ -77,7 +77,7 @@ then
   user=$(getuserbydistro "$distro")
 fi
 
-if [ ! "$user" ] 
+if [ ! "$user" ]
 then
   user=root
 fi
