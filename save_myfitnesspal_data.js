@@ -78,7 +78,7 @@ var MongoClient = mongodb.MongoClient
 
 var summaries_to_save = [];
 
-jsdom.env ( { url: full_url, headers: { "User-Agent": "node.js" }, scripts: ["http://code.jquery.com/jquery.js"], done: function(errors, window) { handler(errors, window); } });
+jsdom.env ( full_url, ["http://code.jquery.com/jquery.js"], function(errors, window) { handler(errors, window); });
 
 function handler(errors, window)
 {
@@ -87,13 +87,9 @@ function handler(errors, window)
     return;
   }
 
-  console.log(window.$("body").html());
-  var calorie_headers = window.$("thead");
-  console.log('calorie_headers.length: ' + calorie_headers.length);
   // contains(Calories) will get exercise tables and food tables
   //
   var calorie_headers = window.$("thead:contains(Foods)");
-  console.log('calorie_headers.length: ' + calorie_headers.length);
   calorie_headers.map(function(index,calorie_header) {
     var column_names = [];
     var summary_data = {};
