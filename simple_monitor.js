@@ -185,7 +185,6 @@ var url_configs = [
     ignore_text: '',
     negated: true
   },
-
   {
     url: 'http://cov1.bci.10gen.cc:8080/',
     cell_selector: "body:contains(Coverity)",
@@ -193,7 +192,6 @@ var url_configs = [
     ignore_text: '',
     negated: true
   },
-
   {
     url: 'http://goeverywhere.ernie.org/get_stats.cgi',
     cell_selector: "body:contains(oldest_point_timestamp)",
