@@ -133,6 +133,7 @@ var url_configs = [
     ignore_text: '',
     negated: true
   },
+  /*
   {
     url: 'http://buildbot.mongodb.org/buildslaves',
     cell_selector: ".offline",
@@ -148,6 +149,7 @@ var url_configs = [
     ignore_text: '',
     negated: true
   },
+  */
   // {
     // url: 'http://buildbot.mongodb.org/buildslaves',
     // cell_selector: ".offline",
