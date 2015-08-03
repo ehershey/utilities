@@ -5,7 +5,7 @@
 # List spot instance price history with caching. All arguments are case-independent grep patterns by
 # which results will be filtered.
 #
-# Depends on: 
+# Depends on:
 # 1) cache_run executable
 # 2) awscli python package and "aws" executable
 #
