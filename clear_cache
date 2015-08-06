@@ -1,5 +1,5 @@
 #!/bin/bash
-# 
+#
 # Delete all cache entries from cache_get and cache_run
 #
 find ~/.generic_cache/ -type f | xargs rm

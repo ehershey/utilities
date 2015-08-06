@@ -1,6 +1,7 @@
 #!/bin/bash
 #
-# Given an aws instance name or other identifying information from format_aws_json.js, stop it
+# Given an aws instance name or other identifying information from
+# format_aws_json.js output, stop it
 #
 # Depends on:
 # 1) cache_run executable
