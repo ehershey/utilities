@@ -1,5 +1,5 @@
 #!/bin/bash
-# 
+#
 # Rename an ec2 instance
 # Usage: rename_instance.sh <old name> <new name>
 #
