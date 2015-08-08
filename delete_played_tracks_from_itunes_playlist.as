@@ -2,9 +2,9 @@
 -- other than 0
 --
 -- This can be used to auto-prune playlists that should only contain unplayed
--- tracks. 
+-- tracks.
 --
--- After execution it will display a dialog showing the naems of tracks that 
+-- After execution it will display a dialog showing the naems of tracks that
 -- were removed.
 --
 tell application "iTunes"
