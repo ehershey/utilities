@@ -1,4 +1,7 @@
 #!/usr/bin/env python
+#
+# Run test_packages fabfile
+#
 from fabfile import  setuprepo, installpackage, verifypackage, uninstallpackage
 from fabric.api import execute
 
