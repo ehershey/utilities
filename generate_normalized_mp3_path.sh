@@ -89,14 +89,14 @@ fi
 dirname="$artist/$album"
 if [ "$track" ]
 then
-  filename=`printf "%02d " $track` 
+  filename=`printf "%02d " $track`
 fi
 filename="$filename$title.$extension"
 
 if [ "$title" -a "$artist" -a "$album" ]
 then
   echo "$dirname/$filename"
-else 
+else
   echo "Can't determine file info ($artist/$album/$title)" >&2
   if [ "$(which id3v2 2>/dev/null)" -a "$extension" = "mp3" -a ! "$noconvert" ]
   then
