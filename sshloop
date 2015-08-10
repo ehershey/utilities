@@ -1,4 +1,8 @@
 #!/bin/bash
+#
+# Loop infinitely, keeping an ssh connection open, restarting it if it exits
+#
+#
 while true
 do
   args="$*"
