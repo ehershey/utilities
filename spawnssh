@@ -1,4 +1,9 @@
 #!/bin/bash
+#
+#
+# Find spawn machinein spawn log and ssh to it
+#
+#
 
 distro="$1"
 
