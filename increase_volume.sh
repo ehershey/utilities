@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 #
-# Increase volume of audio files
+# Filter audio files, increasing their volume
 #
 #
 
