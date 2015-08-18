@@ -5,8 +5,9 @@
 import numerousapp
 import argparse
 
-parser = argparse.ArgumentParser(description='List values for a Numerous metric')
-parser.add_argument('-n', '--number', help='Number of values to retrieve', type = int, default = 10)
+parser = argparse.ArgumentParser(description='List values for Numerous metric')
+parser.add_argument('-n', '--number',
+                    help='Number of values to retrieve', type = int, default = 10)
 group = parser.add_mutually_exclusive_group(required=True)
 group.add_argument('-m', '--metric-id', help='Metric ID')
 group.add_argument('-l', '--labelsearch', help='Metric label regular expression search')
@@ -24,8 +25,6 @@ for metric_id in metric_ids:
   printed = 0
   for value in values:
       print "%s: %s" % (value['updated_pretty'], value['value'])
-      printed+= 1
+      printed += 1
       if printed > args.number:
         break
-
-
