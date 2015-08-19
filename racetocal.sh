@@ -151,8 +151,8 @@ fi
 
 
 
-expected_date="february 22, 2015 8:00 am"
-returned_date="$(get_race_date "https://nycruns.com/races/?race=nycruns-central-park-marathon-2015")"
+expected_date="february 28, 2016 8:00 am"
+returned_date="$(get_race_date "https://nycruns.com/races/?race=nycruns-central-park-marathon-2016")"
 if [ "$returned_date" != "$expected_date" ]
 then
   echo "Test command failed! Got $returned_date, expected $expected_date"
