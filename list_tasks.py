@@ -23,7 +23,7 @@ args = parser.parse_args()
 
 exclude_projects = args.exclude_projects.lower().split(",")
 
-user = todoist.login(email = todoist_auth.email, password = todoist_auth.password)
+user = todoist.login(email=todoist_auth.email, password=todoist_auth.password)
 
 if args.verbose:
     print "Filter: {0}".format(args.filter)
@@ -31,8 +31,8 @@ tasks = user.search_tasks(args.filter)
 
 for task in tasks:
     if task.project and task.project.name and \
-       task.project.name.lower() in exclude_projects:
-       continue
+        task.project.name.lower() in exclude_projects:
+        continue
     if args.verbose:
         print "project: {0}".format(task.project.name)
-    print task.content
+    print task.content.encode('ascii', 'ignore')
