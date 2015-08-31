@@ -34,3 +34,4 @@ temp*.js
 monitor_iphone_env.sh
 wifi-password.txt
 pi-opensensors-password.txt
+dash_config.py
