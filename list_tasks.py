@@ -18,7 +18,8 @@ parser.add_argument('-f', '--filter', help='Filter to search with',
 parser.add_argument('-e', '--exclude_projects',
                     help='Comma separated list of projects whose tasks \
                           to exclude from output')
-parser.add_argument('-v', '--verbose', action='store_true', help='Include some extra details')
+parser.add_argument('-v', '--verbose', action='store_true',
+                    help='Include some extra details')
 args = parser.parse_args()
 
 exclude_projects = args.exclude_projects.lower().split(",")
@@ -31,7 +32,7 @@ tasks = user.search_tasks(args.filter)
 
 for task in tasks:
     if task.project and task.project.name and \
-        task.project.name.lower() in exclude_projects:
+       task.project.name.lower() in exclude_projects:
         continue
     if args.verbose:
         print "project: {0}".format(task.project.name)
