@@ -105,7 +105,13 @@ process.stdout.write("\n");
 
 var signals = ['SIGINT', 'SIGPIPE','SIGHUP','SIGTERM' ]
 for(var i = 0 ; i < signals.length ; i++) {
+  var signal = signals[i];
   process.on(signals[i], function() {
     console.log('Got ' + signal);
+    if(signal === 'SIGTERM')
+    {
+      process.exit();
+    }
+
   });
 }
