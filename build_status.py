@@ -3,7 +3,8 @@
 # Display Evergreen build status
 #
 # Usage:
-# build_status.py [ --verbose ] [ --push-only ] [ --skip-commits <N> ] [ --include-commits <N> ]
+# build_status.py [ --verbose ] [ --push-only ] [ --skip-commits <N> ]
+#                 [ --include-commits <N> ]
 #
 # --skip-commits is how many most recent commits to skip
 # --include-commits is how many commits to include in success/failed status
@@ -15,16 +16,25 @@ import argparse
 import requests
 import sys
 
-URL = 'https://evergreen.mongodb.com/json/timeline/mongodb-mongo-master?limit=%s&skip=%s'
+URL = ('https://evergreen.mongodb.com/json/timeline/mongodb-mongo-master?' +
+       'limit=%s&skip=%s')
 
 
 def main():
     parser = argparse.ArgumentParser(description='Build Status')
-    parser.add_argument('--verbose','-v', default = False, action='store_true', help='Display info about processing');
-    parser.add_argument('--push-only','-p', default = False, action='store_true', help='Only display information from builds with push tasks');
-    parser.add_argument('--skip-commits','-s', default = 0, type=int, help='How many commits to skip');
-    parser.add_argument('--ignore-inactive','-I', default = False, action='store_true', help='Ignore any inactive versions');
-    parser.add_argument('--include-commits','-i', default = 1, type=int, help='How many commits to include');
+    parser.add_argument('--verbose', '-v', default=False,
+                        action='store_true',
+                        help='Display info about processing')
+    parser.add_argument('--push-only', '-p', default=False,
+                        action='store_true',
+                        help='Only display builds with push tasks')
+    parser.add_argument('--skip-commits', '-s', default=0, type=int,
+                        help='How many commits to skip')
+    parser.add_argument('--ignore-inactive', '-I', default=False,
+                        action='store_true',
+                        help='Ignore any inactive versions')
+    parser.add_argument('--include-commits', '-i', default=1, type=int,
+                        help='How many commits to include')
     args = parser.parse_args()
 
     total_to_skip = args.skip_commits
@@ -34,103 +44,110 @@ def main():
 
     # track how many unignored versions we have information for
     #
-    unignored_versions_seen = 0
+    # unignored_versions_seen = 0
 
     versions_skipped = 0
     versions_included = 0
 
     build_variant_map = {}
 
-    colorprint(bcolors.BOLD, "Build Variant,Status, Total, Success Count, Failed count, Started count, Incomplete count")
+    colorprint(bcolors.BOLD, "Build Variant,Status, Total, Success Count, " +
+                             "Failed count, Started count, Incomplete count")
 
     limit = 10
     skip = 0
 
     while versions_included < total_to_include:
 
-      url = URL % (limit, skip)
+        url = URL % (limit, skip)
 
-      skip += limit
+        skip += limit
 
-      if args.verbose:
-          print("Requesting %s" % url)
+        if args.verbose:
+            print("Requesting %s" % url)
 
-      response = requests.get(url)
+        response = requests.get(url)
 
-      data = response.json()
-      for version in data['Versions']:
-          if args.verbose:
-            print("versions_included: %s" % versions_included)
-            print("total_to_include: %s" % total_to_include)
-            print("versions_included < total_to_include: %s" % (versions_included < total_to_include))
-          is_version_active = False
-          builds = version['Builds']
-
-          if versions_included >= total_to_include:
-            break
-
-          # Iterate through all builds once to determine if the version is active
-          #
-          for build in builds:
-              build = build['Build']
-
-              if "activated" in build and build['activated'] != False:
-                is_version_active = True
-
-          if ignore_inactive and not is_version_active:
-            # ignore this versions
-            continue
-
-          if args.verbose:
-            print("versions_skipped: %s" % versions_skipped)
-            print("total_to_skip: %s" % total_to_skip)
-            print("versions_skipped < total_to_skip: %s" % (versions_skipped < total_to_skip))
-
-          if versions_skipped < total_to_skip:
-            versions_skipped += 1
+        data = response.json()
+        for version in data['Versions']:
             if args.verbose:
-                print("Skipping one version")
-            continue
+                print("versions_included: %s" % versions_included)
+                print("total_to_include: %s" % total_to_include)
+                print("versions_included < total_to_include: %s" %
+                      (versions_included < total_to_include))
+            is_version_active = False
+            builds = version['Builds']
 
-          versions_included += 1
+            if versions_included >= total_to_include:
+                break
 
+            # Iterate through all builds once to determine if the version is
+            # active
+            #
+            for build in builds:
+                build = build['Build']
 
-          for build in builds:
-              build = build['Build']
+                if "activated" in build and build['activated'] is not False:
+                    is_version_active = True
 
+            if ignore_inactive and not is_version_active:
+                # ignore this versions
+                continue
 
-              if build['display_name'] in build_variant_map:
-                  build_variant_info = build_variant_map[build['display_name']]
-              else:
-                  build_variant_info = { "success_count": 0,
-                                         "failed_count": 0,
-                                         "started_count": 0,
-                                         "task_count": 0,
-                                         "contains_push_task": False}
+            if args.verbose:
+                print("versions_skipped: %s" % versions_skipped)
+                print("total_to_skip: %s" % total_to_skip)
+                print("versions_skipped < total_to_skip: %s" %
+                      (versions_skipped < total_to_skip))
 
-                  build_variant_map[build['display_name']] = build_variant_info
-
-              tasks = build['tasks']
-              build_variant_info['task_count'] += len(tasks)
-
-              # Task status can be:
-              # * failed
-              # * started
-              # * dispatched
-              # * success
-
-              for task in tasks:
+            if versions_skipped < total_to_skip:
+                versions_skipped += 1
                 if args.verbose:
-                  print("task['status']: %s" % task['status'])
+                    print("Skipping one version")
+                continue
 
-                if task['display_name'] == 'push':
-                    build_variant_info['contains_push_task'] = True
-                if task['status'] == 'success':
-                    build_variant_info['success_count'] = build_variant_info['success_count'] + 1
-                elif task['status'] == 'failed':
-                    build_variant_info['failed_count'] = build_variant_info['failed_count'] + 1
-                elif task['status'] == 'started':
-                    build_variant_info['started_count'] = build_variant_info['started_count'] + 1
+            versions_included += 1
+
+            for build in builds:
+                build = build['Build']
+
+                if build['display_name'] in build_variant_map:
+                    build_variant_info = \
+                        build_variant_map[build['display_name']]
+                else:
+                    build_variant_info = {"success_count": 0,
+                                          "failed_count": 0,
+                                          "started_count": 0,
+                                          "task_count": 0,
+                                          "contains_push_task": False}
+
+                    build_variant_map[build['display_name']] = \
+                        build_variant_info
+
+                tasks = build['tasks']
+                build_variant_info['task_count'] += len(tasks)
+
+                # Task status can be:
+                # * failed
+                # * started
+                # * dispatched
+                # * success
+
+                for task in tasks:
+                    if args.verbose:
+                        print("task['status']: %s" % task['status'])
+
+                    if task['display_name'] == 'push':
+                        build_variant_info['contains_push_task'] = True
+                    if task['status'] == 'success':
+                        build_variant_info['success_count'] = \
+                            build_variant_info['success_count'] + 1
+                    elif task['status'] == 'failed':
+                        build_variant_info['failed_count'] = \
+                            build_variant_info['failed_count'] + 1
+                    elif task['status'] == 'started':
+                        build_variant_info['started_count'] = \
+                            build_variant_info['started_count'] + 1
 
     for build_variant in sorted(build_variant_map.keys()):
 
@@ -139,19 +156,19 @@ def main():
         if args.push_only and not build_variant_info['contains_push_task']:
             continue
 
-        line=""
+        line = ""
         line += build_variant
         line += ","
 
         line_start = ''
-
 
         failed_count = build_variant_info['failed_count']
         success_count = build_variant_info['success_count']
         started_count = build_variant_info['started_count']
         task_count = build_variant_info['task_count']
 
-        incomplete_count = task_count - failed_count - success_count - started_count
+        incomplete_count = task_count - failed_count - success_count - \
+            started_count
 
         build_status = ''
 
@@ -161,7 +178,6 @@ def main():
         # 2) If any tasks are started, status is started (yellow)
         # 3) If any tasks are green, status is success (green)
         # 4) status is incomplete (white)
-
 
         if failed_count > 0:
             build_status = 'failed'
@@ -191,6 +207,7 @@ def main():
         line += str(incomplete_count)
         colorprint(line_start, line)
 
+
 class bcolors:
     GREEN = '\033[92m'
     RED = '\033[91m'
@@ -198,6 +215,7 @@ class bcolors:
     ENDC = '\033[0m'
     BOLD = '\033[1m'
     UNDERLINE = '\033[4m'
+
 
 def colorprint(color, text):
     if color and sys.stdout.isatty():
