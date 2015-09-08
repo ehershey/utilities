@@ -1,12 +1,12 @@
 #!usr/bin/python
 #
-# Update BlinkyTape LED's to match build status from https://evergreen.mongodb.com/
+# Update BlinkyTape LED's to match build status from
+# https://evergreen.mongodb.com/
 #
 #
 import time
 import urllib
 import json
-import tempfile
 import sys
 import colorsys
 import os
@@ -17,11 +17,12 @@ import BlinkyTape
 # Get your API key at http://www.wunderground.com/weather/api
 # Specify it here or in the WUNDERGROUND_KEY environment var. E.g.:
 # $ WUNDERGROUND_KEY=abcdefg123456 python LEDWeather.py
-#apikey = "abcdefg123456"
+# apikey = "abcdefg123456"
 apikey = os.environ.get('WUNDERGROUND_KEY')
 state = "NV"
 city = "Las_Vegas"
-url = "http://api.wunderground.com/api/{}/hourly/q/{}/{}.json".format(apikey, state, city)
+url = "http://api.wunderground.com/api/{}/hourly/q/{}/{}.json".format(
+    apikey, state, city)
 
 
 def connect():
@@ -99,7 +100,11 @@ if __name__ == "__main__":
 
     if not data:
         sys.exit(
-            "Could not fetch weather data. Check your proxy settings and try again. Try: export http_proxy=PROXY_IP:PROXY_PORT before running this script.")
+            "Could not fetch weather data. \
+             Check your proxy settings and \
+             try again. Try: export \
+             http_proxy=PROXY_IP:PROXY_PORT \
+             before running this script.")
 
     print data
     for hour in data['hourly_forecast']:
