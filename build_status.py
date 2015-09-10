@@ -51,7 +51,7 @@ def main():
 
     build_variant_map = {}
 
-    colorprint(bcolors.BOLD, "Build Variant,Status, Total, Success Count, " +
+    colorprint(bcolors.BOLD, "Build Variant, Status, Total, Success Count, " +
                              "Failed count, Started count, Incomplete count")
 
     limit = 10
