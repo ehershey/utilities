@@ -12,6 +12,9 @@ NYCRUNS_ADDRESS_SELECTOR=".race-display-address"
 RNR_DATE_SELECTOR="h2:contains(\"General Info\") + p + p"
 RNR_TITLE_SELECTOR="h2:contains(\"General Info\") + p"
 
+EVENTBRITE_TITLE_SELECTOR="span.summary"
+EVENTBRITE_DATE_SELECTOR="span.dtstart"
+
 set -o nounset
 
 # Use cache_get if available, else curl
@@ -46,6 +49,11 @@ get_race_title() {
     returned_title="$($CURL "$url" | $PUP "$RNR_TITLE_SELECTOR" text{})"
   fi
 
+  if [ ! "$returned_title" ]
+  then
+    returned_title="$($CURL "$url" | $PUP "$EVENTBRITE_TITLE_SELECTOR" text{})"
+  fi
+
   # Trim trailing whitespace
   #
   returned_title="$(echo -n "$returned_title" | sed 's/[ 	]*$//' )"
@@ -69,6 +77,11 @@ get_race_date() {
     returned_date="$($CURL "$url" | $PUP "$RNR_DATE_SELECTOR" text{})"
   fi
 
+  if [ ! "$returned_date" ]
+  then
+    returned_date="$($CURL "$url" | $PUP "$EVENTBRITE_DATE_SELECTOR" text{})"
+  fi
+
   returned_date="$(echo -n "$returned_date" | tr A-Z a-z | sed 's/start time://g' | sed 's/start\.//g')"
   returned_date="$(echo -n "$returned_date" | tr \\n \ )"
   returned_date="$(echo -n "$returned_date" | sed 's/half marathon starts at//g')"
@@ -78,6 +91,8 @@ get_race_date() {
   returned_date="$(echo -n "$returned_date" | sed 's/;.*//g')"
   returned_date="$(echo -n "$returned_date" | sed 's/^[ 	]*//'; )"
   returned_date="$(echo -n "$returned_date" | sed 's/[ 	]*$//'; )"
+  returned_date="$(echo -n "$returned_date" | sed 's/ from / /'; )"
+  returned_date="$(echo -n "$returned_date" | sed 's/ to .*//'; )"
   echo "$returned_date"
 }
 
@@ -149,8 +164,6 @@ then
   exit 2
 fi
 
-
-
 expected_date="february 28, 2016 8:00 am"
 returned_date="$(get_race_date "https://nycruns.com/races/?race=nycruns-central-park-marathon-2016")"
 if [ "$returned_date" != "$expected_date" ]
@@ -158,7 +171,6 @@ then
   echo "Test command failed! Got $returned_date, expected $expected_date"
   exit 2
 fi
-
 
 expected_date="march 28, 2015 8:00 am"
 returned_date="$(get_race_date "https://nycruns.com/races/?race=ladies-first-2015")"
@@ -168,7 +180,6 @@ then
   exit 2
 fi
 
-
 expected_address="9215 4th Avenue Brooklyn, NY"
 returned_address="$(get_race_address "https://nycruns.com/races/?race=harbor-fitness-race-for-autism")"
 if [ "$returned_address" != "$expected_address" ]
@@ -177,8 +188,21 @@ then
   exit 2
 fi
 
+expected_title="Run the River 5K - Icahn Stadium/Randall's Island Park"
+returned_title="$(get_race_title "http://www.eventbrite.com/e/run-the-river-5k-icahn-stadiumrandalls-island-park-registration-17885348559?nomo=1")"
+if [ "$returned_title" != "$expected_title" ]
+then
+  echo "Test command failed! Got $returned_title, expected $expected_title"
+  exit 2
+fi
 
-
+expected_date="saturday, october 24, 2015 10:00 am"
+returned_date="$(get_race_date "http://www.eventbrite.com/e/run-the-river-5k-icahn-stadiumrandalls-island-park-registration-17885348559?nomo=1")"
+if [ "$returned_date" != "$expected_date" ]
+then
+  echo "Test command failed! Got $returned_date, expected $expected_date"
+  exit 2
+fi
 
 
 
