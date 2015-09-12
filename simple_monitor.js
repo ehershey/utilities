@@ -187,13 +187,13 @@ var url_configs = [
     ignore_text: '',
     negated: true
   },
-  {
-    url: 'http://cov1.bci.10gen.cc:8080/',
-    cell_selector: "body:contains(Coverity)",
-    text_finder_from_cell_jqobj: function(jqobj) { return jqobj.text(); },
-    ignore_text: '',
-    negated: true
-  },
+  // {
+    // url: 'http://cov1.bci.10gen.cc:8080/',
+    // cell_selector: "body:contains(Coverity)",
+    // text_finder_from_cell_jqobj: function(jqobj) { return jqobj.text(); },
+    // ignore_text: '',
+    // negated: true
+  // },
   {
     url: 'http://goeverywhere.ernie.org/get_stats.cgi',
     cell_selector: "body:contains(oldest_point_timestamp)",
