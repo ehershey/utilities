@@ -15,6 +15,7 @@ import glob
 
 import BlinkyTape
 
+
 def connect():
     serialPorts = glob.glob("/dev/ttyACM**")
 
@@ -39,6 +40,7 @@ color_map = {
     'white': (255, 255, 255),
 }
 
+
 def adjust_color(color, dim_factor=0.10):
     r, g, b = color
     h, s, v = colorsys.rgb_to_hsv(r / 256.0, g / 256.0, b / 256.0)
@@ -58,6 +60,6 @@ if __name__ == "__main__":
         c = adjust_color(c)
         print("c: ")
         print(c)
-	r, g, b = c
+        r, g, b = c
         bt.sendPixel(r, g, b)
     bt.show()
