@@ -21,8 +21,10 @@ DEFAULT_FILTER = "overdue, today, & p:Inbox"
 
 parser = argparse.ArgumentParser(description='Mark Todoist Task complete')
 parser.add_argument('text_to_match', help='Task text')
-parser.add_argument('--exact_match_only', action='store_true', help='If task text must be exact (default is substring match)')
-parser.add_argument('-v', '--verbose', action='store_true', help='Include some extra details')
+parser.add_argument('--exact_match_only', action='store_true',
+                    help='If task text must be exact (default is substring)')
+parser.add_argument('-v', '--verbose', action='store_true',
+                    help='Include some extra details')
 args = parser.parse_args()
 
 
@@ -48,4 +50,5 @@ else:
     if len(exact_matching_tasks) == 1:
         complete_task(exact_matching_tasks[0])
     else:
-        print "Invalid length of list of matching tasks: " + str(len(matching_tasks))
+        print "Invalid length of list of matching tasks: " + \
+            str(len(matching_tasks))
