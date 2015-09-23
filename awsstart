@@ -23,16 +23,16 @@ then
   . ~/amazon-build.sh
 fi
 
-header=$(cache_run $CACHE_SECONDS "instance_info_by_name.sh $instance_name" $AWS_ACCESS_KEY_ID | head -1)
-data=$(cache_run $CACHE_SECONDS "instance_info_by_name.sh $instance_name" $AWS_ACCESS_KEY_ID | tail -1)
+header=$(cache_run $CACHE_SECONDS ec2list | head -1)
+data=$(cache_run $CACHE_SECONDS "ec2list $instance_name" | tail -1)
 
 # account for weird lost data
 #
 if [ \( ! "$data" \) -o "$(echo \"$data\" | grep running,\*$)" -o "$data" = "$header" ]
 then
   echo "retrying to poll aws data"
-  header=$(cache_run 0 "instance_info_by_name.sh $instance_name" $AWS_ACCESS_KEY_ID | head -1)
-  data=$(cache_run $CACHE_SECONDS "instance_info_by_name.sh $instance_name" $AWS_ACCESS_KEY_ID | tail -1)
+  header=$(cache_run 0 "ec2list" | head -1)
+  data=$(cache_run $CACHE_SECONDS "ec2list $instance_name" | tail -1)
 fi
 
 # get column numbers
@@ -41,6 +41,7 @@ state_column="$(echo "$header"  | tr , \\n | grep -n State.Name | cut -f1 -d: )"
 
 id="$(echo "$data" | cut -f$id_column -d,)"
 state="$(echo "$data" | cut -f$state_column -d,)"
+
 
 if [ ! "$id" -o "$id" = "running" ]
 then
