@@ -85,7 +85,7 @@ fi
 
 if [ ! "${user:-}" ]
 then
-  user=$(getuserbydistro "$distro")
+  user=$(getuserbydistro "$distro" "$name")
 fi
 
 if [ ! "$user" ]
