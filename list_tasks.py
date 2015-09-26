@@ -17,7 +17,7 @@ parser.add_argument('-f', '--filter', help='Filter to search with',
                     default=DEFAULT_FILTER)
 parser.add_argument('-e', '--exclude_projects',
                     help='Comma separated list of projects whose tasks \
-                          to exclude from output')
+                          to exclude from output', default='')
 parser.add_argument('-v', '--verbose', action='store_true',
                     help='Include some extra details')
 args = parser.parse_args()
