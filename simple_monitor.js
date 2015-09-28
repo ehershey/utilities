@@ -106,7 +106,7 @@ var url_configs = [
   // },
   {
     url: 'http://www.mongodb.org/downloads',
-    cell_selector: ".release-version",
+    cell_selector: "#downloads-current-release",
     text_finder_from_cell_jqobj: function(jqobj) { return "Unused"; },
     ignore_text: '',
     negated: true
