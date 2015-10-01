@@ -12,7 +12,6 @@
 import datetime
 import simplejson as json
 import time
-import os.path
 import re
 import sys
 import subprocess
@@ -30,7 +29,7 @@ verbose_activity_names = {
     "car": "Car",
     "transport": "Transport",
     "airplane": "Airplane"
-    }
+}
 
 UNKNOWN_ACTIVITY_BUCKET_VERBOSE_NAME = "Unknown"
 
@@ -41,45 +40,48 @@ verbose_activity_name_list.append(UNKNOWN_ACTIVITY_BUCKET_VERBOSE_NAME)
 
 sys.stdout.write("Date")
 for verbose_activity_name in verbose_activity_name_list:
-  sys.stdout.write(",")
-  sys.stdout.write(verbose_activity_name)
+    sys.stdout.write(",")
+    sys.stdout.write(verbose_activity_name)
 sys.stdout.write(",Calories\n")
 
 if hasattr(datetime.datetime, 'strptime'):
-    #python 2.6
+    # python 2.6
     strptime = datetime.datetime.strptime
 else:
-    #python 2.4 equivalent
-    strptime = lambda date_string, format: datetime.datetime(*(time.strptime(date_string, format)[0:6]))
+    # python 2.4 equivalent
+    strptime = lambda date_string, format: datetime.datetime(
+        *(time.strptime(date_string, format)[0:6]))
 
 
 def print_workouts_from_json_stream(instream):
-  output = json.load(instream)
+    output = json.load(instream)
 
-  for index, summary in enumerate(output):
-    activities = summary['summary']
-    sys.stdout.write(str(strptime(summary['date'], '%Y%m%d')))
-    activities_by_verbose_name = {}
-    calories = 0
-    if activities:
-      for activity in activities:
-        verbose_activity_name = verbose_activity_names.get(activity['activity'])
-        if not verbose_activity_name:
-          verbose_activity_name = UNKNOWN_ACTIVITY_BUCKET_VERBOSE_NAME
-        activities_by_verbose_name[verbose_activity_name] = activity
-        activity_calories = activity.get('calories')
-        if activity_calories:
-          calories += activity_calories
-    for verbose_activity_name in verbose_activity_name_list:
-      sys.stdout.write(",")
-      if verbose_activity_name in activities_by_verbose_name:
-        distance_meters = activities_by_verbose_name[verbose_activity_name].get('distance')
-        if distance_meters:
-          distance_miles = distance_meters / METERS_IN_ONE_MILE
-        else:
-          distance_miles = 0
-        sys.stdout.write("%.2fmi" % distance_miles)
-    sys.stdout.write(",%d" % calories)
-    sys.stdout.write("\n")
+    for index, summary in enumerate(output):
+        activities = summary['summary']
+        sys.stdout.write(str(strptime(summary['date'], '%Y%m%d')))
+        activities_by_verbose_name = {}
+        calories = 0
+        if activities:
+            for activity in activities:
+                verbose_activity_name = verbose_activity_names.get(activity[
+                                                                   'activity'])
+                if not verbose_activity_name:
+                    verbose_activity_name = UNKNOWN_ACTIVITY_BUCKET_VERBOSE_NAME
+                activities_by_verbose_name[verbose_activity_name] = activity
+                activity_calories = activity.get('calories')
+                if activity_calories:
+                    calories += activity_calories
+        for verbose_activity_name in verbose_activity_name_list:
+            sys.stdout.write(",")
+            if verbose_activity_name in activities_by_verbose_name:
+                distance_meters = activities_by_verbose_name[
+                    verbose_activity_name].get('distance')
+                if distance_meters:
+                    distance_miles = distance_meters / METERS_IN_ONE_MILE
+                else:
+                    distance_miles = 0
+                sys.stdout.write("%.2fmi" % distance_miles)
+        sys.stdout.write(",%d" % calories)
+        sys.stdout.write("\n")
 
 print_workouts_from_json_stream(sys.stdin)
