@@ -3,14 +3,14 @@
 //
 // Dump information about when stored Moves data has been seen in CSV format
 //
-// Usage: 
+// Usage:
 // mongo moves dump_moves_seen_data.js
 
 var collection_name = 'activities';
 
 // use moves;
 
-db.getCollection(collection_name).find().toArray().forEach(function(activity) { 
+db.getCollection(collection_name).find().toArray().forEach(function(activity) {
 
   var first_seen = activity.application_metadata.first_seen;
   var start_time = ISODate(activity.startTime.replace(/(\d\d\d\d)(\d\d)(\d\d)/, "$1-$2-$3"));
