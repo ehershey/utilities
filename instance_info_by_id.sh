@@ -1,6 +1,6 @@
 #!/bin/bash
 id="$1"
-if [ ! "$id" ] 
+if [ ! "$id" ]
 then
   echo "usage: $0 <instance id>"
   exit 2
