@@ -6,7 +6,6 @@
 # addrace.sh <title> <date> <url> [ <duration - minutes, default 120> [ <location - default NYC> [ <reminder - minutes, default 10080 (one week)> ] ] ]
 CALENDAR="Rides and Races"
 TODAY=$(date +%D)
-YEAR=$(date +%Y)
 
 TITLE="$1"
 DATE="$2"
@@ -18,9 +17,11 @@ then
   exit 2
 fi
 
+YEAR=$(perl -MPOSIX=strftime -MDate::Parse -e 'print(strftime("%Y",localtime(str2time(shift))));' "$DATE")
+
 if ! echo "$DATE" | grep -q "$YEAR"
 then
-  echo "Date is not in current year, unsupported ($DATE / $YEAR)"
+  echo "Year not in date, unsupported ($DATE / $YEAR)"
   exit 2
 fi
 
