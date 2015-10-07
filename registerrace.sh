@@ -4,17 +4,21 @@ set -o nounset
 # Update status of race in calendar to registered
 # Usage:
 #
-# registerrace.sh <title> [ <registration date> ]
+# registerrace.sh <title> [ <registration date> [ <event year> ]]
 CALENDAR="Rides and Races"
 TODAY=$(date +%D)
-YEAR=$(date +%Y)
 
 TITLE="$1"
+YEAR="${2:-}"
 
 if [ ! "$TITLE" ]
 then
   echo "Usage: registerrace.sh <title> [ <registration date> ]"
   exit 2
+fi
+if [ ! "$YEAR" ]
+then
+  YEAR=$(date +%Y)
 fi
 
 DATE=${2:-$TODAY}
@@ -24,7 +28,7 @@ echo $tempfile
 
 gcalcli --cache --cal "$CALENDAR" search --nolineart --nocolor --detail_description_width 200 "$TITLE (registered) $YEAR" --details all > "$tempfile"
 
-title=$(grep ^$YEAR $tempfile | awk '{print $3,$4,$5,$6,$7,$8,$9,$10}')
+title=$(grep ^$YEAR $tempfile | awk '{print $3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$13,$15,$16,$17}')
 echo "title: $title"
 
 if [[ -s $tempfile && ! "$(grep 'No Events Found...' "$tempfile" )" && $title == *registered* ]]
