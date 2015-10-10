@@ -29,6 +29,8 @@ user = todoist.login(email=todoist_auth.email, password=todoist_auth.password)
 if args.verbose:
     print "Filter: {0}".format(args.filter)
 tasks = user.search_tasks(args.filter)
+if args.verbose:
+    print "Count: {0}".format(len(tasks))
 
 for task in tasks:
     if task.project and task.project.name and \
