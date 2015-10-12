@@ -7,6 +7,6 @@ LOGFILE=/Users/ernie/Dropbox//Documents/10gen/Meetings/random.txt
 
 date >> $LOGFILE
 
-list_tasks.py  | wc -l >> $LOGFILE
+(list_tasks.py  ; list_tasks.py --filter Yesterday) | sort -u | wc -l >> $LOGFILE
 
 tail $LOGFILE
