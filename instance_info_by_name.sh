@@ -1,6 +1,6 @@
 #!/bin/bash
 export name="$1"
-if [ ! "$name" ] 
+if [ ! "$name" ]
 then
   echo "usage: $0 <instance name (or pattern - i.e. pkg_test_linux-64-large_20131129*>"
   exit 2
