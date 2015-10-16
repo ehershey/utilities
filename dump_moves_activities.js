@@ -3,7 +3,7 @@
 //
 // Dump Moves activities in CSV format
 //
-// Usage: 
+// Usage:
 // mongo moves dump_moves_activities.js
 
 var collection_name = 'activities';
@@ -12,13 +12,13 @@ var collection_name = 'activities';
 
 print("Activity Type, Start Time, Start Longitude, Start Latitude, End Time, End Longitude, End Latitude");
 
-db.getCollection(collection_name).find().sort({startTime: 1}).toArray().forEach(function(activity) { 
+db.getCollection(collection_name).find().sort({startTime: 1}).toArray().forEach(function(activity) {
 
   var start_time = ISODate(activity.startTime.replace(/(\d\d\d\d)(\d\d)(\d\d)/, "$1-$2-$3"));
   var end_time = ISODate(activity.endTime.replace(/(\d\d\d\d)(\d\d)(\d\d)/, "$1-$2-$3"));
 
   var start_trackpoint = activity.trackPoints[0];
-  if(start_trackpoint) { 
+  if(start_trackpoint) {
     var end_trackpoint = activity.trackPoints[activity.trackPoints.length - 1];
     var end_longitude = end_trackpoint.lon;
     var end_latitude = end_trackpoint.lat;
