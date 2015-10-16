@@ -86,6 +86,7 @@ get_race_date() {
   returned_date="$(echo -n "$returned_date" | tr \\n \ )"
   returned_date="$(echo -n "$returned_date" | sed 's/half marathon starts at//g')"
   returned_date="$(echo -n "$returned_date" | sed 's/full marathon starts at//g')"
+  returned_date="$(echo -n "$returned_date" | sed 's/race[- ]day.*//g')"
   returned_date="$(echo -n "$returned_date" | sed 's/5k start//g')"
   returned_date="$(echo -n "$returned_date" | sed 's/[ 	][ 	]*/ /g'; )"
   returned_date="$(echo -n "$returned_date" | sed 's/;.*//g')"
@@ -132,35 +133,19 @@ then
   exit 2
 fi
 
-expected_title="For the Love of Queens 5K"
-returned_title="$(get_race_title "https://nycruns.com/races/?race=for-the-love-of-queens-5k")"
+expected_title="City of Yonkers Marathon, Half Marathon, 5K"
+returned_title="$(get_race_title "https://nycruns.com/races/?race=the-yonkers-marathon-2015")"
 if [ "$returned_title" != "$expected_title" ]
 then
   echo "Test command failed! Got $returned_title, expected $expected_title"
   exit 2
 fi
 
-expected_date="february 14, 2015 9:00am"
-returned_date="$(get_race_date "https://nycruns.com/races/?race=for-the-love-of-queens-5k")"
+expected_date="october 18, 2015 8:00 a.m."
+returned_date="$(get_race_date "https://nycruns.com/races/?race=the-yonkers-marathon-2015")"
 if [ "$returned_date" != "$expected_date" ]
 then
   echo "Test command failed! Got $returned_date, expected $expected_date"
-  exit 2
-fi
-
-expected_date="june 21, 2015 8:00"
-returned_date="$(get_race_date "https://nycruns.com/races/?race=fathers-day-half-2015")"
-if [ "$returned_date" != "$expected_date" ]
-then
-  echo "Test command failed! Got $returned_date, expected $expected_date"
-  exit 2
-fi
-
-expected_title="NYCRUNS Father's Day Half Marathon"
-returned_title="$(get_race_title "https://nycruns.com/races/?race=fathers-day-half-2015")"
-if [ "$returned_title" != "$expected_title" ]
-then
-  echo "Test command failed! Got $returned_title, expected $expected_title"
   exit 2
 fi
 
@@ -169,22 +154,6 @@ returned_date="$(get_race_date "https://nycruns.com/races/?race=nycruns-central-
 if [ "$returned_date" != "$expected_date" ]
 then
   echo "Test command failed! Got $returned_date, expected $expected_date"
-  exit 2
-fi
-
-expected_date="march 28, 2015 8:00 am"
-returned_date="$(get_race_date "https://nycruns.com/races/?race=ladies-first-2015")"
-if [ "$returned_date" != "$expected_date" ]
-then
-  echo "Test command failed! Got $returned_date, expected $expected_date"
-  exit 2
-fi
-
-expected_address="9215 4th Avenue Brooklyn, NY"
-returned_address="$(get_race_address "https://nycruns.com/races/?race=harbor-fitness-race-for-autism")"
-if [ "$returned_address" != "$expected_address" ]
-then
-  echo "Test command failed! Got $returned_address, expected $expected_address"
   exit 2
 fi
 
