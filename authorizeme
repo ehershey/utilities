@@ -31,7 +31,7 @@ ssh "$*" "if [ ! -e .ssh ] ; then mkdir .ssh; fi; (cat >> $authfile); chmod 600 
 
 
 #echo type your password:
-#ssh $* mkdir -p .ssh \; cat /tmp/tmp_$shortname.pub \>\> $authfile \; chmod 600 $authfile 
+#ssh $* mkdir -p .ssh \; cat /tmp/tmp_$shortname.pub \>\> $authfile \; chmod 600 $authfile
 
 
 #echo type your password:
