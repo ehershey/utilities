@@ -12,7 +12,7 @@
 # #MOVES_ACCESS_TOKEN=xxx
 # MOVES_ACCESS_TOKEN=xxx
 
-#0 1 * * * /home/ernie/Dropbox/Unix/bin/feedmykindle.py >> /tmp/feedmykindle.log 2>&1 
+#0 1 * * * /home/ernie/Dropbox/Unix/bin/feedmykindle.py >> /tmp/feedmykindle.log 2>&1
 #0 * * * * cp -pri /tmp/uploadr.log /home/ernie/Dropbox/Misc/
 #* * * * * cd /home/ernie/Dropbox/Photos/Android ; PYTHONPATH=. flock --exclusive --nonblock /home/ernie/Dropbox/Unix/bin/flickr_uploadr.py /home/ernie/Dropbox/Unix/bin/flickr_uploadr.py >> /tmp/uploadr.log 2>&1
 #* * * * * cd /home/ernie/Dropbox/Camera\ Uploads ; PYTHONPATH=. flock --exclusive --nonblock /home/ernie/Dropbox/Unix/bin/flickr_uploadr.py /home/ernie/Dropbox/Unix/bin/flickr_uploadr.py >> /tmp/uploadr.log 2>&1
