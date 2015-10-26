@@ -88,6 +88,8 @@ get_race_date() {
   returned_date="$(echo -n "$returned_date" | sed 's/full marathon starts at//g')"
   returned_date="$(echo -n "$returned_date" | sed 's/race[- ]day.*//g')"
   returned_date="$(echo -n "$returned_date" | sed 's/5k start//g')"
+  returned_date="$(echo -n "$returned_date" | sed 's/ 5k//g')"
+  returned_date="$(echo -n "$returned_date" | sed 's/ - / /g')"
   returned_date="$(echo -n "$returned_date" | sed 's/[ 	][ 	]*/ /g'; )"
   returned_date="$(echo -n "$returned_date" | sed 's/;.*//g')"
   returned_date="$(echo -n "$returned_date" | sed 's/^[ 	]*//'; )"
@@ -165,7 +167,7 @@ then
   exit 2
 fi
 
-expected_date="saturday, october 24, 2015 10:00 am"
+expected_date="saturday, october 24, 2015 8:30 am"
 returned_date="$(get_race_date "http://www.eventbrite.com/e/run-the-river-5k-icahn-stadiumrandalls-island-park-registration-17885348559?nomo=1")"
 if [ "$returned_date" != "$expected_date" ]
 then
