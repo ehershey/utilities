@@ -30,7 +30,7 @@ fi
 
 ssh-copy-id pi@$HOSTNAME
 
-ssh="ssh pi@$HOSTNAME"
+ssh="ssh -t pi@$HOSTNAME"
 
 if ! $ssh echo test > /dev/null
 then
@@ -58,4 +58,8 @@ ACTION=="add", ATTRS{idVendor}=="1d34", ATTRS{idProduct}=="000d", SYMLINK+="big_
 ACTION=="remove", ATTRS{idVendor}=="1d34", ATTRS{idProduct}=="000d", RUN+="/usr/bin/mosquitto_pub -h opensensors.io -t $OPENSENSORSTOPIC -m Add -i $OPENSENSORSDEVICEID -u $OPENSENSORSUSERNAME -P $OPENSENSORSPASSWORD"
 EOF
 fi
+
+$ssh crontab <<'EOF'
+* * * * * curl "http://ernie.org/hostupdate?name=eahpi2&ips=$(/sbin/ifconfig -a | grep inet | grep -v inet6 | grep -v 127.0.0.1 | cut -f2 -d: | cut -f1 -d\ | tr \\n \|)" >> /tmp/hostupdate.log
+EOF
 
