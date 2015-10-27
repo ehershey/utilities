@@ -95,6 +95,8 @@ get_race_date() {
   returned_date="$(echo -n "$returned_date" | sed 's/^[ 	]*//'; )"
   returned_date="$(echo -n "$returned_date" | sed 's/[ 	]*$//'; )"
   returned_date="$(echo -n "$returned_date" | sed 's/ from / /'; )"
+  returned_date="$(echo -n "$returned_date" | sed 's/ the / /'; )"
+  returned_date="$(echo -n "$returned_date" | sed 's/ begins at / /'; )"
   returned_date="$(echo -n "$returned_date" | sed 's/ to .*//'; )"
   echo "$returned_date"
 }
