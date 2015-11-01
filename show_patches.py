@@ -17,7 +17,8 @@ URL = 'https://evergreen.mongodb.com/json/patches/user/ernie.hershey%4010gen.com
 
 def main():
     parser = argparse.ArgumentParser(description='Show Patches')
-    parser.add_argument('--verbose','-v', default = False, action='store_true', help='Display info about processing');
+    parser.add_argument('--verbose', '-v', default=False,
+                        action='store_true', help='Display info about processing')
     args = parser.parse_args()
 
     url = URL
@@ -31,11 +32,12 @@ def main():
 
     print "Status, Time, Project, Base, Description"
     for patch in data['UIPatches']:
-      patch=patch['Patch']
-      if patch['Activated']:
-        status = "Activated"
-      else:
-        status = "Inactive"
-      print("%s, %s, %s, %s, %s" % (status, patch['CreateTime'], patch['Project'], patch['Githash'], patch['Description']))
+        patch = patch['Patch']
+        if patch['Activated']:
+            status = "Activated"
+        else:
+            status = "Inactive"
+        print("%s, %s, %s, %s, %s" % (status, patch['CreateTime'], patch[
+              'Project'], patch['Githash'], patch['Description']))
     exit()
 main()
