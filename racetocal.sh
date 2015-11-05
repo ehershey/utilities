@@ -89,6 +89,7 @@ get_race_date() {
   returned_date="$(echo -n "$returned_date" | sed 's/race[- ]day.*//g')"
   returned_date="$(echo -n "$returned_date" | sed 's/5k start//g')"
   returned_date="$(echo -n "$returned_date" | sed 's/ 5k//g')"
+  returned_date="$(echo -n "$returned_date" | sed 's/ 5 miler.*//g')"
   returned_date="$(echo -n "$returned_date" | sed 's/ - / /g')"
   returned_date="$(echo -n "$returned_date" | sed 's/[ 	][ 	]*/ /g'; )"
   returned_date="$(echo -n "$returned_date" | sed 's/;.*//g')"
