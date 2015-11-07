@@ -16,6 +16,7 @@
 # %admin ALL=NOPASSWD:/usr/bin/atq
 # %admin ALL=NOPASSWD:/usr/bin/atrm
 # %admin ALL=NOPASSWD:/usr/bin/at
+# %admin ALL=NOPASSWD:/usr/bin/killall afplay # for alarmkill.sh
 #
 AUDIOFILE=~/Dropbox/Misc/ascending.mp3
 
