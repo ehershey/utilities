@@ -88,11 +88,11 @@ var url_configs = [
     negated: false
   },
   {
-    url: 'https://logkeeper.mongodb.org/build/557b4c96ead33c12e0040eeb/test/557b4cddead33c12e004161e',
-    cell_selector: "body:contains({})",
+    url: 'https://logkeeper.mongodb.org/build/56425954be07c42d831b14bc/test/564259549041304df61b2903',
+    cell_selector: "body:contains(initandlisten)",
     text_finder_from_cell_jqobj: function(jqobj) { return "Unused"; },
     ignore_text: '',
-    negated: false
+    negated: true
   },
 
   {
