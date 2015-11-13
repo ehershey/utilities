@@ -148,9 +148,54 @@ table,tr,td,th {{
   <a class="left" href="?">Refresh</a>
   <a class="right" href="moves://">Launch Moves App</a><br/>
   <script type="text/javascript">
+    var request = new XMLHttpRequest();
+    var request_running = false;
+    var last_new_data_age_seconds = 0;
+
+    request.onreadystatechange = function () {{
+      var DONE = this.DONE || 4;
+      if (this.readyState === DONE) {{
+        request_running = false;
+        console.log('got response');
+        var new_data_timestamp = this.getResponseHeader('last-modified');
+        if(new_data_timestamp) {{
+        console.log('got timestamp');
+          var new_data_date = new Date(new_data_timestamp);
+          var now = new Date();
+          var new_data_age_seconds = ( now - new_data_date ) / 1000;
+          console.log('new data age: ' + new_data_age_seconds);
+          console.log('last new data age: ' + last_new_data_age_seconds);
+
+          // if the age fo the file on the server ever drops, it means
+          // it's newer than what we're currently viewing, so refresh
+          //
+          if(new_data_age_seconds < last_new_data_age_seconds) {{
+            document.location.href = document.location.href.replace(/\?.*/,'') + '?loaded_at' + now.getTime();
+          }}
+          last_new_data_age_seconds = new_data_age_seconds;
+        }}
+        else console.log('did not get timestamp');
+      }}
+      else console.log('did not get done ready state');
+    }};
+
     setInterval(function() {{
       document.getElementById("html_age").innerHTML = get_date_age("{now}"); // diffignore (ignore comparing against previous html)
       document.getElementById("moves_age").innerHTML = get_date_age("{moves_csv_modified}");
+      if(!request_running) {{
+      console.log('request not running');
+        request_running = true;
+        request.open('GET', 'unit_report.html', true);
+        // Tells server that this call is made for ajax purposes.
+        // Most libraries like jQuery/Prototype/Dojo do this
+        //
+        request.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+        request.send(null);  // No data needs to be sent along with the request.
+      }}
+      else console.log('request already running');
+
+
+
     }}, 1000);
 
     // Double curly brace everywhere for python templating
