@@ -9,11 +9,11 @@ CALENDAR="Rides and Races"
 TODAY=$(date +%D)
 
 TITLE="$1"
-YEAR="${2:-}"
+YEAR="${3:-}"
 
 if [ ! "$TITLE" ]
 then
-  echo "Usage: registerrace.sh <title> [ <registration date> ]"
+  echo "Usage: registerrace.sh <title> [ <registration date> [ <event year> ]]"
   exit 2
 fi
 if [ ! "$YEAR" ]
@@ -22,6 +22,14 @@ then
 fi
 
 DATE=${2:-$TODAY}
+
+# Error if date looks like a year
+#
+if echo "$DATE" | grep -xq ....
+then
+  echo "Date looks funny ($DATE). Is it a year?"
+  exit 2
+fi
 
 tempfile="$(mktemp /tmp/registerrace.XXXXX)"
 echo $tempfile
@@ -72,6 +80,14 @@ new_title=$(echo "$title" | sed "s/$YEAR/(registered) $YEAR/")
 echo "new_title: $new_title"
 
 new_description="$(echo "$description" | sed "s#Not registered as of ......[0-9]*#Registered on $DATE#" | grep . | tr \\n \ )"
+
+# Account for no "Not registered" note in original event
+#
+if ! echo "$new_description" | grep -qi registered
+then
+  new_description="$new_description Registered on $DATE"
+fi
+
 echo "new_description: $new_description"
 
 echo -e "t\n$new_title\nd\n$new_description\ns\nq"
