@@ -15,6 +15,9 @@ RNR_TITLE_SELECTOR="h2:contains(\"General Info\") + p"
 EVENTBRITE_TITLE_SELECTOR="span.summary"
 EVENTBRITE_DATE_SELECTOR="span.dtstart"
 
+GENERIC_TITLE_SELECTOR="title"
+GENERIC_DATE_SELECTOR="div.field"
+
 set -o nounset
 
 # Use cache_get if available, else curl
@@ -54,6 +57,15 @@ get_race_title() {
     returned_title="$($CURL "$url" | $PUP "$EVENTBRITE_TITLE_SELECTOR" text{})"
   fi
 
+  if [ ! "$returned_title" ]
+  then
+    returned_title="$($CURL "$url" | $PUP "$GENERIC_TITLE_SELECTOR" text{})"
+  fi
+
+  # Discard pipe and following text
+  #
+  returned_title="$(echo -n "$returned_title" | sed 's/ *|.*//' )"
+
   # Trim trailing whitespace
   #
   returned_title="$(echo -n "$returned_title" | sed 's/[ 	]*$//' )"
@@ -82,8 +94,14 @@ get_race_date() {
     returned_date="$($CURL "$url" | $PUP "$EVENTBRITE_DATE_SELECTOR" text{})"
   fi
 
+  if [ ! "$returned_date" ]
+  then
+    returned_date="$($CURL "$url" | $PUP "$GENERIC_DATE_SELECTOR" text{})"
+  fi
+
   returned_date="$(echo -n "$returned_date" | tr A-Z a-z | sed 's/start time://g' | sed 's/start\.//g')"
   returned_date="$(echo -n "$returned_date" | tr \\n \ )"
+  returned_date="$(echo -n "$returned_date" | sed 's/.*will take place on //g')"
   returned_date="$(echo -n "$returned_date" | sed 's/half marathon starts at//g')"
   returned_date="$(echo -n "$returned_date" | sed 's/full marathon starts at//g')"
   returned_date="$(echo -n "$returned_date" | sed 's/race[- ]day.*//g')"
@@ -99,6 +117,7 @@ get_race_date() {
   returned_date="$(echo -n "$returned_date" | sed 's/ the / /'; )"
   returned_date="$(echo -n "$returned_date" | sed 's/ begins at / /'; )"
   returned_date="$(echo -n "$returned_date" | sed 's/ to .*//'; )"
+  returned_date="$(echo -n "$returned_date" | sed 's/\. .*//'; )"
   echo "$returned_date"
 }
 
@@ -154,7 +173,7 @@ then
   exit 2
 fi
 
-expected_date="february 28, 2016 8:00 am"
+expected_date="february 21, 2016 8:00 am"
 returned_date="$(get_race_date "https://nycruns.com/races/?race=nycruns-central-park-marathon-2016")"
 if [ "$returned_date" != "$expected_date" ]
 then
@@ -177,6 +196,23 @@ then
   echo "Test command failed! Got $returned_date, expected $expected_date"
   exit 2
 fi
+
+expected_title="ORLEN Warsaw Marathon"
+returned_title="$(get_race_title "https://www.orlenmarathon.pl/en/")"
+if [ "$returned_title" != "$expected_title" ]
+then
+  echo "Test command failed! Got $returned_title, expected $expected_title"
+  exit 2
+fi
+
+expected_date="24 april 2016"
+returned_date="$(get_race_date "https://www.orlenmarathon.pl/en/")"
+if [ "$returned_date" != "$expected_date" ]
+then
+  echo "Test command failed! Got $returned_date, expected $expected_date"
+  exit 2
+fi
+
 
 
 
