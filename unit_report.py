@@ -189,11 +189,6 @@ if surplus_today < surplus_2014:
 else:
     placeholder['surplus_class'] = "negative_diff"
 
-if surplus_yesterday < surplus_2014:
-    placeholder['surplus_yesterday_class'] = "positive_diff"
-else:
-    placeholder['surplus_yesterday_class'] = "negative_diff"
-
 if surplus_2days < surplus_2014:
     placeholder['surplus_2days_class'] = "positive_diff"
 else:
