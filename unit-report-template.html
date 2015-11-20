@@ -170,7 +170,7 @@ table,tr,td,th {{
           // it's newer than what we're currently viewing, so refresh
           //
           if(new_data_age_seconds < last_new_data_age_seconds) {{
-            document.location.href = document.location.href.replace(/\?.*/,'') + '?loaded_at' + now.getTime();
+            document.location.href = get_new_self_url();
           }}
           last_new_data_age_seconds = new_data_age_seconds;
         }}
@@ -185,7 +185,8 @@ table,tr,td,th {{
       if(!request_running) {{
       console.log('request not running');
         request_running = true;
-        request.open('GET', 'unit_report.html', true);
+        request.open('GET', get_new_self_url(), true);
+
         // Tells server that this call is made for ajax purposes.
         // Most libraries like jQuery/Prototype/Dojo do this
         //
@@ -228,6 +229,12 @@ table,tr,td,th {{
       if(diff_s) return_string += diff_s + ' second';
       if(diff_s && diff_s > 1) return_string += 's';
       return return_string;
+    }}
+
+    function get_new_self_url()
+    {{
+      var now = new Date();
+      return document.location.href.replace(/\?.*/,'') + '?loaded_at=' + escape(now);
     }}
 
   </script>
