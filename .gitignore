@@ -35,3 +35,4 @@ monitor_iphone_env.sh
 wifi-password.txt
 pi-opensensors-password.txt
 dash_config.py
+myfitnesspal_auth.py
