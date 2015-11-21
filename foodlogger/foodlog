@@ -1,0 +1,68 @@
+#!/usr/bin/python
+#
+#
+# Types of things to be able to specify:
+# # Day
+# ## Today (default)
+# ## Yesterday
+# ## Two days ago (bonus feature)
+# # Meal
+# ## "current" (default - logic based on time of day)
+# ### Time periods should be dynamic
+# ## Breakfast / Lunch / Dinner / "Buffer"
+# ### Should be dynamic based on configured mfp meals
+# # Serving size
+# ## Size associated with food item (default if present - if item from meal or history)
+# ## Numeric value (default if food not pulled from history)
+# # Meal or food item
+# ## case insensitive multiple word text search using first found:
+# ### Meal
+# ### Item from history
+# ### Item from database
+#
+# Actions:
+# # Log food
+# # Remove last entry
+# # Reporting?
+#
+# Goal:
+# Manage mfp food log with minimum friction, thought, clicks or typing.
+#
+# Sample command lines:
+# It's 3:30 pm and I just ate three egg whites. Log them to lunch:
+# foodlog 3 white
+# It's 3:30 pm and I ate a chopt spinach salad for lunch today. Log it to lunch:
+# foodlog 1 chopt
+# It's 3:30 pm and I remember I ate kashi and skim milk for breakfast today. Log their meal:
+# foodlog b 1 kashi
+
+
+import mechanicalsoup
+import myfitnesspal_auth
+
+login_url = "https://www.myfitnesspal.com/account/login"
+login_post_url = "https://www.myfitnesspal.com/account/login"
+
+browser = mechanicalsoup.Browser()
+
+login_page = browser.get(login_url)
+
+login_form = login_page.soup.select("form")[0]
+
+login_form.select("#username")[0]['value'] = myfitnesspal_auth.username
+login_form.select("#password")[0]['value'] = myfitnesspal_auth.password
+login_form.select("#remember_me")[0]['value'] = "1"
+
+page2 = browser.submit(login_form, login_page.url)
+
+user_link = page2.soup.find('a', class_='user-2')
+if user_link and user_link.text == myfitnesspal_auth.username:
+    print("logged in")
+#assert page2.soup.select(".logout-form")
+
+print(page2.soup.title.text)
+
+# verify we remain logged in (thanks to cookies) as we browse the rest of the site
+#page3 = browser.get("https://github.com/hickford/MechanicalSoup")
+#assert page3.soup.select(".logout-form")
+
