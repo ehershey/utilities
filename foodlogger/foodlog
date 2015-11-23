@@ -38,7 +38,18 @@
 
 
 import mechanicalsoup
+import argparse
 import myfitnesspal_auth
+
+parser = argparse.ArgumentParser(description='Command Line Food Logger')
+parser.add_argument('text_to_match', help='food item text')
+parser.add_argument('-v', '--verbose', action='store_true',
+                        help='Include some extra details')
+parser.add_argument('-d', '--debug', action='store_true',
+                        help='Include a lot of extra details')
+args = parser.parse_args()
+
+
 
 login_url = "https://www.myfitnesspal.com/account/login"
 login_post_url = "https://www.myfitnesspal.com/account/login"
