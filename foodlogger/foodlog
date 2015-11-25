@@ -54,9 +54,19 @@ args = parser.parse_args()
 login_url = "https://www.myfitnesspal.com/account/login"
 login_post_url = "https://www.myfitnesspal.com/account/login"
 
+
 browser = mechanicalsoup.Browser()
 
+if args.debug:
+    print("Created browser object: {0}".format(browser))
+
 login_page = browser.get(login_url)
+
+if args.verbose:
+    print("GET {0}".format(login_url))
+
+#if args.debug:
+    #print("Created browser object: {0}".format(browser))
 
 login_form = login_page.soup.select("form")[0]
 
