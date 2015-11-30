@@ -55,7 +55,7 @@ login_url = "https://www.myfitnesspal.com/account/login"
 login_post_url = "https://www.myfitnesspal.com/account/login"
 
 
-browser = mechanicalsoup.Browser()
+browser = mechanicalsoup.Browser(soup_config={ "features": "html.parser"} )
 
 if args.debug:
     print("Created browser object: {0}".format(browser))
