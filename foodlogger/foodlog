@@ -53,6 +53,7 @@ args = parser.parse_args()
 
 login_url = "https://www.myfitnesspal.com/account/login"
 login_post_url = "https://www.myfitnesspal.com/account/login"
+diary_url = "http://www.myfitnesspal.com/food/diary"
 
 
 browser = mechanicalsoup.Browser(soup_config={ "features": "html.parser"} )
@@ -79,6 +80,13 @@ page2 = browser.submit(login_form, login_page.url)
 user_link = page2.soup.find('a', class_='user-2')
 if user_link and user_link.text == myfitnesspal_auth.username:
     print("logged in")
+
+diary_page = browser.get(diary_url)
+
+add_food_link = diary_page.soup.find('a', text='Add Food')
+if add_food_link:
+    print("found food add link")
+
 #assert page2.soup.select(".logout-form")
 
 print(page2.soup.title.text)
