@@ -40,6 +40,7 @@
 import mechanicalsoup
 import argparse
 import myfitnesspal_auth
+import meals
 
 parser = argparse.ArgumentParser(description='Command Line Food Logger')
 parser.add_argument('text_to_match', help='food item text')
@@ -87,6 +88,9 @@ add_food_link = diary_page.soup.find('a', text='Add Food')
 if add_food_link:
     print("found food add link")
 
+meal = meals.get_default_meal()
+print("Using default meal: {meal}".format(meal=meal))
+
 #assert page2.soup.select(".logout-form")
 
 print(page2.soup.title.text)
@@ -94,4 +98,5 @@ print(page2.soup.title.text)
 # verify we remain logged in (thanks to cookies) as we browse the rest of the site
 #page3 = browser.get("https://github.com/hickford/MechanicalSoup")
 #assert page3.soup.select(".logout-form")
+
 
