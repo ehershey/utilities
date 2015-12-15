@@ -84,6 +84,9 @@ if user_link and user_link.text == myfitnesspal_auth.username:
 
 diary_page = browser.get(diary_url)
 
+if args.verbose:
+    print("GET {0}".format(diary_url))
+
 add_food_link = diary_page.soup.find('a', text='Add Food')
 if add_food_link:
     print("found food add link")
