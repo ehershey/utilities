@@ -1,6 +1,6 @@
 #!/usr/bin/python
 #
-# Print the timestamp 24 hours ago
+# Print a timestamp representing 24 hours ago from now
 #
 #
 import datetime
