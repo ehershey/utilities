@@ -55,6 +55,9 @@ args = parser.parse_args()
 login_url = "https://www.myfitnesspal.com/account/login"
 login_post_url = "https://www.myfitnesspal.com/account/login"
 diary_url = "http://www.myfitnesspal.com/food/diary"
+meals_url = "http://www.myfitnesspal.com/meal/mine"
+add_pages_by_meal = {}
+add_pages_by_meal['lunch'] = 'http://www.myfitnesspal.com/user/{0}/diary/add?meal=1'
 
 
 browser = mechanicalsoup.Browser(soup_config={ "features": "html.parser"} )
@@ -97,6 +100,10 @@ print("Using default meal: {meal}".format(meal=meal))
 #assert page2.soup.select(".logout-form")
 
 print(page2.soup.title.text)
+
+meals_page = browser.get(meals_url)
+
+print(meals_page.soup.title.text)
 
 # verify we remain logged in (thanks to cookies) as we browse the rest of the site
 #page3 = browser.get("https://github.com/hickford/MechanicalSoup")
