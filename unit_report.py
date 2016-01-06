@@ -5,6 +5,7 @@ import os
 import os.path
 import pymongo
 import re
+import sys
 import time
 from os.path import expanduser
 from numerousapp import update_metric_value, get_metric_value
@@ -113,18 +114,24 @@ MIN_HOUR_FOR_ZERO_POST = 5
 
 placeholder = {}
 
+sys.stderr.write("starting cuts\n")
+
 units_today = os.popen("cut -f10 -d, %s  | head -2 | tail -1" %
                        MOVES_CSV_FILENAME).read().rstrip()
+sys.stderr.write("in cuts 0.3\n")
 biked_today = os.popen("cut -f3 -d, %s  | head -2 | tail -1 | tr -d a-z" %
                        MOVES_CSV_FILENAME).read().rstrip()
+sys.stderr.write("in cuts 0.4\n")
 ran_today = os.popen("cut -f5 -d, %s  | head -2 | tail -1 | tr -d a-z" %
                      MOVES_CSV_FILENAME).read().rstrip()
+sys.stderr.write("in cuts 0.5\n")
 walked_today = os.popen("cut -f2 -d, %s  | head -2 | tail -1 | tr -d a-z" %
                         MOVES_CSV_FILENAME).read().rstrip()
 units_average = os.popen(
     "cut -f10 -d, %s| awk '{ total += $1; count++ } END { print total/count }'" % MOVES_CSV_FILENAME).read().rstrip()
 units_yesterday = os.popen(
     "cut -f10 -d, %s  | head -3 | tail -1" % MOVES_CSV_FILENAME).read().rstrip()
+sys.stderr.write("in cuts 1\n")
 units_average_2013 = os.popen(
     "grep ^2013- %s | cut -f10 -d, | awk '{ total += $1; count++ } END { print total/count }'" % MOVES_CSV_FILENAME).read().rstrip()
 units_average_2014 = os.popen(
@@ -133,12 +140,15 @@ units_average_2015 = os.popen(
     "grep ^2015- %s | cut -f10 -d, | awk '{ total += $1; count++ } END { print total/count }'" % MOVES_CSV_FILENAME).read().rstrip()
 units_2015_total = os.popen(
     "grep ^2015- %s | cut -f10 -d, | awk '{ total += $1; count++ } END { print total }'" % MOVES_CSV_FILENAME).read().rstrip()
+sys.stderr.write("in cuts 2\n")
 day_count_2015 = os.popen(
     "grep ^2015- %s | cut -f10 -d, | awk '{ total += $1; count++ } END { print count }'" % MOVES_CSV_FILENAME).read().rstrip()
 units_average_7days = os.popen(
     "head -8 %s | tail -7 | cut -f10 -d, | awk '{ total += $1; count++ } END { print total/count }'" % MOVES_CSV_FILENAME).read().rstrip()
 units_average_2days = os.popen(
     "head -3 %s | tail -2 | cut -f10 -d, | awk '{ total += $1; count++ } END { print total/count }'" % MOVES_CSV_FILENAME).read().rstrip()
+
+sys.stderr.write("done with cuts\n")
 
 surplus_today = float(input_today) - \
     (float(units_today) + resting_daily_calories)
