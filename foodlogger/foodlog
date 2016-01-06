@@ -59,6 +59,8 @@ meals_url = "http://www.myfitnesspal.com/meal/mine"
 add_pages_by_meal = {}
 add_pages_by_meal['lunch'] = 'http://www.myfitnesspal.com/user/{0}/diary/add?meal=1'
 
+add_page_urls_by_meal = { "lunch": "http://www.myfitnesspal.com/user/ehershey/diary/add?meal=1" }
+
 
 browser = mechanicalsoup.Browser(soup_config={ "features": "html.parser"} )
 
@@ -97,9 +99,14 @@ if add_food_link:
 meal = meals.get_default_meal()
 print("Using default meal: {meal}".format(meal=meal))
 
+url = add_page_urls_by_meal[meal]
+
+if url:
+  print "url: {url}".format(url=url)
+
 #assert page2.soup.select(".logout-form")
 
-print(page2.soup.title.text)
+#print(page2.soup.title.text)
 
 meals_page = browser.get(meals_url)
 
