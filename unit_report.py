@@ -37,16 +37,16 @@ yesterday_summary = db.nutrition_summary.find_one(
 
 date_regex_2013 = re.compile(", 2013")
 date_regex_2014 = re.compile(", 2014")
-date_regex_2015 = re.compile(", 2015")
+date_regex_2016 = re.compile(", 2016")
 
 nutrition_2013_average = db.nutrition_summary.aggregate([{"$match": {"date": date_regex_2013}}, {
                                                         "$group": {"_id": "2013", "Average": {"$avg": "$calories_numeric"}}}])
 nutrition_2014_average = db.nutrition_summary.aggregate([{"$match": {"date": date_regex_2014}}, {
                                                         "$group": {"_id": "2014", "Average": {"$avg": "$calories_numeric"}}}])
-nutrition_2015_average = db.nutrition_summary.aggregate([{"$match": {"date": date_regex_2015}}, {
-                                                        "$group": {"_id": "2015", "Average": {"$avg": "$calories_numeric"}}}])
-nutrition_2015_total = db.nutrition_summary.aggregate([{"$match": {"date": date_regex_2015}}, {
-                                                      "$group": {"_id": "2015", "Total": {"$sum": "$calories_numeric"}}}])
+nutrition_2016_average = db.nutrition_summary.aggregate([{"$match": {"date": date_regex_2016}}, {
+                                                        "$group": {"_id": "2016", "Average": {"$avg": "$calories_numeric"}}}])
+nutrition_2016_total = db.nutrition_summary.aggregate([{"$match": {"date": date_regex_2016}}, {
+                                                      "$group": {"_id": "2016", "Total": {"$sum": "$calories_numeric"}}}])
 
 input_today_url = "#"
 input_yesterday_url = "#"
@@ -67,10 +67,10 @@ surplus_2014 = 0
 surplus_today_2014_diff = 0
 surplus_yesterday_2014_diff = 0
 surplus_2days_2014_diff = 0
-surplus_2015_total = 0
-input_2015 = 0
-input_2015_total = 0
-surplus_2015_2014_diff = 0
+surplus_2016_total = 0
+input_2016 = 0
+input_2016_total = 0
+surplus_2016_2014_diff = 0
 
 if today_summary and today_summary['Calories']:
     input_today = round(today_summary['calories_numeric'], 2)
@@ -91,11 +91,11 @@ if nutrition_2013_average and nutrition_2013_average['result']:
 if nutrition_2014_average and nutrition_2014_average['result']:
     input_2014 = round(nutrition_2014_average['result'][0]['Average'], 2)
 
-if nutrition_2015_average and nutrition_2015_average['result']:
-    input_2015 = round(nutrition_2015_average['result'][0]['Average'], 2)
+if nutrition_2016_average and nutrition_2016_average['result']:
+    input_2016 = round(nutrition_2016_average['result'][0]['Average'], 2)
 
-if nutrition_2015_total and nutrition_2015_total['result']:
-    input_2015_total = round(nutrition_2015_total['result'][0]['Total'], 2)
+if nutrition_2016_total and nutrition_2016_total['result']:
+    input_2016_total = round(nutrition_2016_total['result'][0]['Total'], 2)
 
 
 input_today_2014_diff = round(input_2014 - input_today, 2)
@@ -136,13 +136,13 @@ units_average_2013 = os.popen(
     "grep ^2013- %s | cut -f10 -d, | awk '{ total += $1; count++ } END { print total/count }'" % MOVES_CSV_FILENAME).read().rstrip()
 units_average_2014 = os.popen(
     "grep ^2014- %s | cut -f10 -d, | awk '{ total += $1; count++ } END { print total/count }'" % MOVES_CSV_FILENAME).read().rstrip()
-units_average_2015 = os.popen(
-    "grep ^2015- %s | cut -f10 -d, | awk '{ total += $1; count++ } END { print total/count }'" % MOVES_CSV_FILENAME).read().rstrip()
-units_2015_total = os.popen(
-    "grep ^2015- %s | cut -f10 -d, | awk '{ total += $1; count++ } END { print total }'" % MOVES_CSV_FILENAME).read().rstrip()
+units_average_2016 = os.popen(
+    "grep ^2016- %s | cut -f10 -d, | awk '{ total += $1; count++ } END { print total/count }'" % MOVES_CSV_FILENAME).read().rstrip()
+units_2016_total = os.popen(
+    "grep ^2016- %s | cut -f10 -d, | awk '{ total += $1; count++ } END { print total }'" % MOVES_CSV_FILENAME).read().rstrip()
 sys.stderr.write("in cuts 2\n")
-day_count_2015 = os.popen(
-    "grep ^2015- %s | cut -f10 -d, | awk '{ total += $1; count++ } END { print count }'" % MOVES_CSV_FILENAME).read().rstrip()
+day_count_2016 = os.popen(
+    "grep ^2016- %s | cut -f10 -d, | awk '{ total += $1; count++ } END { print count }'" % MOVES_CSV_FILENAME).read().rstrip()
 units_average_7days = os.popen(
     "head -8 %s | tail -7 | cut -f10 -d, | awk '{ total += $1; count++ } END { print total/count }'" % MOVES_CSV_FILENAME).read().rstrip()
 units_average_2days = os.popen(
@@ -157,11 +157,11 @@ surplus_yesterday = float(input_yesterday) - \
 surplus_2days = (surplus_today + surplus_yesterday) / 2
 surplus_2014 = float(input_2014) - \
     (float(units_average_2014) + resting_daily_calories)
-surplus_2015 = float(input_2015) - \
-    (float(units_average_2015) + resting_daily_calories)
-surplus_2015_total = float(input_2015_total) - (float(units_2015_total) +
-                                                resting_daily_calories * int(day_count_2015))
-surplus_2015_2014_diff = round(surplus_2015 - surplus_2014, 2)
+surplus_2016 = float(input_2016) - \
+    (float(units_average_2016) + resting_daily_calories)
+surplus_2016_total = float(input_2016_total) - (float(units_2016_total) +
+                                                resting_daily_calories * int(day_count_2016))
+surplus_2016_2014_diff = round(surplus_2016 - surplus_2014, 2)
 
 surplus_today_2014_diff = round(surplus_2014 - surplus_today, 2)
 surplus_yesterday_2014_diff = round(surplus_2014 - surplus_yesterday, 2)
@@ -204,10 +204,10 @@ if surplus_2days < surplus_2014:
 else:
     placeholder['surplus_2days_class'] = "negative_diff"
 
-if surplus_2015_2014_diff > 0:
-    placeholder['surplus_2015_class'] = "negative_diff"
+if surplus_2016_2014_diff > 0:
+    placeholder['surplus_2016_class'] = "negative_diff"
 else:
-    placeholder['surplus_2015_class'] = "positive_diff"
+    placeholder['surplus_2016_class'] = "positive_diff"
 
 if input_today_2014_diff > 0:
     placeholder['input_class'] = "positive_diff"
@@ -265,14 +265,14 @@ placeholder['input_today_url'] = input_today_url
 placeholder['input_yesterday_url'] = input_yesterday_url
 placeholder['surplus_today'] = surplus_today
 placeholder['surplus_2014'] = surplus_2014
-placeholder['surplus_2015'] = surplus_2015
+placeholder['surplus_2016'] = surplus_2016
 placeholder['surplus_yesterday'] = surplus_yesterday
 placeholder['surplus_2days'] = surplus_2days
 placeholder['surplus_today_2014_diff'] = surplus_today_2014_diff
 placeholder['surplus_yesterday_2014_diff'] = surplus_yesterday_2014_diff
 placeholder['surplus_2days_2014_diff'] = surplus_2days_2014_diff
-placeholder['surplus_2015_2014_diff'] = surplus_2015_2014_diff
-placeholder['surplus_2015_total'] = surplus_2015_total
+placeholder['surplus_2016_2014_diff'] = surplus_2016_2014_diff
+placeholder['surplus_2016_total'] = surplus_2016_total
 
 
 # echo "units_today: $units_today"
