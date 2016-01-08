@@ -59,7 +59,8 @@ meals_url = "http://www.myfitnesspal.com/meal/mine"
 add_pages_by_meal = {}
 add_pages_by_meal['lunch'] = 'http://www.myfitnesspal.com/user/{0}/diary/add?meal=1'
 
-add_page_urls_by_meal = { "lunch": "http://www.myfitnesspal.com/user/ehershey/diary/add?meal=1" }
+add_page_urls_by_meal = { "lunch": "http://www.myfitnesspal.com/user/ehershey/diary/add?meal=1",
+"dinner": "http://www.myfitnesspal.com/user/ehershey/diary/add?meal=2" }
 
 
 browser = mechanicalsoup.Browser(soup_config={ "features": "html.parser"} )
