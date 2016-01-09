@@ -100,21 +100,16 @@ if add_food_link:
 meal = meals.get_default_meal()
 print("Using default meal: {meal}".format(meal=meal))
 
-url = add_page_urls_by_meal[meal]
+meal_url = add_page_urls_by_meal[meal]
 
-if url:
-  print "url: {url}".format(url=url)
+if meal_url:
+  print "meal_url: {meal_url}".format(meal_url=meal_url)
 
-#assert page2.soup.select(".logout-form")
+# <a href="/account/logout">Log Out</a>
+assert page2.soup.select(".logout-form")
 
 #print(page2.soup.title.text)
 
-meals_page = browser.get(meals_url)
+meal_page = browser.get(meal_url)
 
 print(meals_page.soup.title.text)
-
-# verify we remain logged in (thanks to cookies) as we browse the rest of the site
-#page3 = browser.get("https://github.com/hickford/MechanicalSoup")
-#assert page3.soup.select(".logout-form")
-
-
