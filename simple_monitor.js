@@ -94,6 +94,20 @@ var url_configs = [
     ignore_text: '',
     negated: true
   },
+  {
+    url: 'http://dl.mongodb.org/',
+    cell_selector: "div.wrapper",
+    text_finder_from_cell_jqobj: function(jqobj) { return "Unused"; },
+    ignore_text: '',
+    negated: true
+  },
+  {
+    url: 'http://dl.mongodb.org/dl/linux/',
+    cell_selector: "head title",
+    text_finder_from_cell_jqobj: function(jqobj) { return "Unused"; },
+    ignore_text: '',
+    negated: true
+  },
 
   {
     url: 'http://buildlogs.mongodb.org/',
