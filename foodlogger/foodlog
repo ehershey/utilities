@@ -111,6 +111,8 @@ if meal_url:
 meal_page = browser.get(meal_url)
 
 print(meal_page.soup.title.text)
+if args.debug:
+  print(meal_page.content)
 
 # <a href="/account/logout">Log Out</a>
 assert meal_page.soup.select('a[href="/account/logout"]')
