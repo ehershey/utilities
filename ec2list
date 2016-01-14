@@ -16,7 +16,7 @@ fi
 tempfile=$(mktemp /tmp/ec2list.XXXXXX)
 tempfile2=$(mktemp /tmp/ec2list.XXXXXX)
 
-regions=$(cache_run 9999999 "aws ec2 describe-regions  --query Regions[*].RegionName --output text" $AWS_ACCESS_KEY_ID)
+regions=$(cache_run 9999999 "aws ec2 describe-regions  --query Regions[*].RegionName --output text" $AWS_ACCESS_KEY_ID | sed 's/ap-northeast-2//')
 printed_header=""
 for region in $regions
 do
