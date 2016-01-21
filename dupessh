@@ -1,0 +1,41 @@
+#!/bin/bash
+#
+# Duplicate existing ssh session running on current machine.
+#
+# If there are multiple, display list and take a choice.
+#
+#
+# Usage:
+# dupessh [ <case insensitive pattern to match in command line> ]
+tempfile=`mktemp /tmp/sshdupe.XXXXXX`
+
+if [[ "${1:-}" ]]
+then
+  pattern="$1"
+else
+  pattern=.
+fi
+ps -o command -www | grep ^ssh | grep -i "$pattern" > $tempfile
+count=$(wc -l < $tempfile | tr -d \\t\ )
+
+if [[ $count == 0 ]]
+then
+  echo "No current sessions!"
+  exit 1
+fi
+
+if [[ $count == 1 ]]
+then
+  num=1
+else
+  grep -n . $tempfile | sed 's/:/: /g'
+  echo -n "Choose session (1-$count): "
+  read num
+fi
+cmd=$(head -n $num $tempfile | tail -1 )
+echo "COMMAND:"
+echo "$cmd"
+eval $cmd
+echo "COMMAND:"
+echo "$cmd"
+rm $tempfile
