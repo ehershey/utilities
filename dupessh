@@ -4,9 +4,9 @@
 #
 # If there are multiple, display list and take a choice.
 #
-#
 # Usage:
 # dupessh [ <case insensitive pattern to match in command line> ]
+#
 tempfile=`mktemp /tmp/sshdupe.XXXXXX`
 
 if [[ "${1:-}" ]]
