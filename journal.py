@@ -28,4 +28,7 @@ with open(filename, "a") as filehandle:
     filehandle.write("\n")
 
 editor = os.getenv('EDITOR', 'vi')
+
+if "vi" in editor:
+    editor = editor + " +\"go 999999999\" +start"
 subprocess.call('%s %s' % (editor, filename), shell=True)
