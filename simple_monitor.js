@@ -18,9 +18,9 @@ var fs = require('fs');
 var jsdom = require('jsdom');
 var nodemailer = require('nodemailer');
 
-var MAILTO = 'Ernie Hershey <ernie@mongodb.com>'
-var MAILFROM = 'Simple Monitor <ernie@mongodb.com>'
-var SUBJECT = 'Simple_monitor alert!'
+var MAILTO = 'Ernie Hershey <ernie@mongodb.com>';
+var MAILFROM = 'Simple Monitor <ernie@mongodb.com>';
+var SUBJECT = 'Simple_monitor alert!';
 var TIMEOUT_MILLIS = 30000;
 
 var nodemailer_transport = nodemailer.createTransport();
