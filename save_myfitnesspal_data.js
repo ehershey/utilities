@@ -49,7 +49,7 @@ else
   from = moment().subtract(1,'day').format('YYYY-MM-DD');
   to = moment().format('YYYY-MM-DD');
 }
-username = 'ehershey'
+username = 'ehershey';
 
 var full_url = util.format(url,username,from,to)
 console.log('full_url: ' + full_url);
