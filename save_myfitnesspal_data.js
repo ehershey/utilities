@@ -51,7 +51,7 @@ else
 }
 username = 'ehershey';
 
-var full_url = util.format(url,username,from,to)
+var full_url = util.format(url,username,from,to);
 console.log('full_url: ' + full_url);
 
 // process database options
