@@ -86,6 +86,7 @@ get_price() {
   returned_price="$(echo -n "$returned_price" | tr \\n \ )"
   returned_price="$(echo -n "$returned_price" | sed 's/^[ 	]*//'; )"
   returned_price="$(echo -n "$returned_price" | sed 's/[ 	]*$//'; )"
+  returned_price="$(echo -n "$returned_price" | sed 's/Sold: *//'; )"
   echo "$returned_price"
 }
 
