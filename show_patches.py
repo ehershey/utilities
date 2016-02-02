@@ -12,16 +12,18 @@ import argparse
 import requests
 import sys
 
-URL = 'https://evergreen.mongodb.com/json/patches/user/ernie.hershey%4010gen.com?page=0'
+URL = 'https://evergreen.mongodb.com/json/patches/user/ernie.hershey%4010gen.com?page={page}'
 
 
 def main():
     parser = argparse.ArgumentParser(description='Show Patches')
     parser.add_argument('--verbose', '-v', default=False,
                         action='store_true', help='Display info about processing')
+    parser.add_argument('--page', '-p', default=0,
+                        action='store', help='Page number to display')
     args = parser.parse_args()
 
-    url = URL
+    url = URL.format(page=args.page)
 
     if args.verbose:
         print("Requesting %s" % url)
