@@ -22,7 +22,7 @@ then
   exit 2
 fi
 
-# sorting nastiness to do numeric sort on part of alphanumeric field
+# Sorting nastiness to do numeric sort on part of alphanumeric field
 # From http://unix.stackexchange.com/questions/41655/how-to-sort-the-string-which-combined-with-string-numeric-using-bash-script/41656#41656
 
 if ! ls -1 Z* >/dev/null 2>&1
