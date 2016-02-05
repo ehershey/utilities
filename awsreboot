@@ -1,14 +1,10 @@
 #!/bin/bash
 #
-# Given an aws instance name, reboot it
+# Given an aws ec2 listing pattern match string, reboot an instance
 #
 # Depends on:
-# 1) cache_run executable
-# 2) ec2list executable
-# 3) awscli python package and "aws" executable
-
-# how long to cache aws info
-CACHE_SECONDS=300
+# 1) ec2list and clear_cache executables
+# 2) awscli python package and "aws" executable
 
 instance_name="$1"
 
@@ -23,16 +19,17 @@ then
   . ~/amazon-build.sh
 fi
 
-header=$(cache_run $CACHE_SECONDS ec2list | head -1)
-data=$(cache_run $CACHE_SECONDS "ec2list $instance_name" | tail -1)
+header=$(ec2list | head -1)
+data=$(ec2list $instance_name | tail -1)
 
 # account for weird lost data
 #
 if [ \( ! "$data" \) -o "$(echo \"$data\" | grep running,\*$)" -o "$data" = "$header" ]
 then
   echo "retrying to poll aws data"
-  header=$(cache_run 0 "ec2list" | head -1)
-  data=$(cache_run $CACHE_SECONDS "ec2list $instance_name" | tail -1)
+  clear_cache
+  header=$(ec2list | head -1)
+  data=$(ec2list $instance_name | tail -1)
 fi
 
 # get column numbers
@@ -44,7 +41,7 @@ state="$(echo "$data" | cut -f$state_column -d,)"
 
 if [ ! "$id" -o "$id" = "running" ]
 then
-  echo "Can't find dns info for server ($data)"
+  echo "Can't find dns info for server (id: $id, data: $data)"
   exit 3
 fi
 
