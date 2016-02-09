@@ -49,7 +49,7 @@ var url_configs = [
     negated: true
   },
   {
-    url: 'http://mci.10gen.com/',
+    url: 'https://evergreen.mongodb.com/',
     cell_selector: "#content",
     text_finder_from_cell_jqobj: function(jqobj) { return "Unused"; },
     ignore_text: '',
@@ -214,7 +214,18 @@ function check_url(url_config, done_checking_one) {
     else {
 
       console.log("looking for cells with selector: " + cell_selector);
-      var cells = window.$(cell_selector);
+      var cells;
+
+      // in a special case where the selector is an id ("#id") -
+      // use getElementById for speed and in case jQuery doesn't load correctly
+      //
+      if(cell_selector.match(/^#[a-zA-Z0-9_-]+$/)) {
+        var element_id = cell_selector.replace('#','');
+        cells = new Array(window.document.getElementById(element_id));
+      }
+      else {
+        cells = window.$(cell_selector);
+      }
       var detail_text;
 
       console.log('found cells: ' + cells.length);
