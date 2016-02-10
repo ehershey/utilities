@@ -59,7 +59,7 @@ else
 fi
 
 cat | \
- jq '.[] | ( { activities: [] } + .segments[] ) | .activities[] | .trackPoints[]' | \
+ jq '{ segments: [ { activities: [ { trackPoints: [] } ] } ] } + .[] | ( { activities: [] } + .segments[] ) | .activities[] | .trackPoints[] ' | \
  sed 's/"time": "\(....\)\(..\)\(..\)T\(..\)\(..\)\(..\)Z"/entry_date: { "$date": "\1-\2-\3T\4:\5:\6.000-0000" }/g' | \
  sed 's/"time": "\(....\)\(..\)\(..\)T\(..\)\(..\)\(..\)-\([0-9][0-9][0-9][0-9]\)"/entry_date: { "$date": "\1-\2-\3T\4:\5:\6.000-\7" }/g' | \
  sed 's/"lon" *: *\(-*..\)/loc: { type: "Point", coordinates: [ \1/g' | \
