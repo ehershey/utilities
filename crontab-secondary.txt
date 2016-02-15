@@ -13,3 +13,4 @@
 */15 * * * * ~/git/utilities/save_myfitnesspal_data.js  >> /tmp/save_myfitnesspal_data.log 2>&1
 */10 * * * * ( chown :apache ~ernie/Dropbox/Web/moves.csv ; chmod g+rwx ~ernie/Dropbox/Web/moves.csv ; ~/git/utilities/update_moves_csv.sh  ) >> /tmp/update_moves_csv.log 2>&1
 */5 * * * * pkill -0 -x dropbox || echo "Dropbox not running on $(hostname)"
+*/5 * * * * curl --silent "https://api.moves-app.com/api/v1/user/activities/daily?pastDays=7&access_token=$MOVES_ACCESS_TOKEN" | /home/ernie/git/utilities/save_moves_activities.js >> /tmp/save_moves_activities.log 2>&1
