@@ -1,4 +1,4 @@
--- remove tracks from playlists "ib" and "ib2" that have played counts
+-- remove tracks from playlists "ib," "ib2" and "ib4"that have played counts
 -- other than 0
 --
 -- This can be used to auto-prune playlists that should only contain unplayed
@@ -6,6 +6,8 @@
 --
 -- After execution it will display a dialog showing the naems of tracks that
 -- were removed.
+--
+-- To install, copy to ~/Library/iTunes/Scripts/ (directory does not exist by default)
 --
 tell application "iTunes"
   set output to ""
