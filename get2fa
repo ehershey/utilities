@@ -1,4 +1,9 @@
 #!/bin/bash
+#
+# Return a 2fa token, without repeating. 
+#
+# Requires ~/.secret_2fa and oath-toolkit homebrew package
+#
 
 set -o nounset
 
