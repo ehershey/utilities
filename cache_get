@@ -2,7 +2,7 @@
 #
 # Retrieve a url and cache it for an arbitrary period of time,
 # avoiding duplicate requests if unexpired cached output exists.
-# Usage: cache_get <lifetime> <url>
+# Usage: cache_get <lifetime in seconds> <url>
 #
 
 cachedir=$HOME/.generic_cache
