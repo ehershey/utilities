@@ -1,3 +1,6 @@
 #!/bin/bash
+#
+# Launch osx screensaver
+#
 /usr/bin/osascript -e "tell application \"ScreenSaverEngine\" to activate"
 
