@@ -2,6 +2,6 @@ MAILTO=cron-workstation-notify@ernie.org
 THRESHOLD_DISK_PERCENT=90
 NODE_PATH=.
 
-*/5 * * * * pkill -0 -x Dropbox || echo "Dropbox not running on $(hostname)"
-*/10 * * * * for percentage in $(df | grep /dev/disk | grep -v /Volumes/ | grep -vi virtualbox | awk '{print $5}' | tr -d \%) ; do if [ "$percentage" -gt $THRESHOLD_DISK_PERCENT ] ; then df | mail -s "disk space problem on $(hostname) ($percentage > $THRESHOLD_DISK_PERCENT)" $MAILTO ; fi ; done
-* * * * * pkill -0 -x ScreenSaverMonitor || ( ~/Dropbox/Misc/ScreenSaverMonitor  2>&1 | /usr/local/bin/ts >> ~/Dropbox/Misc/ScreenSaverMonitor.$(hostname).log ) &
+*/5 * * * * pkill -0 -x Dropbox || echo "Dropbox not running on $(hostname -s)"
+*/10 * * * * for percentage in $(df | grep /dev/disk | grep -v /Volumes/ | grep -vi virtualbox | awk '{print $5}' | tr -d \%) ; do if [ "$percentage" -gt $THRESHOLD_DISK_PERCENT ] ; then df | mail -s "disk space problem on $(hostname -s) ($percentage > $THRESHOLD_DISK_PERCENT)" $MAILTO ; fi ; done
+* * * * * pkill -0 -x ScreenSaverMonitor || ( ~/Dropbox/Misc/ScreenSaverMonitor  2>&1 | /usr/local/bin/ts >> ~/Dropbox/Misc/ScreenSaverMonitor.$(hostname -s).log ) &
