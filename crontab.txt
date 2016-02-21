@@ -1,10 +1,11 @@
 #
-# DO NOT EDIT BY HAND
+# DO NOT EDIT CRONTAB BY HAND
+#
+# Make changes via crontab.env and crontab.txt
 #
 # LOAD WITH load_crontab.sh
 #
 # Set via crontab.env
-# JENKINS_HOME=http://chunkhost.ernie.org:8080/
 # PATH=/bin:/usr/bin:/usr/local/bin:/home/ernie/bin:.
 # PYTHONPATH=/home/ernie/Dropbox/Development/Misc:.:
 # NODE_PATH=.
@@ -38,4 +39,4 @@
 # */5 * * * * ~/git/utilities/simple_monitor.js >> /tmp/simple_monitor.log 2>&1
 #*/5 * * * * /home/ernie/git/sharewarn/bin/runner.sh >> /tmp/runner.sh.log 2>&1
 
-*/7 * * * * /usr/bin/killall node curl; sleep  5; /usr/bin/killall node curl
+#*/7 * * * * /usr/bin/killall node curl; sleep  5; /usr/bin/killall node curl
