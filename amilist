@@ -8,6 +8,9 @@
 # amilist suse packer
 #
 #
+
+CACHE_SECONDS=300
+
 if [ ! "$AWS_SECRET_ACCESS_KEY" -o ! "$AWS_ACCESS_KEY_ID" ]
 then
   . ~/amazon-build.sh
@@ -15,7 +18,7 @@ fi
 
 tempfile=$(mktemp /tmp/amilist.XXXXXX)
 tempfile2=$(mktemp /tmp/amilist.XXXXXX)
-cache_run 300 "aws ec2 describe-images --owner self | format_ami_json.js" $AWS_ACCESS_KEY_ID > $tempfile
+cache_run $CACHE_SECONDS "aws ec2 describe-images --owner self | format_ami_json.js" $AWS_ACCESS_KEY_ID > $tempfile
 while [ "$1" ]
 do
   cat "$tempfile" | grep -i "$1" > "$tempfile2"
