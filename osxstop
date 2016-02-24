@@ -1,2 +1,6 @@
 #!/bin/bash
+#
+# Tell iTunes to stop playing
+#
+
 osascript -e 'tell application "iTunes" to stop'
