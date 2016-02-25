@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# run a command caching the output for an arbitrary period of time,
+# Run a command and cache the output for the specified period of time,
 # avoiding duplicate executions if unexpired cached output exists
 # usage: cache_run <lifetime> <cmd> [ <extra key component> ]
 #
