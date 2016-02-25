@@ -1,9 +1,10 @@
 #!/bin/bash
 #
 # Add open house to calendar
-# Usage:
 #
+# Usage:
 # addopenhouse.sh <title> <date> <description> <duration - minutes> <location>
+#
 CALENDAR="Personal"
 
 TITLE="$1"
