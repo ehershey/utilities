@@ -199,6 +199,17 @@ function check_url(url_config, done_checking_one) {
     console.log('');
     console.log('In callback for url: ' + url);
 
+    // sometimes jquery disappears
+    //
+    if(!window.$)
+    {
+      if(errors)
+      {
+        errors += ", ";
+      }
+      errors += "JQuery not found (window.$)";
+    }
+
     if(errors) {
       console.log('errors loading url: ' + errors);
       console.log('sending mail');
