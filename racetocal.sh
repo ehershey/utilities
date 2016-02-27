@@ -149,8 +149,8 @@ then
   exit 2
 fi
 
-expected_date="saturday, february 21, 2015 8:00am"
-returned_date="$(get_race_date "http://www.nyrr.org/races-and-events/2015/nyrr-al-gordon-4-mile")"
+expected_date="saturday, february 20, 2016 8:00am"
+returned_date="$(get_race_date "http://www.nyrr.org/races-and-events/2016/nyrr-al-gordon-4m")"
 if [ "$returned_date" != "$expected_date" ]
 then
   echo "Test command failed! Got $returned_date, expected $expected_date"
