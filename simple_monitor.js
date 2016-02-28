@@ -198,14 +198,19 @@ function check_url(url_config, done_checking_one) {
   var handler = function(errors, window) {
     console.log('');
     console.log('In callback for url: ' + url);
+    var is_id_selector = cell_selector.match(/^#[a-zA-Z0-9_-]+$/);
 
     // sometimes jquery disappears
     //
-    if(!window.$)
+    if(!window.$ && !is_id_selector)
     {
       if(errors)
       {
         errors += ", ";
+      }
+      else
+      {
+        errors = ''
       }
       errors += "JQuery not found (window.$)";
     }
@@ -230,7 +235,7 @@ function check_url(url_config, done_checking_one) {
       // in a special case where the selector is an id ("#id") -
       // use getElementById for speed and in case jQuery doesn't load correctly
       //
-      if(cell_selector.match(/^#[a-zA-Z0-9_-]+$/)) {
+      if(is_id_selector) {
         var element_id = cell_selector.replace('#','');
         cells = new Array(window.document.getElementById(element_id));
       }
