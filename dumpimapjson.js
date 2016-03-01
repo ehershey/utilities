@@ -1,11 +1,7 @@
 #!/usr/bin/env node
 //
-//
-//
 // Dump imap data in JSON format
-//
 // Requires "authdata.js" file exporting username and password fields.
-//
 //
 var SERVER = 'imap.gmail.com';
 
@@ -13,9 +9,9 @@ var util = require('util');
 
 var Imap = require('imap');
 
-//var since = 'January 01, 2013';
+var since = 'January 01, 2013';
 //var folder = 'UNSEEN';
-var since = 'January 01, 2015';
+//var since = 'January 01, 2015';
 var folder = 'ALL';
 
 var authdata = require('authdata');
@@ -62,7 +58,14 @@ imap.once('ready', function() {
           var this_index = index;
           var message_output = {"_id": results[i], msg: msg, seqno: seqno, index: this_index};
           process.stderr.write('.');
-          process.stderr.write(results[i]);
+
+          try {
+            process.stderr.write(results[i]);
+          }
+          catch(e) {
+            process.stderr.write('got error\n');
+            // process.stderr.write(e);
+          }
           // process.stderr.write('starting message no. ' + this_index + "\n");
           msg.on('body', function(stream, info) {
             var buffer = '';
