@@ -4,7 +4,7 @@
 #
 # for example:
 #
-# file_mp3s.sh [ --nocache ] "/cygdrive/x/LCD Soundsystem" /cygdrive/x
+# file_mp3s.sh [ --dryrun ] [ --nocache ] "/cygdrive/x/LCD Soundsystem" /cygdrive/x
 #
 #
 # Depends on:
