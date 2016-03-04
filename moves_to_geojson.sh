@@ -49,7 +49,11 @@
 #   accuracy: 5,
 # }
 #
+# Example usage:
+#
 # curl --silent "https://api.moves-app.com/api/v1/user/storyline/daily?pastDays=1&trackPoints=true&access_token=$MOVES_ACCESS_TOKEN" | moves_to_geojson.sh "Moves API" |  mongoimport --db ernie_org --collection gps_log
+#
+# Requires "jq" command line tool
 
 if [ "$1" ]
 then
