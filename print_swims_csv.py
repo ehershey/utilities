@@ -1,4 +1,7 @@
 #!/usr/bin/python2.7
+#
+# convert json from Moves to CSV data
+#
 import json
 import os.path
 import re
