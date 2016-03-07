@@ -1,16 +1,17 @@
 #!/bin/bash
 #
-# Given an aws ec2 listing pattern match string, reboot an instance
+# Reboot an AWS instance, given an aws ec2 listing pattern match string
 #
 # Depends on:
 # 1) ec2list and clear_cache executables
 # 2) awscli python package and "aws" executable
+#
 
-instance_name="$1"
+instance_search_string="$1"
 
-if [ ! "$instance_name" ]
+if [ ! "$instance_search_string" ]
 then
-  echo "usage: $0 <instance_name>"
+  echo "usage: $0 <instance_search_string>"
   exit 2
 fi
 
@@ -20,7 +21,7 @@ then
 fi
 
 header=$(ec2list | head -1)
-data=$(ec2list $instance_name | tail -1)
+data=$(ec2list $instance_search_string | tail -1)
 
 # account for weird lost data
 #
@@ -29,7 +30,7 @@ then
   echo "retrying to poll aws data"
   clear_cache
   header=$(ec2list | head -1)
-  data=$(ec2list $instance_name | tail -1)
+  data=$(ec2list $instance_search_string | tail -1)
 fi
 
 # get column numbers
