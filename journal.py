@@ -1,4 +1,7 @@
 #!/usr/bin/env python
+#
+# Append the date to a file and open it in an editor
+#
 
 import argparse
 import datetime
