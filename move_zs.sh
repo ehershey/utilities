@@ -1,8 +1,6 @@
 #!/bin/bash
 #
-#
 # Move images saved with generic names from Marathon Foto to meaningful names
-#
 #
 # For example:
 #
