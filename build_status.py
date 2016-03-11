@@ -42,7 +42,7 @@ def main():
 
     ignore_inactive = args.ignore_inactive
 
-    # track how many unignored versions we have information for
+    # Track how many unignored versions we have information for
     #
     # unignored_versions_seen = 0
 
