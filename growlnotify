@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# convert growlnotify command line parameters to terminal-notifier gem options
+# Convert growlnotify command line parameters to terminal-notifier gem options
 #
 # Real growlnotify:
 # http://growl.info/extras.php
