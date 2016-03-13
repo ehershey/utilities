@@ -1,44 +1,50 @@
 #!/bin/bash
 #
-# Run a command and cache the output for the specified period of time,
-# avoiding duplicate executions if unexpired cached output exists
+# Run a command and cache the output. If output from a previous duplicate
+# execution exists from more recent than <lifetime seconds ago, re-use the
+# output.
+#
 # usage: cache_run <lifetime> <cmd> [ <extra key component> ]
 #
 
-cachedir=$HOME/.generic_cache
+set -o errexit
+set -o nounset
+
+cachedir="$HOME/.generic_cache"
 
 TIMEOUT=2
 
-if [ ! -d $cachedir ]
+if [ ! -d "$cachedir" ]
 then
-	mkdir $cachedir
+	mkdir "$cachedir"
 fi
 
 cache_life=$1
 cmd=$2
-key_extra="$3" # optional
+key_extra="${3:-}" # optional
 
 if [ ! "$cmd" ]
 then
-	echo "usage: $0 <data_lifetime> <cmd>"
+	echo "usage: $0 <data_lifetime> <cmd> [ <extra key component> ]"
 	exit 2
 fi
 
-cachefile=$cachedir/`echo "$key_extra$cmd" | sed 's/[^0-9a-zA-Z_-]/_/g'`
+cachefile="$cachedir"/`echo "$key_extra$cmd" | sed 's/[^0-9a-zA-Z_-]/_/g'`
 
-if [ -e $cachefile ]
+if [ -e "$cachefile.out" -a -e "$cachefile.err" ]
 then
-	# check if content has expired
+	# check if content has expired using stdout file
 	#
-	file_mtime=`perl -MFile::stat -e 'print stat("'$cachefile'")->mtime'`
+	file_mtime=`perl -MFile::stat -e 'print stat("'$cachefile.out'")->mtime'`
 
 	current_time=`date +%s`
 	if [ `expr $current_time - $file_mtime` -lt $cache_life ]
 	then
-		#echo cache hit >&2
-    cat $cachefile
+    cat "$cachefile.out" >&1
+    cat "$cachefile.err" >&2
 		exit
 	fi
 fi
-trap "rm $cachefile" INT
-eval $cmd | tee $cachefile
+trap "rm \"$cachefile.out\" \"$cachefile.err\"" INT
+eval $cmd 2>"$cachefile.err" | tee "$cachefile.out" 
+cat "$cachefile.err" >&2
