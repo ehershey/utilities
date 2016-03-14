@@ -2,7 +2,6 @@
 #
 # Connect bluetooth audio device in osx
 #
-#
 # Use applescript to navigate bluetooth menu bar and select "Connect"
 # in the submenu named in this variable:
 #
