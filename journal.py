@@ -2,6 +2,8 @@
 #
 # Append the date to a file and open it in an editor
 #
+# If $EDITOR isn't defined, use vi
+#
 
 import argparse
 import datetime
