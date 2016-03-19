@@ -1,5 +1,4 @@
-#!/usr/bin/python
-#
+#!/usr/bin/env python
 #
 # Types of things to be able to specify:
 # # Day
@@ -59,11 +58,11 @@ meals_url = "http://www.myfitnesspal.com/meal/mine"
 add_pages_by_meal = {}
 
 add_page_urls_by_meal = {
-    "breakfast": "http://www.myfitnesspal.com/user/ehershey/diary/add?meal=0",
+    "Breakfast": "http://www.myfitnesspal.com/user/ehershey/diary/add?meal=0",
     "Snack 1": "http://www.myfitnesspal.com/user/ehershey/diary/add?meal=1",
-    "lunch": "http://www.myfitnesspal.com/user/ehershey/diary/add?meal=2",
+    "Lunch": "http://www.myfitnesspal.com/user/ehershey/diary/add?meal=2",
     "Snack 2": "http://www.myfitnesspal.com/user/ehershey/diary/add?meal=3",
-    "dinner": "http://www.myfitnesspal.com/user/ehershey/diary/add?meal=4",
+    "Dinner": "http://www.myfitnesspal.com/user/ehershey/diary/add?meal=4",
     "Snack 3": "http://www.myfitnesspal.com/user/ehershey/diary/add?meal=5",
     }
 
