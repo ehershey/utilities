@@ -1,7 +1,6 @@
 #!/bin/bash
 #
-#
-# take a file, generate a standard path for it using the id3v2 utility
+# Take a file, generate a standard path for it using the id3v2 utility
 #
 
 
