@@ -8,7 +8,7 @@
 # # Meal
 # ## "current" (default - logic based on time of day)
 # ### Time periods should be dynamic
-# ## Breakfast / Lunch / Dinner / "Buffer"
+# ## Breakfast / Snack 1 / Lunch / Snack 2 / Dinner / Snack 3
 # ### Should be dynamic based on configured mfp meals
 # # Serving size
 # ## Size associated with food item (default if present - if item from meal or history)
