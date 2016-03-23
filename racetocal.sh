@@ -19,6 +19,8 @@ GENERIC_TITLE_SELECTOR="title"
 GENERIC_DATE_SELECTOR="div.field"
 
 set -o nounset
+set -o errexit
+set -o pipefail
 
 # Use cache_get if available, else curl
 #
@@ -113,6 +115,7 @@ get_race_date() {
   returned_date="$(echo -n "$returned_date" | sed 's/;.*//g')"
   returned_date="$(echo -n "$returned_date" | sed 's/^[ 	]*//'; )"
   returned_date="$(echo -n "$returned_date" | sed 's/[ 	]*$//'; )"
+  returned_date="$(echo -n "$returned_date" | sed 's/ for both.*$//'; )"
   returned_date="$(echo -n "$returned_date" | sed 's/ from / /'; )"
   returned_date="$(echo -n "$returned_date" | sed 's/ the / /'; )"
   returned_date="$(echo -n "$returned_date" | sed 's/ begins at / /'; )"
@@ -157,21 +160,41 @@ then
   exit 2
 fi
 
-expected_title="City of Yonkers Marathon, Half Marathon, 5K"
-returned_title="$(get_race_title "https://nycruns.com/races/?race=the-yonkers-marathon-2015")"
-if [ "$returned_title" != "$expected_title" ]
-then
-  echo "Test command failed! Got $returned_title, expected $expected_title"
-  exit 2
-fi
 
-expected_date="october 18, 2015 8:00 a.m."
-returned_date="$(get_race_date "https://nycruns.com/races/?race=the-yonkers-marathon-2015")"
-if [ "$returned_date" != "$expected_date" ]
-then
-  echo "Test command failed! Got $returned_date, expected $expected_date"
-  exit 2
-fi
+# Test get_race_title and get_race_date
+#
+# Arguments: <url> <expected title> <expected date>
+#
+test_url() {
+  url_to_test="$1"
+  expected_title="$2"
+  expected_date="$3"
+
+  returned_title="$(get_race_title "$url_to_test")"
+  returned_date="$(get_race_date "$url_to_test")"
+
+
+  if [ "$returned_title" != "$expected_title" ]
+  then
+    echo "Test command failed! Got $returned_title, expected $expected_title"
+    echo "Test URL: $url_to_test"
+    exit 2
+  fi
+
+  if [ "$returned_date" != "$expected_date" ]
+  then
+    echo "Test command failed! Got $returned_date, expected $expected_date"
+    echo "Test URL: $url_to_test"
+    exit 2
+  fi
+}
+
+url_to_test="https://nycruns.com/races/?race=queens-half-marathon-5k-2016"
+expected_title="NYCRUNS Queens Half Marathon and 5K"
+expected_date="april 17, 2016 8:00 am"
+
+test_url "$url_to_test" "$expected_title" "$expected_date"
+
 
 expected_date="february 21, 2016 8:00 am"
 returned_date="$(get_race_date "https://nycruns.com/races/?race=nycruns-central-park-marathon-2016")"
