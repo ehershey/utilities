@@ -1,6 +1,5 @@
 // update gps_log data with the number of nearby points that occurred before it
 //
-//
 // usage :
 // mongo ernie_org < print_location_newness.js
 //
@@ -15,6 +14,5 @@ var update_previous_nearby = function(item) {
   };
   print(db.gps_log.find(earlier_criteria).count());
 }
-
 
 db.gps_log.find(criteria).forEach(update_previous_nearby);
