@@ -1,5 +1,6 @@
 #!/bin/bash
 set -o nounset
+set -o errexit
 #
 # Update status of race in calendar to registered
 # Usage:
@@ -8,7 +9,7 @@ set -o nounset
 CALENDAR="Rides and Races"
 TODAY=$(date +%D)
 
-TITLE="$1"
+TITLE="${1:-}"
 YEAR="${3:-}"
 
 if [ ! "$TITLE" ]
@@ -30,6 +31,21 @@ then
   echo "Date looks funny ($DATE). Is it a year?"
   exit 2
 fi
+
+# Error if title looks like a date or year
+#
+if echo "$TITLE" | grep -xq ....
+then
+  echo "Title looks funny ($TITLE). Is it a year?"
+  exit 2
+fi
+if echo "$TITLE" | grep '^.*/.*/.*'
+then
+  echo "Title looks funny ($TITLE). Is it a date?"
+  exit 2
+fi
+
+
 
 tempfile="$(mktemp /tmp/registerrace.XXXXX)"
 echo $tempfile
