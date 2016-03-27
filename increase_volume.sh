@@ -1,11 +1,14 @@
 #!/bin/bash
 #
-#
 # Filter audio files, increasing their volume
 #
+# Requires: ffmpeg
 #
+set -o errexit
+set -o nounset
+set -o pipefail
 
-if [ ! "$1" ]
+if [ ! "${1:-}" ]
 then
   echo "usage: $0: <file> [ <file> ... ]"
   exit 1
