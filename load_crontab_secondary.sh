@@ -1,7 +1,6 @@
 #!/bin/bash
 # load crontab from crontab-secondary.txt and crontab.env
 #
-#
 CRON_USER=ernie
 FILEHOME=/home/ernie/git/utilities
 CRON_HOSTNAME=eahdroplet1
