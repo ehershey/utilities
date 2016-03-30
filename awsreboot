@@ -7,7 +7,11 @@
 # 2) awscli python package and "aws" executable
 #
 
-instance_search_string="$1"
+set -o errexit
+set -o nounset
+set -o pipefail
+
+instance_search_string="${1:-}"
 
 if [ ! "$instance_search_string" ]
 then
