@@ -1,11 +1,9 @@
 #!/bin/bash
 # usage: file_mp3s.sh <source> <target>
 #
-#
 # for example:
 #
 # file_mp3s.sh [ --dryrun ] [ --nocache ] "/cygdrive/x/LCD Soundsystem" /cygdrive/x
-#
 #
 # Depends on:
 # generate_normalized_mp3_path.sh in path
