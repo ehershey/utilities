@@ -3,7 +3,7 @@
 // usage :
 // mongo ernie_org < print_location_newness.js
 //
-var criteria = { entry_date: { $gte: new Date(2014,03,1,0,0,0,0) } };
+var criteria = { entry_date: { $gte: new Date(2016,03,1,0,0,0,0) } };
 var distance_required_to_be_new_meters = 25;
 
 var update_previous_nearby = function(item) {
