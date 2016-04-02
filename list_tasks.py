@@ -1,6 +1,5 @@
 #!/usr/bin/python
 #
-#
 # List Todoist tasks due today or overdue, excluding "@home" label
 #
 # See also:
