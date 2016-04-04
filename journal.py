@@ -28,6 +28,7 @@ if "." not in filename:
 print(filename)
 
 with open(filename, "a") as filehandle:
+    filehandle.write("\n")
     filehandle.write(datetime.date.strftime(datetime.datetime.now(), "%D"))
     filehandle.write("\n")
     filehandle.write("\n")
