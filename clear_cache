@@ -2,4 +2,7 @@
 #
 # Delete all cache entries from cache_get and cache_run
 #
+set -o nounset
+set -o pipefail
+set -o errexit
 find ~/.generic_cache/ -type f | xargs rm
