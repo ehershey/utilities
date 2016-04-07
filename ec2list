@@ -8,7 +8,11 @@
 # ec2list running ernie-keypair1 sometagvalue
 #
 #
-if [ ! "$AWS_SECRET_ACCESS_KEY" -o ! "$AWS_ACCESS_KEY_ID" ]
+set -o nounset
+set -o pipefail
+set -o errexit
+
+if [ ! "${AWS_SECRET_ACCESS_KEY:-}" -o ! "${AWS_ACCESS_KEY_ID:-}" ]
 then
   . ~/amazon-build.sh
 fi
@@ -29,7 +33,7 @@ do
     fi
 done
 wait
-while [ "$1" ]
+while [ "${1:-}" ]
 do
   cat "$tempfile" | grep -i "$1" > "$tempfile2"
   cat "$tempfile2" > "$tempfile"
