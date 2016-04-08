@@ -15,13 +15,16 @@
 #
 # Does not support instance names with spaces in them
 #
+set -o nounset
+set -o pipefail
+set -o errexit
 
 # how long to cache aws info
 CACHE_SECONDS=300
 
 . getuserbydistro.sh
 
-if [ ! "$2" ]
+if [ ! "${2:-}" ]
 then
   echo "usage: "
   echo "1) instance name in last arg: awsscp <localpath(s)> instance_name:[<remote_path>]"
@@ -40,7 +43,7 @@ fi
 
 
 
-if [ ! "$AWS_SECRET_ACCESS_KEY" -o ! "$AWS_ACCESS_KEY_ID" ]
+if [ ! "${AWS_SECRET_ACCESS_KEY:-}" -o ! "${AWS_ACCESS_KEY_ID:-}" ]
 then
   . ~/amazon-build.sh
 fi
@@ -72,7 +75,7 @@ then
   exit 3
 fi
 
-if [ ! "$user" ]
+if [ ! "${user:-}" ]
 then
   user=$(getuserbydistro "$distro")
 fi
