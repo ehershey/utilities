@@ -12,13 +12,15 @@
 # 4) instance_info_by_name.sh executable
 
 set -o nounset
+set -o pipefail
+set -o errexit
 
 # how long to cache aws info
 CACHE_SECONDS=300
 
 . getuserbydistro.sh
 
-if [[ "$1" == "-t" ]]
+if [[ "${1:-}" == "-t" ]]
 then
   extra_args=" -t"
   shift
@@ -26,7 +28,7 @@ else
   extra_args=""
 fi
 
-instance_name="$1"
+instance_name="${1:-}"
 shift
 
 if echo $instance_name | grep -q @
