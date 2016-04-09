@@ -1,7 +1,7 @@
 getuserbydistro ()
 {
-    distro="$1"
-    name="$2"
+    distro="${1:-}"
+    name="${2:-}"
     if echo $distro $name | grep windows > /dev/null 2>&1
     then
       echo Administrator
