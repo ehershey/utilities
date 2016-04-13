@@ -2,4 +2,7 @@
 #
 # Launch osx screensaver
 #
+set -o nounset
+set -o errexit
+set -o pipefail
 /usr/bin/osascript -e "tell application \"ScreenSaverEngine\" to activate"
