@@ -3,10 +3,15 @@
 # Connect bluetooth audio device in osx
 #
 # Use applescript to navigate bluetooth menu bar and select "Connect"
-# in the submenu named in this variable:
+# in the submenu named $DEVICE_NAME.
+#
+# $DEVICE_NAME can be set in these ways, in descending precedence:
+# 1) The command line
+# 2) $BLUETOOTH_AUDIO_DEVICE_NAME environment variable set outside this script
+# 3) $DEFAULT_DEVICE_NAME, set below
 #
 DEFAULT_DEVICE_NAME="ODT Privates"
-DEVICE_NAME=${1:-$DEFAULT_DEVICE_NAME}
+DEVICE_NAME=${1:-${BLUETOOTH_AUDIO_DEVICE_NAME:-$DEFAULT_DEVICE_NAME}}
 
 if [[ "$DEVICE_NAME" = "-h" ]]
 then
