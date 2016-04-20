@@ -116,6 +116,7 @@ get_race_date() {
   returned_date="$(echo -n "$returned_date" | sed 's/^[ 	]*//'; )"
   returned_date="$(echo -n "$returned_date" | sed 's/[ 	]*$//'; )"
   returned_date="$(echo -n "$returned_date" | sed 's/ for both.*$//'; )"
+  returned_date="$(echo -n "$returned_date" | sed 's/ for the.*$//'; )"
   returned_date="$(echo -n "$returned_date" | sed 's/ from / /'; )"
   returned_date="$(echo -n "$returned_date" | sed 's/ the / /'; )"
   returned_date="$(echo -n "$returned_date" | sed 's/ begins at / /'; )"
@@ -191,7 +192,7 @@ test_url() {
 
 url_to_test="https://nycruns.com/races/?race=queens-half-marathon-5k-2016"
 expected_title="NYCRUNS Queens Half Marathon and 5K"
-expected_date="april 17, 2016 8:00 am"
+expected_date="april 17, 2016 8:00am"
 
 test_url "$url_to_test" "$expected_title" "$expected_date"
 
