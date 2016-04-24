@@ -64,7 +64,7 @@ fi
 
 REGISTERED_TITLE="$(echo "$TITLE" | sed "s/ $YEAR$/(registered) $YEAR/")"
 
-output="$(gcalcli --cache --cal "$CALENDAR" search "\"$TITLE\"" --details url | grep .)"
+output="$(gcalcli --cache --calendar "$CALENDAR" search "\"$TITLE\"" --details url | grep .)"
 if [ ! "$(echo "$output" | grep 'No Events Found...')" ]
 then
   echo "Probable duplicate:"
@@ -72,7 +72,7 @@ then
   exit 2
 fi
 
-output="$(gcalcli --cache --cal "$CALENDAR" search "\"$REGISTERED_TITLE\"" --details url | grep .)"
+output="$(gcalcli --cache --calendar "$CALENDAR" search "\"$REGISTERED_TITLE\"" --details url | grep .)"
 if [ ! "$(echo "$output" | grep 'No Events Found...')" ]
 then
   echo "Probable duplicate:"
@@ -81,7 +81,7 @@ then
 fi
 
 
-output="$(gcalcli add --cal "$CALENDAR" --title "$TITLE" --when "$DATE" --duration "$DURATION" --description "$URL
+output="$(gcalcli add --calendar "$CALENDAR" --title "$TITLE" --when "$DATE" --duration "$DURATION" --description "$URL
 
 Not registered as of $TODAY" --where "$LOCATION" --reminder "$REMINDER" --details url)"
 
