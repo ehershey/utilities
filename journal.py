@@ -4,6 +4,8 @@
 #
 # If $EDITOR isn't defined, use vi
 #
+# if file isn't specified, use ~/Dropbox/Documents/filename.txt
+#
 
 import argparse
 import datetime
