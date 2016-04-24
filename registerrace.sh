@@ -50,7 +50,7 @@ fi
 tempfile="$(mktemp /tmp/registerrace.XXXXX)"
 echo $tempfile
 
-gcalcli --cache --cal "$CALENDAR" search --nolineart --nocolor --detail_description_width 200 "$TITLE (registered) $YEAR" --details all > "$tempfile"
+gcalcli --cache --calendar "$CALENDAR" search --nolineart --nocolor --detail_description_width 200 "$TITLE (registered) $YEAR" --details all > "$tempfile"
 
 title=$(grep ^$YEAR $tempfile | awk '{print $3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$13,$15,$16,$17}')
 echo "title: $title"
@@ -62,7 +62,7 @@ then
   exit 2
 fi
 
-gcalcli --cache --cal "$CALENDAR" search --nolineart --nocolor --detail_description_width 200 "\"$TITLE\" $YEAR" --details all > "$tempfile"
+gcalcli --cache --calendar "$CALENDAR" search --nolineart --nocolor --detail_description_width 200 "\"$TITLE\" $YEAR" --details all > "$tempfile"
 
 count=$(grep Description: $tempfile | wc -l)
 
@@ -107,9 +107,9 @@ fi
 echo "new_description: $new_description"
 
 echo -e "t\n$new_title\nd\n$new_description\ns\nq"
-echo -e "t\n$new_title\nd\n$new_description\ns\nq" | gcalcli --cal "$CALENDAR" edit "\"$title\""
+echo -e "t\n$new_title\nd\n$new_description\ns\nq" | gcalcli --calendar "$CALENDAR" edit "\"$title\""
 
-#output="$(gcalcli add --cal "$CALENDAR" --title "$TITLE" --when "$DATE" --duration "$DURATION" --description "$URLNot registered as of $TODAY" --where "$LOCATION" --reminder "$REMINDER" --details url)"
+#output="$(gcalcli add --calendar "$CALENDAR" --title "$TITLE" --when "$DATE" --duration "$DURATION" --description "$URLNot registered as of $TODAY" --where "$LOCATION" --reminder "$REMINDER" --details url)"
 
 #url="$(echo "$output" | tr \ \\t \\n | grep http | head -1)"
 #if [ ! "$url" ]
