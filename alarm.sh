@@ -41,6 +41,23 @@ then
   exit 2
 fi
 
+if ! launchctl list com.apple.atrun >/dev/null 2>&1
+then
+  echo "AT service not installed. Install with:"
+  echo "launchctl load -w /System/Library/LaunchDaemons/com.apple.atrun.plist"
+  echo -n "Should I run this now? (Y/n): "
+  read answer
+  if [ "$answer" == "" -o "$answer" == "y" -o "$answer" == "Y" ]
+  then
+    if ! launchctl load -w /System/Library/LaunchDaemons/com.apple.atrun.plist
+    then
+      exit $?
+    fi
+  else
+    exit 3
+  fi
+fi
+
 echo "Will alarm in $minutes minutes"
 #echo "(afplay "$AUDIOFILE" ; afplay "$AUDIOFILE" ) & killall PandoraJam iTunes iTunesHelper mdworker" | at now + $minutes minutes
 echo "(afplay "$AUDIOFILE" ; afplay "$AUDIOFILE" ) & killall PandoraJam ; osxstop & osxnotify 'Move!'" | sudo at now + $minutes minutes
