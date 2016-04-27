@@ -2,11 +2,14 @@
 #
 # Take a file, generate a standard path for it using the id3v2 utility
 #
+set -o pipefail
+set -o errexit
+set -o nounset
 
 
 # --noconvert disables attempting to convert idv2 to idv3
 #
-if [ "$1" = "--noconvert" ]
+if [ "${1:-}" = "--noconvert" ]
 then
   noconvert=1
   shift
@@ -15,7 +18,7 @@ else
 fi
 
 
-file="$1"
+file="${1:-}"
 
 
 if [ ! "$file" ]
