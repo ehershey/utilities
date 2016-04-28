@@ -1,4 +1,8 @@
 #!/bin/bash
+#
+set -o pipefail
+set -o errexit
+set -o nounset
 
 INTERFACE=en0
 WIFIDOC=~/Dropbox//PlainText/wifi.txt
