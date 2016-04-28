@@ -81,6 +81,13 @@ var url_configs = [
     negated: true
   },
   {
+    url: 'http://downloads-distro.mongodb.org/',
+    cell_selector: "body:contains(README)",
+    text_finder_from_cell_jqobj: function(jqobj) { return "Unused"; },
+    ignore_text: '',
+    negated: true
+  },
+  {
     url: 'http://logkeeper.mongodb.org/',
     cell_selector: "body:contains(Service Unavailable)",
     text_finder_from_cell_jqobj: function(jqobj) { return "Unused"; },
