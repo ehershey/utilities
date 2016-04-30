@@ -8,7 +8,7 @@
 # Z (1).jpeg
 # Z (2).jpeg
 
-
+set -o pipefail
 set -o errexit
 set -o nounset
 
