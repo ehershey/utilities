@@ -17,6 +17,7 @@ EVENTBRITE_DATE_SELECTOR="span.dtstart"
 
 GENERIC_TITLE_SELECTOR="title"
 GENERIC_DATE_SELECTOR="div.field"
+GENERIC_DATE_SELECTOR2="div.date"
 
 set -o nounset
 set -o errexit
@@ -39,6 +40,14 @@ then
 else
   echo "pup utility required"
   exit 3
+fi
+
+# Check argument
+#
+if [ ! "${1:-}" ]
+then
+  echo "Usage: $0 <URL>"
+  exit 1
 fi
 
 get_race_title() {
@@ -75,6 +84,10 @@ get_race_title() {
   # Grab only first line
   #
   returned_title="$(echo -n "$returned_title" | head -1 )"
+
+  # Remove leading "Home" text
+  #
+  returned_title="$(echo -n "$returned_title" | sed 's/Home [–-] //')"
   echo "$returned_title"
 }
 
@@ -99,6 +112,11 @@ get_race_date() {
   if [ ! "$returned_date" ]
   then
     returned_date="$($CURL "$url" | $PUP "$GENERIC_DATE_SELECTOR" text{})"
+  fi
+
+  if [ ! "$returned_date" ]
+  then
+    returned_date="$($CURL "$url" | $PUP "$GENERIC_DATE_SELECTOR2" text{})"
   fi
 
   returned_date="$(echo -n "$returned_date" | tr A-Z a-z | sed 's/start time://g' | sed 's/start\.//g')"
@@ -196,6 +214,18 @@ expected_date="april 17, 2016 8:00am"
 
 test_url "$url_to_test" "$expected_title" "$expected_date"
 
+expected_title="ORLEN Warsaw Marathon"
+expected_date="24 april 2016"
+# url_to_test="https://www.orlenmarathon.pl/en/"
+url_to_test="http://web.archive.org/web/20160321034209/http://www.orlenmarathon.pl/en/"
+
+test_url "$url_to_test" "$expected_title" "$expected_date"
+
+expected_title="Virgin Money London Marathon"
+expected_date="23 april 2017"
+url_to_test="https://www.virginmoneylondonmarathon.com/en-gb/"
+
+test_url "$url_to_test" "$expected_title" "$expected_date"
 
 expected_date="february 21, 2016 8:00 am"
 returned_date="$(get_race_date "https://nycruns.com/races/?race=nycruns-central-park-marathon-2016")"
@@ -220,25 +250,6 @@ then
   echo "Test command failed! Got $returned_date, expected $expected_date"
   exit 2
 fi
-
-expected_title="ORLEN Warsaw Marathon"
-returned_title="$(get_race_title "https://www.orlenmarathon.pl/en/")"
-if [ "$returned_title" != "$expected_title" ]
-then
-  echo "Test command failed! Got $returned_title, expected $expected_title"
-  exit 2
-fi
-
-expected_date="24 april 2016"
-returned_date="$(get_race_date "https://www.orlenmarathon.pl/en/")"
-if [ "$returned_date" != "$expected_date" ]
-then
-  echo "Test command failed! Got $returned_date, expected $expected_date"
-  exit 2
-fi
-
-
-
 
 url="$1"
 
