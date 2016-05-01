@@ -4,6 +4,10 @@
 # Usage:
 #
 # addrace.sh <title> <date> <url> [ <duration - minutes, default 120> [ <location - default NYC> [ <reminder - minutes, default 10080 (one week)> ] ] ]
+
+set -o pipefail
+set -o errexit
+
 CALENDAR="Rides and Races"
 TODAY=$(date +%D)
 
