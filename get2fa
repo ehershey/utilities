@@ -1,14 +1,33 @@
 #!/bin/bash
 #
-# Return a 2fa token, without repeating. 
+# Return a 2fa token, without repeating.
 #
-# Requires ~/.secret_2fa and oath-toolkit homebrew package
+# Requires oath-toolkit homebrew package
+#
+# Optional configuration environment variables - $DIR_2FA (default is ~)
+#
+# Optional command line argument - name of file to load from $DIR_2FA/ (default is .secret_2fa)
 #
 
 set -o nounset
+set -o pipefail
+set -o errexit
 
-LAST_ENTRY_FILE=~/.2fa-last.txt
-source ~/.secret_2fa
+if [ ! "${DIR_2FA:-}" ]
+then
+  DIR_2FA=~
+fi
+
+if [ "${1:-}" ]
+then
+  KEYFILE="$DIR_2FA/${1:-}"
+else
+  KEYFILE="$DIR_2FA/.secret_2fa"
+fi
+
+LAST_ENTRY_FILE="~/.2fa-last-${1:-}.txt"
+
+SECRET_2FA="$(cat "$KEYFILE" | tr -d \ )"
 
 if [ -e "$LAST_ENTRY_FILE" ]
 then
@@ -29,5 +48,8 @@ done
 echo
 
 echo $new_entry
-echo $new_entry > $LAST_ENTRY_FILE
+if [ -e "$LAST_ENTRY_FILE" ]
+then
+  echo $new_entry > $LAST_ENTRY_FILE
+fi
 echo $new_entry | pbcopy
