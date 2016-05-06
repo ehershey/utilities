@@ -5,6 +5,7 @@
 #
 # Requires Blueutil (https://github.com/toy/blueutil)
 #
+set -o errexit
 
 export "PATH=/usr/sbin:/usr/local/bin:$PATH"
 
