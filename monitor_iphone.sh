@@ -11,7 +11,7 @@ export "PATH=/usr/sbin:/usr/local/bin:$PATH"
 
 # To populate $iphone_serial
 #
-. $(dirname "$0")/monitor_iphone_env.sh
+. "$(dirname "$0")"/monitor_iphone_env.sh
 
 echo "iphone_serial: $iphone_serial"
 
