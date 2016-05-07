@@ -1,5 +1,8 @@
 #!/bin/bash
 #
+
+set -o errexit
+
 CACHE_TIME=300
 DIR=~/Dropbox/Misc/bash_history
 tempfile=$(mktemp /tmp/global_history.XXXXXX)
