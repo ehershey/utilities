@@ -8,7 +8,6 @@ DIR=~/Dropbox/Misc/bash_history
 tempfile=$(mktemp /tmp/global_history.XXXXXX)
 tempfile2=$(mktemp /tmp/global_history.XXXXXX)
 
-
 cache_run 300 "ls -tr \"$DIR\"/*" | xargs cat > "$tempfile"
 while [ "$1" ]
 do
