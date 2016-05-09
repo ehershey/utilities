@@ -95,7 +95,7 @@ var url_configs = [
     negated: false
   },
   {
-    url: 'https://logkeeper.mongodb.org/build/56ba15a3be07c465a397c5c1/test/56ba15a39041300b275bd160',
+    url: 'https://logkeeper.mongodb.org/build/5730c2199041307c58077ce4/test/5730c2299041307c58077de5',
     cell_selector: "body:contains(initandlisten)",
     text_finder_from_cell_jqobj: function(jqobj) { return "Unused"; },
     ignore_text: '',
