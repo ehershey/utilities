@@ -1,4 +1,8 @@
-#!/usr/bin/perl -w
+#!/usr/bin/perl
+# Parse a time and date string
+# and convert to unix timestamp
+#
+use warnings;
 use strict;
 use Date::Parse;
 my $time = str2time($ARGV[0]) || time;
