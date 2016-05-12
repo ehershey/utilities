@@ -3,9 +3,9 @@
 # Display Evergreen patches and patch info
 #
 # Usage:
-# show_patches.py [ --verbose ]
+# show_patches.py [ --verbose ] [ --page # ]
 #
-# --verbose includes extra information like the URL being requested
+# --verbose includes extra information such as the URL being requested
 #
 
 import argparse
