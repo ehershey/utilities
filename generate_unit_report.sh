@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -o errexit
+
 date >&2
 
 SCRIPT=~ernie/git/utilities/unit_report.py
