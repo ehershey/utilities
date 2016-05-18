@@ -52,7 +52,7 @@ export PATH=$PATH:./node_modules/.bin
 for file in $filelist
 do
   let filecount=filecount+1
-  loudecho "Testing file: $file"
+  loudecho "Examining directory entry: $file"
   if [ -d "$file" ]
   then
     loudecho Skipping directory
