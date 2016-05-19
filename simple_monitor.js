@@ -95,6 +95,14 @@ var url_configs = [
     negated: false
   },
   {
+    url: 'https://evergreen.mongodb.com/hosts',
+    cell_selector: "td:contains(days)",
+    text_finder_from_cell_jqobj: function(jqobj) { return jqobj.text() },
+    ignore_text: '',
+    negated: false
+  },
+
+  {
     url: 'https://logkeeper.mongodb.org/build/5730c2199041307c58077ce4/test/5730c2299041307c58077de5',
     cell_selector: "body:contains(initandlisten)",
     text_finder_from_cell_jqobj: function(jqobj) { return "Unused"; },
@@ -173,7 +181,7 @@ var url_configs = [
     // so until 11pm this will return yesterday. This can be shaky logic since most days it
     // shouldn't trigger anyways
     //
-    cell_selector: 'div.contrib-column:contains(Current streak):contains(' + (new Date((new Date()) - 23 * 60 * 60 * 1000)).toFormat("MMMM D") + '), ' + 'div.contrib-column:contains(Current streak):contains(' + (new Date()).toFormat("MMMM D") + '), ' + 'div.contrib-column:contains(Current streak):contains(' + (new Date((new Date()).getTime() + 23 * 60 * 60 * 1000)).toFormat("MMMM D") + ')',
+    cell_selector: 'div.contribution-activity-listing:contains(' + (new Date((new Date()) - 23 * 60 * 60 * 1000)).toFormat("MMMM D") + '), ' + 'div.contribution-activity-listing:contains(' + (new Date()).toFormat("MMMM D") + '), ' + 'div.contribution-activity-listing:contains(' + (new Date((new Date()).getTime() + 23 * 60 * 60 * 1000)).toFormat("MMMM D") + ')',
     text_finder_from_cell_jqobj: function(jqobj) { return "date not found in page! (" + (new Date((new Date()) - 23 * 60 * 60 * 1000)).toFormat("MMMM DD") + ')'; },
     ignore_text: '',
     negated: true
