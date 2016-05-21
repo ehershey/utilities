@@ -25,14 +25,15 @@ else
   KEYFILE="$DIR_2FA/.secret_2fa"
 fi
 
-LAST_ENTRY_FILE="~/.2fa-last-${1:-}.txt"
+LAST_ENTRY_FILE=~/".2fa-last-${1:-}.txt"
 
 SECRET_2FA="$(cat "$KEYFILE" | tr -d \ )"
 
 if [ -e "$LAST_ENTRY_FILE" ]
 then
   last_entry=$(cat $LAST_ENTRY_FILE)
-  echo "Found last entry..."
+  echo "Found last entry:"
+  echo "$last_entry"
 else
   last_entry=""
 fi
@@ -48,8 +49,6 @@ done
 echo
 
 echo $new_entry
-if [ -e "$LAST_ENTRY_FILE" ]
-then
-  echo $new_entry > $LAST_ENTRY_FILE
-fi
+touch "$LAST_ENTRY_FILE"
+echo "$new_entry" > "$LAST_ENTRY_FILE"
 echo $new_entry | pbcopy
