@@ -5,12 +5,13 @@ set -o errexit
 # Update status of race in calendar to registered
 # Usage:
 #
-# registerrace.sh <title> [ <registration date> [ <event year> ]]
+# registerrace.sh <title> [ <event year> [ <registration date> ]]
+
 CALENDAR="Rides and Races"
 TODAY=$(date +%D)
 
 TITLE="${1:-}"
-YEAR="${3:-}"
+YEAR="${2:-}"
 
 if [ ! "$TITLE" ]
 then
@@ -22,11 +23,11 @@ then
   YEAR=$(date +%Y)
 fi
 
-DATE=${2:-$TODAY}
+DATE=${3:-$TODAY}
 
 # Error if date looks like a year
 #
-if echo "$DATE" | grep -xq ....
+if echo "$DATE" | grep -xq '[0-9][0-9][0-9][0-9]'
 then
   echo "Date looks funny ($DATE). Is it a year?"
   exit 2
@@ -34,7 +35,7 @@ fi
 
 # Error if title looks like a date or year
 #
-if echo "$TITLE" | grep -xq ....
+if echo "$TITLE" | grep -xq '[0-9][0-9][0-9][0-9]'
 then
   echo "Title looks funny ($TITLE). Is it a year?"
   exit 2
