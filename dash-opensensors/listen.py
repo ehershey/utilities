@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 """
 
 Listen for Amazon Dash buttons on the network and send their
