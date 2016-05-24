@@ -6,17 +6,8 @@
 # alarm.sh [ <minutes> ]
 #
 # Requires:
-# * "at" service - https://developer.apple.com/library/mac/documentation/Darwin/Reference/Manpages/man1/at.1.html#//apple_ref/doc/man/1/at
-# ** Enable with:            launchctl load -w /System/Library/LaunchDaemons/com.apple.atrun.plist
 # * afplay executable - https://developer.apple.com/library/mac/documentation/Darwin/Reference/Manpages/man1/afplay.1.html#//apple_ref/doc/man/1/afplay
 # * ~/Dropbox/Misc/ascending.mp3 audio file
-#
-# Works best with sudo password exemptions set via 'sudo visudo':
-#
-# %admin ALL=NOPASSWD:/usr/bin/atq
-# %admin ALL=NOPASSWD:/usr/bin/atrm
-# %admin ALL=NOPASSWD:/usr/bin/at
-# %admin ALL=NOPASSWD:/usr/bin/killall afplay # for alarmkill.sh
 #
 AUDIOFILE=~/Dropbox/Misc/ascending.mp3
 
@@ -41,24 +32,8 @@ then
   exit 2
 fi
 
-if ! launchctl list com.apple.atrun >/dev/null 2>&1
-then
-  echo "AT service not installed. Install with:"
-  echo "launchctl load -w /System/Library/LaunchDaemons/com.apple.atrun.plist"
-  echo -n "Should I run this now? (Y/n): "
-  read answer
-  if [ "$answer" == "" -o "$answer" == "y" -o "$answer" == "Y" ]
-  then
-    if ! launchctl load -w /System/Library/LaunchDaemons/com.apple.atrun.plist
-    then
-      exit $?
-    fi
-  else
-    exit 3
-  fi
-fi
+seconds=$(expr $minutes \* 60)
+echo "Will alarm in $minutes minutes ($seconds seconds)"
 
-echo "Will alarm in $minutes minutes"
-#echo "(afplay "$AUDIOFILE" ; afplay "$AUDIOFILE" ) & killall PandoraJam iTunes iTunesHelper mdworker" | at now + $minutes minutes
-echo "(afplay "$AUDIOFILE" ; afplay "$AUDIOFILE" ) & killall PandoraJam ; osxstop & osxnotify 'Move!'" | sudo at now + $minutes minutes
-osxnotify $(sudo atq | cut -f2-)
+osxnotify "Alarm in $minutes minutes"
+sleep $seconds; ( afplay "$AUDIOFILE" ; afplay "$AUDIOFILE" ) & killall PandoraJam ; osxstop & osxnotify 'Move!'
