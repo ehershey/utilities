@@ -1,6 +1,5 @@
 #!/bin/bash
 #
-#
 # Turn bluetooth on when my iphone is connected via usb
 #
 # Requires Blueutil (https://github.com/toy/blueutil)
