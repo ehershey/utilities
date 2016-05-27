@@ -1,8 +1,8 @@
 #!/usr/bin/env node
-// Format aws ec2 describe-images output into csv data - image_name, name, description, etc...
+// Format ami ec2 describe-images output into csv data - image_name, name, description, etc...
 //
 // Example usage:
-// aws ec2 describe-images --owner self | ./format_aws_json.js
+// ami ec2 describe-images --owner self | ./format_ami_json.js
 //
 
 var stdin_chunks = []
