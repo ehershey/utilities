@@ -8,10 +8,10 @@
 # 3) cache_run executable
 # 4) instance_info_by_name.sh executable
 #
-# Only supported usage:
+# Usage:
 #
-# 1) instance name in last arg: awsscp <localpath(s)> instance_name:[<remote_path>]
-# 2) instance name in first arg: awsscp instance_name:<remote_path(s)> localpath
+# 1) Instance name in last arg: awsscp <localpath(s)> instance_name:[<remote_path>]
+# 2) Instance name in first arg: awsscp instance_name:<remote_path(s)> localpath
 #
 # Does not support instance names with spaces in them
 #
@@ -87,4 +87,4 @@ fi
 
 args=$(echo "$*" | sed "s/$full_instance_name:/$user@$dns:/")
 
-scp -i ~/.ssh/$key.pem $args
+scp -o StrictHostKeyChecking=no --i ~/.ssh/$key.pem $args
