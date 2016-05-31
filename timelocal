@@ -1,6 +1,6 @@
 #!/usr/bin/perl
-# Parse a time and date string
-# and convert to unix timestamp
+# Parse a time and date string,
+# convert to unix timestamp
 #
 use warnings;
 use strict;
