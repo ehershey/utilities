@@ -22,8 +22,8 @@ if [ ! -e "$csvfile" ]
 then
   touch "$csvfile"
 fi
-curl "https://api.moves-app.com/api/1.1/user/summary/daily?pastDays=10&access_token=$MOVES_ACCESS_TOKEN" | ~ernie/git/utilities/print_moves_csv.py > $tempfile ; cat "$csvfile" >> $tempfile ; cat $tempfile | sort --key 10,10 --field-separator=, --reverse --numeric | sort --key=1,1 --field-separator=, --reverse --unique >> $tempfile2
-ls -l $tempfile2 $csvfile
+curl "https://api.moves-app.com/api/1.1/user/summary/daily?pastDays=10&access_token=$MOVES_ACCESS_TOKEN" | ~ernie/git/utilities/print_moves_csv.py > $tempfile ; cat "$csvfile" >> $tempfile ; cat $tempfile | sort --key 10,10 --field-separator=, --reverse --numeric | sort --key=1,1 --field-separator=, --reverse --unique >> "$tempfile2"
+ls -l "$tempfile2" $csvfile
 if ! cmp -s $tempfile2 $csvfile
 then
   cat $tempfile2 > $csvfile
