@@ -16,7 +16,7 @@
 # Does not support instance names with spaces in them
 #
 set -o nounset
-set -o pipefail
+#set -o pipefail
 set -o errexit
 
 # how long to cache aws info
@@ -87,4 +87,4 @@ fi
 
 args=$(echo "$*" | sed "s/$full_instance_name:/$user@$dns:/")
 
-scp -o StrictHostKeyChecking=no --i ~/.ssh/$key.pem $args
+scp -o StrictHostKeyChecking=no -i ~/.ssh/$key.pem $args
