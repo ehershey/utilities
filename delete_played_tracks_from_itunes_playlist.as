@@ -1,4 +1,4 @@
--- remove tracks from playlists "ib," "ib2" and "ib4"that have played counts
+-- remove tracks from playlists "ib," "ib2" and "ib4" that have played counts
 -- other than 0
 --
 -- This can be used to auto-prune playlists that should only contain unplayed
