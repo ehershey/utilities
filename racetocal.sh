@@ -18,6 +18,7 @@ EVENTBRITE_DATE_SELECTOR="span.dtstart"
 GENERIC_TITLE_SELECTOR="title"
 GENERIC_DATE_SELECTOR="div.field"
 GENERIC_DATE_SELECTOR2="div.date"
+GENERIC_DATE_SELECTOR3=".hero-subheading"
 
 set -o nounset
 set -o errexit
@@ -117,6 +118,11 @@ get_race_date() {
   if [ ! "$returned_date" ]
   then
     returned_date="$($CURL "$url" | $PUP "$GENERIC_DATE_SELECTOR2" text{})"
+  fi
+
+  if [ ! "$returned_date" ]
+  then
+    returned_date="$($CURL "$url" | $PUP "$GENERIC_DATE_SELECTOR3" text{})"
   fi
 
   returned_date="$(echo -n "$returned_date" | tr A-Z a-z | sed 's/start time://g' | sed 's/start\.//g')"
