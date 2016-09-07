@@ -36,4 +36,5 @@ seconds=$(expr $minutes \* 60)
 echo "Will alarm in $minutes minutes ($seconds seconds)"
 
 osxnotify "Alarm in $minutes minutes"
+date
 sleep $seconds; ( afplay "$AUDIOFILE" ; afplay "$AUDIOFILE" ) & killall PandoraJam ; osxstop & osxnotify 'Move!'
