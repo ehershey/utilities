@@ -103,15 +103,15 @@ var url_configs = [
   },
 
   {
-    url: 'https://logkeeper.mongodb.org/build/5730c2199041307c58077ce4/test/5730c2299041307c58077de5',
-    cell_selector: "body:contains(initandlisten)",
+    url: 'https://logkeeper.mongodb.org/build/ebe6729c2d8281eeabd926dad610fde8/test/57a57377be07c41da309134b',
+    cell_selector: "body:contains(removeJournalFiles)",
     text_finder_from_cell_jqobj: function(jqobj) { return "Unused"; },
     ignore_text: '',
     negated: true
   },
   {
-    url: 'http://dl.mongodb.org/',
-    cell_selector: "div.wrapper",
+    url: 'http://dl.mongodb.org/dl/',
+    cell_selector: "head title",
     text_finder_from_cell_jqobj: function(jqobj) { return "Unused"; },
     ignore_text: '',
     negated: true
@@ -130,7 +130,7 @@ var url_configs = [
     text_finder_from_cell_jqobj: function(jqobj) { return "Unused"; },
     ignore_text: '',
     negated: true
-  },
+  }
   // {
     // url: 'http://frau.ernie.org/',
     // cell_selector: "body:contains(frau.ernie.org)",
@@ -174,18 +174,18 @@ var url_configs = [
     // negated: true
   // },
 
-  {
-    url: 'https://github.com/ehershey',
-
-    // Date logic to get the full month name and day number of the day that was 23 hours ago,
-    // so until 11pm this will return yesterday. This can be shaky logic since most days it
+  //{
+   // url: 'https://github.com/ehershey',
+//
+ //   // Date logic to get the full month name and day number of the day that was 23 hours ago,
+  //  // so until 11pm this will return yesterday. This can be shaky logic since most days it
     // shouldn't trigger anyways
     //
-    cell_selector: 'div.contribution-activity-listing:contains(' + (new Date((new Date()) - 23 * 60 * 60 * 1000)).toFormat("MMMM D") + '), ' + 'div.contribution-activity-listing:contains(' + (new Date()).toFormat("MMMM D") + '), ' + 'div.contribution-activity-listing:contains(' + (new Date((new Date()).getTime() + 23 * 60 * 60 * 1000)).toFormat("MMMM D") + ')',
-    text_finder_from_cell_jqobj: function(jqobj) { return "date not found in page! (" + (new Date((new Date()) - 23 * 60 * 60 * 1000)).toFormat("MMMM DD") + ')'; },
-    ignore_text: '',
-    negated: true
-  }
+//    cell_selector: 'div.contribution-activity-listing:contains(' + (new Date((new Date()) - 23 * 60 * 60 * 1000)).toFormat("MMMM D") + '), ' + 'div.contribution-activity-listing:contains(' + (new Date()).toFormat("MMMM D") + '), ' + 'div.contribution-activity-listing:contains(' + (new Date((new Date()).getTime() + 23 * 60 * 60 * 1000)).toFormat("MMMM D") + ')',
+//    text_finder_from_cell_jqobj: function(jqobj) { return "date not found in page! (" + (new Date((new Date()) - 23 * 60 * 60 * 1000)).toFormat("MMMM DD") + ')'; },
+//    ignore_text: '',
+//    negated: true
+//  }
 
 ];
 
