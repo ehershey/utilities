@@ -26,7 +26,9 @@ $project_underscored =~ s/-/_/g;
 my $build_ids_by_variant_underscored = {};
 
 my $url = "https://evergreen.mongodb.com/version/${project_underscored}_$revision";
+#print STDERR "url: $url\n";
 my $waterfall_html = get($url);
+#print STDERR "waterfall_html: $waterfall_html\n";
 foreach my $build_id ($waterfall_html =~ /\bbuild_id"*:"([^"]+)"/g) {
   if($build_id =~ /${project_underscored}_(.*)_${revision}_(.*)/) {
     my $variant_underscored = $1;
