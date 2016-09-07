@@ -27,7 +27,7 @@ fi
 
 LAST_ENTRY_FILE=~/".2fa-last-${1:-}.txt"
 
-SECRET_2FA="$(cat "$KEYFILE" | tr -d \ )"
+SECRET_2FA="$(grep -v ^\# "$KEYFILE" | tr -d \ )"
 
 if [ -e "$LAST_ENTRY_FILE" ]
 then
