@@ -8,6 +8,11 @@ set -o pipefail
 set -o errexit
 set -o nounset
 
+if [ -e ~/.ssh-agent ] 
+then
+  . ~/.ssh-agent
+fi
+
 # Needed at least for sysctl
 #
 export PATH=$PATH:/usr/sbin
