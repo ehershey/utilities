@@ -19,6 +19,7 @@ GENERIC_TITLE_SELECTOR="title"
 GENERIC_DATE_SELECTOR="div.field"
 GENERIC_DATE_SELECTOR2="div.date"
 GENERIC_DATE_SELECTOR3=".hero-subheading"
+GENERIC_DATE_SELECTOR3="time.clrfix"
 
 set -o nounset
 set -o errexit
