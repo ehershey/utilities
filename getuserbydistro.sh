@@ -7,9 +7,49 @@ getuserbydistro ()
       echo Administrator
       return
     fi
+    if echo $distro $name | grep ubuntu1604-power8 > /dev/null 2>&1
+    then
+      echo root
+      return
+    fi
+    if echo $distro $name | grep ubuntu1604-zseries > /dev/null 2>&1
+    then
+      echo mci-exec
+      return
+    fi
+    if echo $distro $name | grep suse12-zseries > /dev/null 2>&1
+    then
+      echo mci-exec
+      return
+    fi
+    if echo $distro $name | grep suse11-zseries > /dev/null 2>&1
+    then
+      echo mci-exec
+      return
+    fi
     if echo $distro $name | grep ubuntu > /dev/null 2>&1
     then
       echo ubuntu
+      return
+    fi
+    if echo $distro $name | grep solaris > /dev/null 2>&1
+    then
+      echo mci
+      return
+    fi
+    if echo $distro $name | grep debian > /dev/null 2>&1
+    then
+      echo admin
+      return
+    fi
+    if echo $distro $name | grep osx > /dev/null 2>&1
+    then
+      echo mci
+      return
+    fi
+    if echo $distro $name | grep centos6-perf > /dev/null 2>&1
+    then
+      echo mci-perf-exec
       return
     fi
     if echo $distro $name | grep amazon > /dev/null 2>&1
