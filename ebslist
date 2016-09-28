@@ -1,0 +1,29 @@
+#!/bin/bash
+#
+# ebslist
+#
+# List Volumes in EC2 with caching. All arguments are case-independent grep patterns to filter by.
+#
+# Example:
+# ebslist suse packer
+#
+#
+
+CACHE_SECONDS=300
+
+if [ ! "$AWS_SECRET_ACCESS_KEY" -o ! "$AWS_ACCESS_KEY_ID" ]
+then
+  . ~/amazon-build.sh
+fi
+
+tempfile=$(mktemp /tmp/ebslist.XXXXXX)
+tempfile2=$(mktemp /tmp/ebslist.XXXXXX)
+cache_run $CACHE_SECONDS "aws ec2 describe-volumes | format_ebs_json.js" $AWS_ACCESS_KEY_ID > $tempfile
+while [ "$1" ]
+do
+  cat "$tempfile" | grep -i "$1" > "$tempfile2"
+  cat "$tempfile2" > "$tempfile"
+  shift
+done
+
+cat $tempfile
