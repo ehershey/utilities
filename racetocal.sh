@@ -234,8 +234,8 @@ url_to_test="https://www.virginmoneylondonmarathon.com/en-gb/"
 
 test_url "$url_to_test" "$expected_title" "$expected_date"
 
-expected_date="february 21, 2016 8:00 am"
-returned_date="$(get_race_date "https://nycruns.com/races/?race=nycruns-central-park-marathon-2016")"
+expected_date="october 15, 2016 9:00 a.m."
+returned_date="$(get_race_date "https://nycruns.com/races/?race=new-york-city-scope-it-out-5k-2016")"
 if [ "$returned_date" != "$expected_date" ]
 then
   echo "Test command failed! Got $returned_date, expected $expected_date"
