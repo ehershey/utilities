@@ -1,6 +1,6 @@
 Setting up access to the Moves API (https://dev.moves-app.com/)
 
-1) Set $CLIENT_ID and $CLIENT_SECRET from https://dev.moves-app.com/apps/8fIA4X85c3PUf5a4szvc9t7A3pvhU0O8/edit
+1) Set $CLIENT_ID and $CLIENT_SECRET from https://dev.moves-app.com/apps/8fIA4X85c3PUf5a4szvc9t7A3pvhU0O8/edit ("Development" tab)
 
 2) Visit in a browser:
 #https://api.moves-app.com/oauth/v1/authorize?response_type=code&client_id=<client_id>&scope=<scope>
