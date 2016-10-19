@@ -57,7 +57,7 @@
 
 if [ "$1" ]
 then
-  entry_source_sed="sed 's/^}$/, entry_source: \"$1\"}/g'"
+  entry_source_sed="sed 's/}$/, entry_source: \"$1\"}/g'"
 else
   entry_source_sed="cat"
 fi
