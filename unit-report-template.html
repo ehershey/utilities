@@ -41,37 +41,6 @@ table,tr,td,th {{
       <th>Vs. 2014</th>
       <th>Vs. 2013</th>
     </tr>
-    <tr class="{surplus_class}">
-      <td>Surplus:</td>
-      <td>{surplus_today}</td>
-      <td class="comparitor">{surplus_today_2014_diff}</td>
-      <td>&nbsp;</td>
-    </tr>
-    <tr class="{surplus_2days_class}">
-      <td>Surplus over 2 days:</td>
-      <td>{surplus_2days}</td>
-      <td class="comparitor">{surplus_2days_2014_diff}</td>
-      <td>&nbsp;</td>
-    </tr>
-    <tr>
-      <td>Surplus Yesterday:</td>
-      <td>{surplus_yesterday}</td>
-      <td class="comparitor">{surplus_yesterday_2014_diff}</td>
-      <td>&nbsp;</td>
-    </tr>
-    <tr>
-      <td>2014 Surplus (average):</td>
-      <td>{surplus_2014}</td>
-      <td>&nbsp;</td>
-      <td>&nbsp;</td>
-    </tr>
-    <tr class="{surplus_2016_class}">
-      <td>2016 Surplus (average):</td>
-      <td>{surplus_2016}</td>
-      <td class="compatitor">{surplus_2016_2014_diff}</td>
-      <td>&nbsp;</td>
-    </tr>
-
     <tr class="{today_class}">
       <td>Today:</td>
       <td>{units_today}</td>
@@ -95,6 +64,12 @@ table,tr,td,th {{
       <td>{units_average}</td>
       <td>{units_average_2014_diff}</td>
       <td class="comparitor">{units_average_2013_diff}</td>
+    </tr>
+    <tr>
+      <td>2016 Average:</td>
+      <td>{units_average_2016}</td>
+      <td>{units_average_2016_2014_diff}</td>
+      <td>{units_average_2016_2013_diff}</td>
     </tr>
     <tr>
       <td>2014 Average:</td>
@@ -127,11 +102,6 @@ table,tr,td,th {{
       <td>{input_2014_2013_diff}</td>
     </tr>
    <tr>
-      <td>2016 Surplus (cumulative):</td>
-      <td>{surplus_2016_total}</td>
-      <td>&nbsp;</td>
-      <td>&nbsp;</td>
-    </tr>
  </table><br>
   <br>
   <table summary="Timestamp information" cellpadding='0'
