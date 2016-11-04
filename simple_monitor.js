@@ -103,7 +103,7 @@ var url_configs = [
   },
 
   {
-    url: 'https://logkeeper.mongodb.org/build/ebe6729c2d8281eeabd926dad610fde8/test/57a57377be07c41da309134b',
+    url: 'https://logkeeper.mongodb.org/build/0820c974e519211e29eae9879a51b173/test/581c11549041303a9f02d5f7',
     cell_selector: "body:contains(removeJournalFiles)",
     text_finder_from_cell_jqobj: function(jqobj) { return "Unused"; },
     ignore_text: '',
