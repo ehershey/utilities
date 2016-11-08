@@ -15,6 +15,9 @@ RNR_TITLE_SELECTOR="h2:contains(\"General Info\") + p"
 EVENTBRITE_TITLE_SELECTOR="span.summary"
 EVENTBRITE_DATE_SELECTOR="span.dtstart"
 
+ACTIVE_TITLE_SELECTOR='h1[itemprop=name]'
+ACTIVE_DATE_SELECTOR='div.field'
+
 GENERIC_TITLE_SELECTOR="title"
 GENERIC_DATE_SELECTOR="div.field"
 GENERIC_DATE_SELECTOR2="div.date"
@@ -214,6 +217,12 @@ test_url() {
     exit 2
   fi
 }
+
+url_to_test='http://www.active.com/new-york-ny/running/distance-running-races/stache-dash-nyc-5k-10k-2016?int='
+expected_title="Stache Dash NYC 5K / 10"
+expected_date="Saturday, November 12, 2016"
+
+test_url "$url_to_test" "$expected_title" "$expected_date"
 
 url_to_test="https://nycruns.com/races/?race=queens-half-marathon-5k-2016"
 expected_title="NYCRUNS Queens Half Marathon and 5K"
