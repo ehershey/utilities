@@ -82,6 +82,10 @@ get_race_title() {
   #
   returned_title="$(echo -n "$returned_title" | sed 's/ *|.*//' )"
 
+  # Discard dash and following text
+  #
+  returned_title="$(echo -n "$returned_title" | sed 's/ * - .*//' )"
+
   # Trim trailing whitespace
   #
   returned_title="$(echo -n "$returned_title" | sed 's/[ 	]*$//' )"
