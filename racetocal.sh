@@ -16,7 +16,7 @@ EVENTBRITE_TITLE_SELECTOR="span.summary"
 EVENTBRITE_DATE_SELECTOR="span.dtstart"
 
 ACTIVE_TITLE_SELECTOR='h1[itemprop=name]'
-ACTIVE_DATE_SELECTOR='div.field'
+ACTIVE_DATE_SELECTOR='meta[itemprop=startDate]'
 
 GENERIC_TITLE_SELECTOR="title"
 GENERIC_DATE_SELECTOR="div.field"
@@ -133,6 +133,11 @@ get_race_date() {
     returned_date="$($CURL "$url" | $PUP "$GENERIC_DATE_SELECTOR3" text{})"
   fi
 
+  if [ ! "$returned_date" ]
+  then
+    returned_date="$($CURL "$url" | $PUP "$ACTIVE_DATE_SELECTOR" attr{content} | head -1)"
+  fi
+
   returned_date="$(echo -n "$returned_date" | tr A-Z a-z | sed 's/start time://g' | sed 's/start\.//g')"
   returned_date="$(echo -n "$returned_date" | tr \\n \ )"
   returned_date="$(echo -n "$returned_date" | sed 's/.*will take place on //g')"
@@ -223,8 +228,8 @@ test_url() {
 }
 
 url_to_test='http://www.active.com/new-york-ny/running/distance-running-races/stache-dash-nyc-5k-10k-2016?int='
-expected_title="Stache Dash NYC 5K / 10"
-expected_date="Saturday, November 12, 2016"
+expected_title="Stache Dash NYC 5K / 10K"
+expected_date="2016-11-12t05:00:00"
 
 test_url "$url_to_test" "$expected_title" "$expected_date"
 
@@ -255,7 +260,7 @@ then
   exit 2
 fi
 
-expected_title="Run the River 5K - Icahn Stadium/Randall's Island Park"
+expected_title="Run the River 5K"
 returned_title="$(get_race_title "http://www.eventbrite.com/e/run-the-river-5k-icahn-stadiumrandalls-island-park-registration-17885348559?nomo=1")"
 if [ "$returned_title" != "$expected_title" ]
 then
