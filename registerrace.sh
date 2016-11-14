@@ -15,7 +15,7 @@ YEAR="${2:-}"
 
 if [ ! "$TITLE" ]
 then
-  echo "Usage: registerrace.sh <title> [ <registration date> [ <event year> ]]"
+  echo "Usage: registerrace.sh <title> [ <event year> [ <registration date> ]]"
   exit 2
 fi
 if [ ! "$YEAR" ]
