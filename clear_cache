@@ -5,4 +5,8 @@
 set -o nounset
 set -o pipefail
 set -o errexit
-find ~/.generic_cache/ -type f | xargs rm
+
+CACHEDIR=~/.generic_cache/
+
+PATTERN="${1:-}"
+find "$CACHEDIR" -name \*"$PATTERN"\* -type f | xargs rm
