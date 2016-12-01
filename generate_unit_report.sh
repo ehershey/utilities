@@ -21,6 +21,7 @@ else
 fi
 
 tempfile=$(mktemp /tmp/average_unit_report.XXXXXX)
+trap "rm $tempfile" exit
 
 $SCRIPT > "$tempfile"
 
@@ -38,4 +39,3 @@ else
   echo "Not generating new report" >&2
 fi
 
-rm "$tempfile"
