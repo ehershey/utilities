@@ -27,75 +27,23 @@ db = connection.ernie_org
 today = datetime.datetime.now()
 yesterday = datetime.datetime.now() - datetime.timedelta(days=1)
 
+current_year = today.year
+previous_year = current_year - 1
+
 today_summary = db.nutrition_summary.find_one(
     {"date": today.strftime("%B %-d, %Y")})
 yesterday_summary = db.nutrition_summary.find_one(
     {"date": yesterday.strftime("%B %-d, %Y")})
 
-date_regex_2013 = re.compile(", 2013")
-date_regex_2014 = re.compile(", 2014")
-date_regex_2016 = re.compile(", 2016")
+date_regex_previous_year = re.compile(", %d".format(previous_year))
+date_regex_current_year = re.compile(", %d".format(current_year))
 
-nutrition_2013_average = db.nutrition_summary.aggregate([{"$match": {"date": date_regex_2013}}, {
-                                                        "$group": {"_id": "2013", "Average": {"$avg": "$calories_numeric"}}}])
-nutrition_2014_average = db.nutrition_summary.aggregate([{"$match": {"date": date_regex_2014}}, {
-                                                        "$group": {"_id": "2014", "Average": {"$avg": "$calories_numeric"}}}])
-nutrition_2016_average = db.nutrition_summary.aggregate([{"$match": {"date": date_regex_2016}}, {
-                                                        "$group": {"_id": "2016", "Average": {"$avg": "$calories_numeric"}}}])
-nutrition_2016_total = db.nutrition_summary.aggregate([{"$match": {"date": date_regex_2016}}, {
-                                                      "$group": {"_id": "2016", "Total": {"$sum": "$calories_numeric"}}}])
-
-input_today_url = "#"
-input_yesterday_url = "#"
-input_today = 0
-input_yesterday = 0
-input_2013 = 0
-input_today_2013_diff = 0
-input_yesterday_2013_diff = 0
-input_yesterday_2014_diff = 0
-input_2014 = 0
-input_today_2014_diff = 0
-input_2014_2013_diff = 0
-input_2013_2014_diff = 0
-input_2016 = 0
-input_2016_total = 0
-input_2016_2013_diff = 0
-input_2016_2014_diff = 0
-
-if today_summary and today_summary['Calories']:
-    input_today = round(today_summary['calories_numeric'], 2)
-
-if today_summary and today_summary['report_url']:
-    input_today_url = today_summary['report_url']
-
-if yesterday_summary and yesterday_summary['Calories']:
-    input_yesterday = round(yesterday_summary['calories_numeric'], 2)
-
-if yesterday_summary and yesterday_summary['report_url']:
-    input_yesterday_url = yesterday_summary['report_url']
-
-
-if nutrition_2013_average and nutrition_2013_average['result']:
-    input_2013 = round(nutrition_2013_average['result'][0]['Average'], 2)
-
-if nutrition_2014_average and nutrition_2014_average['result']:
-    input_2014 = round(nutrition_2014_average['result'][0]['Average'], 2)
-
-if nutrition_2016_average and nutrition_2016_average['result']:
-    input_2016 = round(nutrition_2016_average['result'][0]['Average'], 2)
-
-if nutrition_2016_total and nutrition_2016_total['result']:
-    input_2016_total = round(nutrition_2016_total['result'][0]['Total'], 2)
-
-
-input_today_2014_diff = round(input_2014 - input_today, 2)
-input_today_2013_diff = round(input_2013 - input_today, 2)
-input_yesterday_2013_diff = round(input_2013 - input_yesterday, 2)
-input_yesterday_2014_diff = round(input_2014 - input_yesterday, 2)
-input_2016_2013_diff = round(input_2013 - input_2014, 2)
-input_2016_2014_diff = round(input_2014 - input_2016, 2)
-input_2013_2014_diff = round(input_2014 - input_2013, 2)
-
+nutrition_previous_year_average = db.nutrition_summary.aggregate([{"$match": {"date": date_regex_previous_year}}, {
+                                                        "$group": {"_id": str(previous_year), "Average": {"$avg": "$calories_numeric"}}}])
+nutrition_current_year_average = db.nutrition_summary.aggregate([{"$match": {"date": date_regex_current_year}}, {
+                                                        "$group": {"_id": str(current_year), "Average": {"$avg": "$calories_numeric"}}}])
+nutrition_current_year_total = db.nutrition_summary.aggregate([{"$match": {"date": date_regex_current_year}}, {
+                                                      "$group": {"_id": str(current_year), "Total": {"$sum": "$calories_numeric"}}}])
 
 TEMPLATE_FILENAME = "%s/unit-report-template.html" % os.path.dirname(
     os.path.realpath(__file__))
@@ -123,17 +71,15 @@ units_average = os.popen(
 units_yesterday = os.popen(
     "cut -f10 -d, %s  | head -3 | tail -1" % MOVES_CSV_FILENAME).read().rstrip()
 sys.stderr.write("in cuts 1\n")
-units_average_2013 = os.popen(
-    "grep ^2013- %s | cut -f10 -d, | awk '{ total += $1; count++ } END { print total/count }'" % MOVES_CSV_FILENAME).read().rstrip()
-units_average_2014 = os.popen(
-    "grep ^2014- %s | cut -f10 -d, | awk '{ total += $1; count++ } END { print total/count }'" % MOVES_CSV_FILENAME).read().rstrip()
-units_average_2016 = os.popen(
-    "grep ^2016- %s | cut -f10 -d, | awk '{ total += $1; count++ } END { print total/count }'" % MOVES_CSV_FILENAME).read().rstrip()
-units_2016_total = os.popen(
-    "grep ^2016- %s | cut -f10 -d, | awk '{ total += $1; count++ } END { print total }'" % MOVES_CSV_FILENAME).read().rstrip()
+units_average_previous_year = os.popen(
+    "grep ^%d- %s | cut -f10 -d, | awk '{ total += $1; count++ } END { print total/count }'" % (previous_year, MOVES_CSV_FILENAME)).read().rstrip()
+units_average_current_year = os.popen(
+    "grep ^%d- %s | cut -f10 -d, | awk '{ total += $1; count++ } END { print total/count }'" % (current_year, MOVES_CSV_FILENAME)).read().rstrip()
+units_current_year_total = os.popen(
+    "grep ^%d- %s | cut -f10 -d, | awk '{ total += $1; count++ } END { print total }'" % (current_year, MOVES_CSV_FILENAME)).read().rstrip()
 sys.stderr.write("in cuts 2\n")
-day_count_2016 = os.popen(
-    "grep ^2016- %s | cut -f10 -d, | awk '{ total += $1; count++ } END { print count }'" % MOVES_CSV_FILENAME).read().rstrip()
+day_count_current_year = os.popen(
+    "grep ^%d- %s | cut -f10 -d, | awk '{ total += $1; count++ } END { print count }'" % (current_year, MOVES_CSV_FILENAME)).read().rstrip()
 units_average_7days = os.popen(
     "head -8 %s | tail -7 | cut -f10 -d, | awk '{ total += $1; count++ } END { print total/count }'" % MOVES_CSV_FILENAME).read().rstrip()
 units_average_2days = os.popen(
@@ -141,94 +87,41 @@ units_average_2days = os.popen(
 
 sys.stderr.write("done with cuts\n")
 
-units_today_2013_diff = float(units_today) - float(units_average_2013)
-units_today_2014_diff = float(units_today) - float(units_average_2014)
-units_yesterday_2013_diff = float(units_yesterday) - float(units_average_2013)
-units_yesterday_2014_diff = float(units_yesterday) - float(units_average_2014)
-units_average_2013_diff = float(units_average) - float(units_average_2013)
-units_average_2014_diff = float(units_average) - float(units_average_2014)
-units_average_7days_2013_diff = float(
-    units_average_7days) - float(units_average_2013)
-units_average_7days_2014_diff = float(
-    units_average_7days) - float(units_average_2014)
-units_average_2days_2013_diff = float(
-    units_average_2days) - float(units_average_2013)
-units_average_2days_2014_diff = float(
-    units_average_2days) - float(units_average_2014)
-units_average_2014_2013_diff = float(
-    units_average_2014) - float(units_average_2013)
-units_average_2016_2014_diff = float(
-    units_average_2016) - float(units_average_2014)
-units_average_2016_2013_diff = float(
-    units_average_2016) - float(units_average_2013)
-units_average_2013_2014_diff = float(
-    units_average_2013) - float(units_average_2014)
+units_today_previous_year_diff = float(units_today) - float(units_average_previous_year)
+units_yesterday_previous_year_diff = float(units_yesterday) - float(units_average_previous_year)
+units_average_previous_year_diff = float(units_average) - float(units_average_previous_year)
+units_average_7days_previous_year_diff = float(
+    units_average_7days) - float(units_average_previous_year)
+units_average_2days_previous_year_diff = float(
+    units_average_2days) - float(units_average_previous_year)
+units_average_current_year_previous_year_diff = float(
+    units_average_current_year) - float(units_average_previous_year)
 
 minutes_since_moves_update = (datetime.datetime.now(
 ) - datetime.datetime.fromtimestamp(os.path.getmtime(MOVES_CSV_FILENAME))).seconds / 60
 
-if units_today_2013_diff > 0:
-    placeholder['today_class'] = "positive_diff"
-else:
-    placeholder['today_class'] = "negative_diff"
-
-if input_today_2014_diff > 0:
-    placeholder['input_class'] = "positive_diff"
-else:
-    placeholder['input_class'] = "negative_diff"
-
-if units_average_2days_2013_diff > 0:
-    placeholder['2days_class'] = "positive_diff"
-else:
-    placeholder['2days_class'] = "negative_diff"
-
-if units_average_7days_2013_diff > 0:
-    placeholder['7days_class'] = "positive_diff"
-else:
-    placeholder['7days_class'] = "negative_diff"
-
-if units_average_2013_diff > 0:
-    placeholder['alltime_class'] = "positive_diff"
-else:
-    placeholder['alltime_class'] = "negative_diff"
-
-
-placeholder['units_today_2013_diff'] = units_today_2013_diff
-placeholder['units_today_2014_diff'] = units_today_2014_diff
+placeholder['units_today_previous_year_diff'] = units_today_previous_year_diff
 placeholder['units_today'] = units_today
-placeholder['units_yesterday_2013_diff'] = units_yesterday_2013_diff
-placeholder['units_yesterday_2014_diff'] = units_yesterday_2014_diff
+placeholder['units_yesterday_previous_year_diff'] = units_yesterday_previous_year_diff
 placeholder['units_yesterday'] = units_yesterday
 placeholder['units_average'] = units_average
-placeholder['units_average_2013_diff'] = units_average_2013_diff
-placeholder['units_average_2014_diff'] = units_average_2014_diff
-placeholder['units_average_2013'] = units_average_2013
-placeholder['units_average_2014'] = units_average_2014
-placeholder['units_average_2014_2013_diff'] = units_average_2014_2013_diff
-placeholder['units_average_2013_2014_diff'] = units_average_2013_2014_diff
+placeholder['units_average_previous_year_diff'] = units_average_previous_year_diff
+placeholder['units_average_previous_year'] = units_average_previous_year
 placeholder['units_average_7days'] = units_average_7days
-placeholder['units_average_7days_2013_diff'] = units_average_7days_2013_diff
-placeholder['units_average_7days_2014_diff'] = units_average_7days_2014_diff
+placeholder['units_average_7days_previous_year_diff'] = units_average_7days_previous_year_diff
 placeholder['units_average_2days'] = units_average_2days
-placeholder['units_average_2days_2013_diff'] = units_average_2days_2013_diff
-placeholder['units_average_2days_2014_diff'] = units_average_2days_2014_diff
+placeholder['units_average_2days_previous_year_diff'] = units_average_2days_previous_year_diff
 placeholder['now'] = time.ctime()
 placeholder['moves_csv_modified'] = time.ctime(
     os.path.getmtime(MOVES_CSV_FILENAME))
-placeholder['input_today'] = input_today
-placeholder['input_yesterday'] = input_yesterday
-placeholder['input_today_2013_diff'] = input_today_2013_diff
-placeholder['input_yesterday_2013_diff'] = input_yesterday_2013_diff
-placeholder['input_yesterday_2014_diff'] = input_yesterday_2014_diff
-placeholder['input_2014'] = input_2014
-placeholder['input_today_2014_diff'] = input_today_2014_diff
-placeholder['input_2014_2013_diff'] = input_2014_2013_diff
-placeholder['input_2013_2014_diff'] = input_2013_2014_diff
-placeholder['input_today_url'] = input_today_url
-placeholder['input_yesterday_url'] = input_yesterday_url
-placeholder['units_average_2016'] = units_average_2016
-placeholder['units_average_2016_2013_diff'] = units_average_2016_2013_diff
-placeholder['units_average_2016_2014_diff'] = units_average_2016_2014_diff
+placeholder['units_average_current_year'] = units_average_current_year
+placeholder['units_average_current_year_previous_year_diff'] = units_average_current_year_previous_year_diff
+placeholder['current_year'] = current_year
+placeholder['previous_year'] = previous_year
+placeholder['today_class'] = ""
+placeholder['2days_class'] = ""
+placeholder['7days_class'] = ""
+placeholder['alltime_class'] = ""
 
 if __name__ == '__main__':
 
@@ -237,10 +130,6 @@ if __name__ == '__main__':
 
     formated = template.format(**placeholder)
     print formated
-
-
-def get_daily_calorie_goal():
-    return float(units_average_2013)
 
 
 def get_running_calorie_multiplier():

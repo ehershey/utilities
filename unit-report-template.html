@@ -10,6 +10,19 @@
     .left {{
         float: left;
     }}
+    .center {{
+        float: center;
+    }}
+  .main-container {{
+      float: left;
+      position: relative;
+      left: 50%;
+  }}
+  .fixer-container {{
+      float: left;
+      position: relative;
+      left: -50%;
+    }}
     table,body {{
         width: 100%;
         font-size: 32pt;
@@ -38,68 +51,42 @@ table,tr,td,th {{
     <tr>
       <th>What</th>
       <th>Value</th>
-      <th>Vs. 2014</th>
-      <th>Vs. 2013</th>
+      <th>Vs. {previous_year}</th>
     </tr>
     <tr class="{today_class}">
       <td>Today:</td>
       <td>{units_today}</td>
-      <td>{units_today_2014_diff}</td>
-      <td class="comparitor">{units_today_2013_diff}</td>
+      <td>{units_today_previous_year_diff}</td>
     </tr>
     <tr class="{2days_class}">
       <td>Last 2 days:</td>
       <td>{units_average_2days}</td>
-      <td>{units_average_2days_2014_diff}</td>
-      <td class="comparitor">{units_average_2days_2013_diff}</td>
+      <td>{units_average_2days_previous_year_diff}</td>
     </tr>
     <tr>
       <td>Yesterday:</td>
       <td>{units_yesterday}</td>
-      <td>{units_yesterday_2014_diff}</td>
-      <td>{units_yesterday_2013_diff}</td>
+      <td>{units_yesterday_previous_year_diff}</td>
     </tr>
     <tr class="{alltime_class}">
       <td>Alltime Average:</td>
       <td>{units_average}</td>
-      <td>{units_average_2014_diff}</td>
-      <td class="comparitor">{units_average_2013_diff}</td>
+      <td>{units_average_previous_year_diff}</td>
     </tr>
     <tr>
-      <td>2016 Average:</td>
-      <td>{units_average_2016}</td>
-      <td>{units_average_2016_2014_diff}</td>
-      <td>{units_average_2016_2013_diff}</td>
+      <td>{current_year} Average:</td>
+      <td>{units_average_current_year}</td>
+      <td>{units_average_current_year_previous_year_diff}</td>
     </tr>
     <tr>
-      <td>2014 Average:</td>
-      <td>{units_average_2014}</td>
+      <td>{previous_year} Average:</td>
+      <td>{units_average_previous_year}</td>
       <td>&nbsp;</td>
-      <td>{units_average_2014_2013_diff}</td>
     </tr>
     <tr class="{7days_class}">
       <td>Last 7 days:</td>
       <td>{units_average_7days}</td>
-      <td>{units_average_7days_2014_diff}</td>
-      <td class="comparitor">{units_average_7days_2013_diff}</td>
-    </tr>
-    <tr class="{input_class}">
-      <td><a href="{input_today_url}">Input:</a></td>
-      <td><a href="{input_today_url}">{input_today}</a></td>
-      <td class="comparitor">{input_today_2014_diff}</td>
-      <td>{input_today_2013_diff}</td>
-    </tr>
-    <tr>
-      <td><a href="{input_yesterday_url}">Input Yesterday:</a></td>
-      <td><a href="{input_yesterday_url}">{input_yesterday}</a></td>
-      <td>{input_yesterday_2014_diff}</td>
-      <td>{input_yesterday_2013_diff}</td>
-    </tr>
-    <tr>
-      <td>2014 Input:</td>
-      <td>{input_2014}</td>
-      <td>&nbsp;</td>
-      <td>{input_2014_2013_diff}</td>
+      <td>{units_average_7days_previous_year_diff}</td>
     </tr>
    <tr>
  </table><br>
@@ -116,6 +103,12 @@ table,tr,td,th {{
     </tr>
   </table>
   <a class="left" href="?">Refresh</a>
+<div class="main-container">
+  <div class="fixer-container">
+  <a class="center" href="moves-notification.cgi">Trigger Server Moves Reload</a>
+  </div>
+</div>
+
   <a class="right" href="moves://">Launch Moves App</a><br/>
   <script type="text/javascript">
     var request = new XMLHttpRequest();
