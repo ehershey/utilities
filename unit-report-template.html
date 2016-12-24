@@ -52,43 +52,62 @@ table,tr,td,th {{
       <th>What</th>
       <th>Value</th>
       <th>Vs. {previous_year}</th>
+      <th>Vs. Last 30 days</th>
     </tr>
     <tr class="{today_class}">
       <td>Today:</td>
       <td>{units_today}</td>
       <td>{units_today_previous_year_diff}</td>
+      <td>{units_today_30days_diff}</td>
     </tr>
     <tr class="{2days_class}">
       <td>Last 2 days:</td>
       <td>{units_average_2days}</td>
       <td>{units_average_2days_previous_year_diff}</td>
+      <td>{units_average_2days_30days_diff}</td>
     </tr>
     <tr>
       <td>Yesterday:</td>
       <td>{units_yesterday}</td>
       <td>{units_yesterday_previous_year_diff}</td>
+      <td>{units_yesterday_30days_diff}</td>
     </tr>
     <tr class="{alltime_class}">
       <td>Alltime Average:</td>
       <td>{units_average}</td>
       <td>{units_average_previous_year_diff}</td>
+      <td>{units_average_30days_diff}</td>
     </tr>
     <tr>
       <td>{current_year} Average:</td>
       <td>{units_average_current_year}</td>
       <td>{units_average_current_year_previous_year_diff}</td>
+      <td>{units_average_current_year_30days_diff}</td>
     </tr>
     <tr>
       <td>{previous_year} Average:</td>
       <td>{units_average_previous_year}</td>
       <td>&nbsp;</td>
+      <td>{units_average_previous_year_30days_diff}</td>
+    </tr>
+    <tr>
+      <td>30 Day Average:</td>
+      <td>{units_average_30days}</td>
+      <td>{units_average_30days_previous_year_diff}</td>
+      <td>&nbsp;</td>
     </tr>
     <tr class="{7days_class}">
-      <td>Last 7 days:</td>
+      <td>Last 7 day average:</td>
       <td>{units_average_7days}</td>
       <td>{units_average_7days_previous_year_diff}</td>
+      <td>{units_average_7days_30days_diff}</td>
     </tr>
-   <tr>
+    <tr>
+      <td>Today last year:</td>
+      <td>{units_today_last_year}</td>
+      <td>{units_today_last_year_previous_year_diff}</td>
+      <td>{units_today_last_year_30days_diff}</td>
+    </tr>
  </table><br>
   <br>
   <table summary="Timestamp information" cellpadding='0'
