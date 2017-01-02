@@ -141,6 +141,7 @@ table,tr,td,th {{
     var request = new XMLHttpRequest();
     var request_running = false;
     var last_new_data_age_seconds = 0;
+    var data_checked_timestamp;
 
     var refresh_check_status_messages = new Array()
     REFRESH_CHECK_STATUS_MESSAGES_MAX_LENGTH = 5;
@@ -173,13 +174,12 @@ table,tr,td,th {{
       if (this.readyState === DONE) {{
         request_running = false;
         refresh_check_log('got response');
-        var data_checked_timestamp = new Date();
+        data_checked_timestamp = new Date();
         document.getElementById("data_checked_timestamp").innerHTML = data_checked_timestamp;
-        document.getElementById("data_check_age").innerHTML = get_date_age(data_checked_timestamp);
 
         var new_data_timestamp = this.getResponseHeader('last-modified');
         if(new_data_timestamp) {{
-        refresh_check_log('got timestamp');
+          refresh_check_log('got timestamp');
           var new_data_date = new Date(new_data_timestamp);
           var now = new Date();
           var new_data_age_seconds = ( now - new_data_date ) / 1000;
@@ -202,6 +202,7 @@ table,tr,td,th {{
     setInterval(function() {{
       document.getElementById("html_age").innerHTML = get_date_age("{now}"); // diffignore (ignore comparing against previous html)
       document.getElementById("moves_age").innerHTML = get_date_age("{moves_csv_modified}");
+      document.getElementById("data_check_age").innerHTML = get_date_age(data_checked_timestamp);
       if(!request_running) {{
       refresh_check_log('request not running');
         request_running = true;
