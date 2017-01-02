@@ -120,6 +120,14 @@ table,tr,td,th {{
       <td>Moves data updated:</td>
       <td>{moves_csv_modified} (<span id="moves_age"></span>)</td>
     </tr>
+    <tr>
+      <td>New data checked:</td>
+      <td><span id="data_checked_timestamp"></span> (<span id="data_check_age"></span>)</td>
+    </tr>
+    <tr>
+      <td>New data check status:</td>
+      <td><span id="refresh_check_status"></span></td>
+    </tr>
   </table>
   <a class="left" href="?">Refresh</a>
 <div class="main-container">
@@ -134,21 +142,51 @@ table,tr,td,th {{
     var request_running = false;
     var last_new_data_age_seconds = 0;
 
+    var refresh_check_status_messages = new Array()
+    REFRESH_CHECK_STATUS_MESSAGES_MAX_LENGTH = 5;
+    function refresh_check_log(message) {{
+      console.log(message);
+      // if the most recent message is a duplicate, just update the count
+      //
+      var last_message = refresh_check_status_messages[refresh_check_status_messages.length];
+      if(last_message && last_message.indexOf(message) == 0) {{
+        var old_count = last_message.match(/\(([0-9]+)\)$/);
+        var new_count = 2;
+        if(old_count && old_count[1]) {{
+          new_count = old_count + 1;
+        }}
+
+        last_message = last_message.replace(/\s+\([0-9]+\)$/,"");
+        last_message = last_message + " (" + new_count + ")";
+        refresh_check_status_messages[refresh_check_status_messages.length] = last_message;
+      }} else {{
+        refresh_check_status_messages.push(message);
+      }}
+      while(refresh_check_status_messages.length > REFRESH_CHECK_STATUS_MESSAGES_MAX_LENGTH) {{
+        refresh_check_status_messages.shift();
+      }}
+      document.getElementById("refresh_check_status").innerHTML = refresh_check_status_messages.join("<br>");
+    }}
+
     request.onreadystatechange = function () {{
       var DONE = this.DONE || 4;
       if (this.readyState === DONE) {{
         request_running = false;
-        console.log('got response');
+        refresh_check_log('got response');
+        var data_checked_timestamp = new Date();
+        document.getElementById("data_checked_timestamp").innerHTML = data_checked_timestamp;
+        document.getElementById("data_check_age").innerHTML = get_date_age(data_checked_timestamp);
+
         var new_data_timestamp = this.getResponseHeader('last-modified');
         if(new_data_timestamp) {{
-        console.log('got timestamp');
+        refresh_check_log('got timestamp');
           var new_data_date = new Date(new_data_timestamp);
           var now = new Date();
           var new_data_age_seconds = ( now - new_data_date ) / 1000;
-          console.log('new data age: ' + new_data_age_seconds);
-          console.log('last new data age: ' + last_new_data_age_seconds);
+          refresh_check_log('new data age: ' + new_data_age_seconds);
+          refresh_check_log('last new data age: ' + last_new_data_age_seconds);
 
-          // if the age fo the file on the server ever drops, it means
+          // if the age of the file on the server ever drops, it means
           // it's newer than what we're currently viewing, so refresh
           //
           if(new_data_age_seconds < last_new_data_age_seconds) {{
@@ -156,16 +194,16 @@ table,tr,td,th {{
           }}
           last_new_data_age_seconds = new_data_age_seconds;
         }}
-        else console.log('did not get timestamp');
+        else refresh_check_log('did not get timestamp');
       }}
-      else console.log('did not get done ready state');
+      else refresh_check_log('did not get done ready state');
     }};
 
     setInterval(function() {{
       document.getElementById("html_age").innerHTML = get_date_age("{now}"); // diffignore (ignore comparing against previous html)
       document.getElementById("moves_age").innerHTML = get_date_age("{moves_csv_modified}");
       if(!request_running) {{
-      console.log('request not running');
+      refresh_check_log('request not running');
         request_running = true;
         request.open('GET', get_new_self_url(), true);
 
@@ -175,7 +213,7 @@ table,tr,td,th {{
         request.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
         request.send(null);  // No data needs to be sent along with the request.
       }}
-      else console.log('request already running');
+      else refresh_check_log('request already running');
 
 
 
@@ -188,8 +226,8 @@ table,tr,td,th {{
       var return_string = '';
       var old_date = new Date(date_string);
       var now = new Date();
-      var diff_ms = now - old_date;
-      var diff_s = Math.floor(diff_ms / 1000);
+      var diff_total_ms = now - old_date;
+      var diff_s = Math.floor(diff_total_ms / 1000);
       var diff_m = Math.floor(diff_s / 60);
       var diff_h = Math.floor(diff_m / 60);
       var diff_d = Math.floor(diff_h / 24);
@@ -208,8 +246,8 @@ table,tr,td,th {{
       if(diff_m) return_string += diff_m + ' minute';
       if(diff_m && diff_m > 1) return_string += 's';
       if(diff_s) if(return_string) return_string += ', ';
-      if(diff_s) return_string += diff_s + ' second';
-      if(diff_s && diff_s > 1) return_string += 's';
+      if(diff_s || diff_total_ms < 1000) return_string += diff_s + ' second';
+      if((diff_s && diff_s > 1) || diff_total_ms < 1000) return_string += 's';
       return return_string;
     }}
 
