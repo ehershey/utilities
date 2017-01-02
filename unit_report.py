@@ -85,8 +85,9 @@ units_average = os.popen(
 units_yesterday = os.popen(
     "cut -f10 -d, %s  | head -3 | tail -1" % MOVES_CSV_FILENAME).read().rstrip()
 
+sys.stderr.write("cmd: grep ^%d-%02d-%02d %s | cut -f10 -d, \n" % (previous_year, current_month, current_day, MOVES_CSV_FILENAME))
 units_today_last_year = os.popen(
-    "grep ^%d-%d-%d %s | cut -f10 -d, " % (previous_year, current_month, current_day, MOVES_CSV_FILENAME)).read().rstrip()
+    "grep ^%d-%02d-%02d %s | cut -f10 -d, " % (previous_year, current_month, current_day, MOVES_CSV_FILENAME)).read().rstrip()
 sys.stderr.write("in cuts 1\n")
 units_average_previous_year = os.popen(
     "grep ^%d- %s | cut -f10 -d, | awk '{ total += $1; count++ } END { print total/count }'" % (previous_year, MOVES_CSV_FILENAME)).read().rstrip()
@@ -117,6 +118,8 @@ units_average_2days_previous_year_diff = float(
     units_average_2days) - float(units_average_previous_year)
 units_average_current_year_previous_year_diff = float(
     units_average_current_year) - float(units_average_previous_year)
+sys.stderr.write('utly: ' + units_today_last_year + "\n")
+sys.stderr.write('uapy: ' + units_average_previous_year + "\n")
 units_today_last_year_previous_year_diff = float(units_today_last_year) - float(units_average_previous_year)
 
 units_today_30days_diff = float(units_today) - float(units_average_30days)
