@@ -236,7 +236,7 @@ expected_date="2016-11-12t05:00:00"
 test_url "$url_to_test" "$expected_title" "$expected_date"
 
 url_to_test="https://nycruns.com/races/?race=queens-half"
-expected_title="NYCRUNS Queens Half Marathon & 5K"
+expected_title="NYCRUNS Flushing Meadows Half Marathon & 5K"
 expected_date="april 16, 2017 8:00am"
 
 test_url "$url_to_test" "$expected_title" "$expected_date"
