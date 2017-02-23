@@ -21,6 +21,10 @@ then
   exit 3
 fi
 
+# for "ts" command
+#
+brew install moreutils
+
 if [ ! -e "$FILEHOME/crontab-workstation.txt" ]
 then
   echo "Can't find crontab-workstation.txt in $FILEHOME"
