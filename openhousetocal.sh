@@ -175,7 +175,8 @@ fi
 title="Open house - $title"
 daymonth=${date% *}
 daymonth=${daymonth% (*}
-fulltime=${date#* }
+daymonth=${daymonth%:*}
+fulltime="$(echo "$date" | sed 's/.* //')" # used to be this: fulltime=${date#* }
 fulltime="$(echo "$fulltime" | sed 's/.*(//')"
 fulltime="$(echo "$fulltime" | tr -d \(\))"
 starttime=${fulltime%-*}
