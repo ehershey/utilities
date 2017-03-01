@@ -40,8 +40,11 @@ verbose_activity_name_list.append(UNKNOWN_ACTIVITY_BUCKET_VERBOSE_NAME)
 
 sys.stdout.write("Date")
 for verbose_activity_name in verbose_activity_name_list:
+    verbose_activity_name_duration = verbose_activity_name + ' Seconds'
     sys.stdout.write(",")
     sys.stdout.write(verbose_activity_name)
+    sys.stdout.write(",")
+    sys.stdout.write(verbose_activity_name_duration)
 sys.stdout.write(",Calories\n")
 
 if hasattr(datetime.datetime, 'strptime'):
@@ -49,8 +52,8 @@ if hasattr(datetime.datetime, 'strptime'):
     strptime = datetime.datetime.strptime
 else:
     # python 2.4 equivalent
-    strptime = lambda date_string, format: datetime.datetime(
-        *(time.strptime(date_string, format)[0:6]))
+    def strptime(date_string, format):
+        return datetime.datetime(*(time.strptime(date_string, format)[0:6]))
 
 
 def print_workouts_from_json_stream(instream):
@@ -81,6 +84,13 @@ def print_workouts_from_json_stream(instream):
                 else:
                     distance_miles = 0
                 sys.stdout.write("%.2fmi" % distance_miles)
+            sys.stdout.write(",")
+            if verbose_activity_name in activities_by_verbose_name:
+
+                duration_seconds = activities_by_verbose_name[
+                    verbose_activity_name].get('duration')
+                sys.stdout.write("%.2f" % duration_seconds)
+
         sys.stdout.write(",%d" % calories)
         sys.stdout.write("\n")
 
