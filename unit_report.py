@@ -69,7 +69,7 @@ placeholder = {}
 
 sys.stderr.write("starting cuts\n")
 
-units_today = os.popen("cut -f10 -d, %s  | head -2 | tail -1" %
+units_today = os.popen("sed 's/.*,//' %s  | head -2 | tail -1" %
                        MOVES_CSV_FILENAME).read().rstrip()
 sys.stderr.write("in cuts 0.3\n")
 biked_today = os.popen("cut -f3 -d, %s  | head -2 | tail -1 | tr -d a-z" %
@@ -81,29 +81,29 @@ sys.stderr.write("in cuts 0.5\n")
 walked_today = os.popen("cut -f2 -d, %s  | head -2 | tail -1 | tr -d a-z" %
                         MOVES_CSV_FILENAME).read().rstrip()
 units_average = os.popen(
-    "cut -f10 -d, %s| awk '{ total += $1; count++ } END { print total/count }'" % MOVES_CSV_FILENAME).read().rstrip()
+    "sed 's/.*,//' %s| awk '{ total += $1; count++ } END { print total/count }'" % MOVES_CSV_FILENAME).read().rstrip()
 units_yesterday = os.popen(
-    "cut -f10 -d, %s  | head -3 | tail -1" % MOVES_CSV_FILENAME).read().rstrip()
+    "sed 's/.*,//' %s  | head -3 | tail -1" % MOVES_CSV_FILENAME).read().rstrip()
 
-sys.stderr.write("cmd: grep ^%d-%02d-%02d %s | cut -f10 -d, \n" % (previous_year, current_month, current_day, MOVES_CSV_FILENAME))
+sys.stderr.write("cmd: grep ^%d-%02d-%02d %s | sed 's/.*,//' \n" % (previous_year, current_month, current_day, MOVES_CSV_FILENAME))
 units_today_last_year = os.popen(
-    "grep ^%d-%02d-%02d %s | cut -f10 -d, " % (previous_year, current_month, current_day, MOVES_CSV_FILENAME)).read().rstrip()
+    "grep ^%d-%02d-%02d %s | sed 's/.*,//' " % (previous_year, current_month, current_day, MOVES_CSV_FILENAME)).read().rstrip()
 sys.stderr.write("in cuts 1\n")
 units_average_previous_year = os.popen(
-    "grep ^%d- %s | cut -f10 -d, | awk '{ total += $1; count++ } END { print total/count }'" % (previous_year, MOVES_CSV_FILENAME)).read().rstrip()
+    "grep ^%d- %s | sed 's/.*,//' | awk '{ total += $1; count++ } END { print total/count }'" % (previous_year, MOVES_CSV_FILENAME)).read().rstrip()
 units_average_current_year = os.popen(
-    "grep ^%d- %s | cut -f10 -d, | awk '{ total += $1; count++ } END { print total/count }'" % (current_year, MOVES_CSV_FILENAME)).read().rstrip()
+    "grep ^%d- %s | sed 's/.*,//' | awk '{ total += $1; count++ } END { print total/count }'" % (current_year, MOVES_CSV_FILENAME)).read().rstrip()
 units_current_year_total = os.popen(
-    "grep ^%d- %s | cut -f10 -d, | awk '{ total += $1; count++ } END { print total }'" % (current_year, MOVES_CSV_FILENAME)).read().rstrip()
+    "grep ^%d- %s | sed 's/.*,//' | awk '{ total += $1; count++ } END { print total }'" % (current_year, MOVES_CSV_FILENAME)).read().rstrip()
 sys.stderr.write("in cuts 2\n")
 day_count_current_year = os.popen(
-    "grep ^%d- %s | cut -f10 -d, | awk '{ total += $1; count++ } END { print count }'" % (current_year, MOVES_CSV_FILENAME)).read().rstrip()
+    "grep ^%d- %s | sed 's/.*,//' | awk '{ total += $1; count++ } END { print count }'" % (current_year, MOVES_CSV_FILENAME)).read().rstrip()
 units_average_30days = os.popen(
-    "head -8 %s | tail -30 | cut -f10 -d, | awk '{ total += $1; count++ } END { print total/count }'" % MOVES_CSV_FILENAME).read().rstrip()
+    "head -8 %s | tail -30 | sed 's/.*,//' | awk '{ total += $1; count++ } END { print total/count }'" % MOVES_CSV_FILENAME).read().rstrip()
 units_average_7days = os.popen(
-    "head -8 %s | tail -7 | cut -f10 -d, | awk '{ total += $1; count++ } END { print total/count }'" % MOVES_CSV_FILENAME).read().rstrip()
+    "head -8 %s | tail -7 | sed 's/.*,//' | awk '{ total += $1; count++ } END { print total/count }'" % MOVES_CSV_FILENAME).read().rstrip()
 units_average_2days = os.popen(
-    "head -3 %s | tail -2 | cut -f10 -d, | awk '{ total += $1; count++ } END { print total/count }'" % MOVES_CSV_FILENAME).read().rstrip()
+    "head -3 %s | tail -2 | sed 's/.*,//' | awk '{ total += $1; count++ } END { print total/count }'" % MOVES_CSV_FILENAME).read().rstrip()
 
 sys.stderr.write("done with cuts\n")
 
