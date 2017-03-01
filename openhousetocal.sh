@@ -3,7 +3,7 @@
 # Add open house to calendar by Zillow listing URL
 #
 ZILLOW_TITLE_SELECTOR="h1"
-ZILLOW_DATE_SELECTOR="span[itemprop=\"date\"]"
+ZILLOW_DATE_SELECTOR="#hdp-content > div.hdp-content-wrapper.zsg-content-section > section > div.hdp-facts  > div:nth-child(1) li"
 ZILLOW_PRICE_SELECTOR="div.main-row"
 ZILLOW_DESCRIPTION_SELECTOR="span.addr_bbs"
 STREETEASY_TITLE_SELECTOR=".building-title"
@@ -63,6 +63,11 @@ get_date() {
   then
     returned_date="$($CURL "$url" | $PUP "$STREETEASY_DATE_SELECTOR" text{})"
   fi
+
+  # Only support soonest date for now
+  #
+  returned_date="$(echo -n "$returned_date" | head -1)"
+
   returned_date="$(echo -n "$returned_date" | tr \\n \ )"
   returned_date="$(echo -n "$returned_date" | sed 's/[ 	][ 	]*/ /g'; )"
   returned_date="$(echo -n "$returned_date" | sed 's/;.*//g')"
@@ -140,6 +145,13 @@ fi
   #exit 2
 #fi
 
+if [ "$1" = "--no-dupe-check" ]
+then
+  no_dupe_check="true"
+  shift
+else
+  no_dupe_check=""
+fi
 
 url="$1"
 
@@ -180,5 +192,13 @@ then
   exit 5
 fi
 
+if [ "$no_dupe_check" ]
+then
+  no_dupe_check_arg="--no-dupe-check"
+else
+  no_dupe_check_arg=""
+fi
 
-addopenhouse.sh "$title" "$daymonth $starttime" "$description$price$url" "$duration" "$location"
+echo "bash addopenhouse.sh $no_dupe_check_arg \"$title\" \"$daymonth $starttime\" \"$description $price $url\" " # \"$duration\" \"$location\""
+bash addopenhouse.sh $no_dupe_check_arg "$title" "$daymonth $starttime" "$description$price$url" "$duration" "$location"
+
