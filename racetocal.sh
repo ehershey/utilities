@@ -255,7 +255,7 @@ url_to_test="https://www.virginmoneylondonmarathon.com/en-gb/"
 
 test_url "$url_to_test" "$expected_title" "$expected_date"
 
-expected_date="march 18, 2017 8:30am"
+expected_date="march 18, 2018 8:30am"
 returned_date="$(get_race_date "https://nycruns.com/races/?race=nycruns-spring-fling-5k-10k")"
 if [ "$returned_date" != "$expected_date" ]
 then
