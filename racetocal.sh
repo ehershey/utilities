@@ -146,6 +146,7 @@ get_race_date() {
   returned_date="$(echo -n "$returned_date" | sed 's/race[- ]day.*//g')"
   returned_date="$(echo -n "$returned_date" | sed 's/5k start//g')"
   returned_date="$(echo -n "$returned_date" | sed 's/ 5k:*//g')"
+  returned_date="$(echo -n "$returned_date" | sed 's/ 10k:*//g')"
   returned_date="$(echo -n "$returned_date" | sed 's/ half:*//g')"
   returned_date="$(echo -n "$returned_date" | sed 's/ 5 miler.*//g')"
   returned_date="$(echo -n "$returned_date" | sed 's/ - / /g')"
@@ -249,18 +250,28 @@ url_to_test="http://web.archive.org/web/20160321034209/http://www.orlenmarathon.
 test_url "$url_to_test" "$expected_title" "$expected_date"
 
 expected_title="Virgin Money London Marathon"
-expected_date="23 april 2017"
+expected_date="22 april 2018"
 url_to_test="https://www.virginmoneylondonmarathon.com/en-gb/"
 
 test_url "$url_to_test" "$expected_title" "$expected_date"
 
-expected_date="october 15, 2016 9:00 a.m."
-returned_date="$(get_race_date "https://nycruns.com/races/?race=new-york-city-scope-it-out-5k-2016")"
+expected_date="march 18, 2017 8:30am"
+returned_date="$(get_race_date "https://nycruns.com/races/?race=nycruns-spring-fling-5k-10k")"
 if [ "$returned_date" != "$expected_date" ]
 then
   echo "Test command failed! Got $returned_date, expected $expected_date"
   exit 2
 fi
+
+expected_date="april 22, 2017 8:00am"
+returned_date="$(get_race_date "https://nycruns.com/races/?race=nycruns-prospect-park-10k")"
+if [ "$returned_date" != "$expected_date" ]
+then
+  echo "Test command failed! Got $returned_date, expected $expected_date"
+  exit 2
+fi
+
+
 
 expected_title="Run the River 5K"
 returned_title="$(get_race_title "http://www.eventbrite.com/e/run-the-river-5k-icahn-stadiumrandalls-island-park-registration-17885348559?nomo=1")"
