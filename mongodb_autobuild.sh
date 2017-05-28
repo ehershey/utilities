@@ -8,7 +8,7 @@ set -o pipefail
 set -o errexit
 set -o nounset
 
-if [ -e ~/.ssh-agent ] 
+if [ -e ~/.ssh-agent ]
 then
   . ~/.ssh-agent
 fi
@@ -20,7 +20,8 @@ export PATH=$PATH:/usr/sbin
 BUILD_DIR=/Users/ernie/git/mongo.autobuild
 REV=master
 #SCONS_ARGS="--use-new-tools all dist dist-debugsymbols distsrc-tgz --ssl --allocator=system -j$(sysctl -n hw.logicalcpu) --osx-version-min=10.7 --libc++ LINKFLAGS=-L/usr/local/opt/openssl/lib CCFLAGS=-I/usr/local/opt/openssl/include"
-SCONS_ARGS="all --ssl --allocator=system -j$(sysctl -n hw.logicalcpu) --osx-version-min=10.7 --libc++ LINKFLAGS=-L/usr/local/opt/openssl/lib CCFLAGS=-I/usr/local/opt/openssl/include"
+#SCONS_ARGS="all --ssl --allocator=system -j$(sysctl -n hw.logicalcpu) --osx-version-min=10.7 --libc++ LINKFLAGS=-L/usr/local/opt/openssl/lib CCFLAGS=-I/usr/local/opt/openssl/include"
+SCONS_ARGS="all --ssl -j$(sysctl -n hw.logicalcpu) LINKFLAGS=-L/usr/local/opt/openssl/lib CCFLAGS=-I/usr/local/opt/openssl/include"
 exe=
 gorootvars=
 gitvars=
