@@ -13,6 +13,8 @@ set -o errexit
 DEVICE1="Lab Light Switch"
 DEVICE2="Ernie Desk Lamp"
 
+PATH="$PATH:/usr/local/bin"
+
 # Returns "0" for off and "1" for on
 #
 DEVICE1_STATUS=$(wemo switch "$DEVICE1" status)
