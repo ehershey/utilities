@@ -55,13 +55,15 @@ var url_configs = [
     ignore_text: '',
     negated: true
   },
-  {
+  /* 
+   * {
     url: 'http://mci-motu.10gen.cc:8080/api/2/',
     cell_selector: "body:contains(API)",
     text_finder_from_cell_jqobj: function(jqobj) { return "Unused"; },
     ignore_text: '',
     negated: true
-  },
+  }, */
+
   // {
     // url: 'http://mci.10gen.com/hosts/',
     // cell_selector: "script:contains(unreachable)",
