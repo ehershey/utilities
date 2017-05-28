@@ -19,6 +19,7 @@ ACTIVE_TITLE_SELECTOR='h1[itemprop=name]'
 ACTIVE_DATE_SELECTOR='meta[itemprop=startDate]'
 
 GENERIC_TITLE_SELECTOR="title"
+GENERIC_TITLE_SELECTOR2="meta[property=og:title]"
 GENERIC_DATE_SELECTOR="div.field"
 GENERIC_DATE_SELECTOR2="div.date"
 GENERIC_DATE_SELECTOR3=".hero-subheading"
@@ -76,6 +77,11 @@ get_race_title() {
   if [ ! "$returned_title" ]
   then
     returned_title="$($CURL "$url" | $PUP "$GENERIC_TITLE_SELECTOR" text{})"
+  fi
+
+  if [ ! "$returned_title" ]
+  then
+    returned_title="$($CURL "$url" | $PUP "$GENERIC_TITLE_SELECTOR2" text{})"
   fi
 
   # Discard pipe and following text
