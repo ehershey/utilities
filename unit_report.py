@@ -72,8 +72,10 @@ sys.stderr.write("starting cuts\n")
 units_today = os.popen("sed 's/.*,//' %s  | head -2 | tail -1" %
                        MOVES_CSV_FILENAME).read().rstrip()
 sys.stderr.write("in cuts 0.3\n")
-biked_today = os.popen("cut -f3 -d, %s  | head -2 | tail -1 | tr -d a-z" %
-                       MOVES_CSV_FILENAME).read().rstrip()
+biked_today_cmd = "cut -f3 -d, %s  | head -2 | tail -1 | tr -d a-z" % MOVES_CSV_FILENAME
+sys.stderr.write("in cuts 0.3, cmd: %s\n" % biked_today_cmd)
+biked_today = os.popen(biked_today_cmd).read().rstrip()
+sys.stderr.write("in cuts 0.3, cmd: %s\n" % biked_today_cmd)
 sys.stderr.write("in cuts 0.4\n")
 ran_today = os.popen("cut -f5 -d, %s  | head -2 | tail -1 | tr -d a-z" %
                      MOVES_CSV_FILENAME).read().rstrip()
