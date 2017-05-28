@@ -1,9 +1,14 @@
 #!/bin/bash
-# Update moves.csv with all values from Moves Service (takes a long time to run)
+# Re-udate moves.csv with values from Moves Service (takes a long time to run)
 #
 # Requires $MOVES_ACCESS_TOKEN environment variable
 # or crontab.env in same directory
 #
+#
+# Usage:
+# redo_moves_csv.sh [ <year> [ <month> [ <day> ] ] ]
+#
+
 
 MONTHLY_SLEEP_SECONDS=45
 
@@ -25,14 +30,50 @@ if [ ! -e "$csvfile" ]
 then
   touch "$csvfile"
 fi
-for year in $(seq 2013 2015)
+
+CURRENT_YEAR=$(date +%Y)
+OLDEST_YEAR=2013
+
+# YEAR
+#
+if [ "$1" ]
+then
+  year_range="$1"
+  shift
+else
+  year_range=$(seq $OLDEST_YEAR $CURRENT_YEAR)
+fi
+
+# MONTH
+#
+if [ "$1" ]
+then
+  month_range="$1"
+  shift
+else
+  month_range=$(seq -w 1 12)
+fi
+
+# DATE
+#
+if [ "$1" ]
+then
+  day_range="$1"
+  shift
+else
+  day_range=$(seq -w 1 31)
+fi
+
+
+
+for year in $year_range
 do
-  for month in $(seq -w 1 12)
+  for month in $month_range
   do
     date
     echo "starting $MONTHLY_SLEEP_SECONDS second sleep timer"
     sleep $MONTHLY_SLEEP_SECONDS &
-    for day in $(seq -w 1 31)
+    for day in $day_range
     do
       echo $year$month$day:
       curl --silent "https://api.moves-app.com/api/1.1/user/summary/daily/$year$month$day?access_token=$MOVES_ACCESS_TOKEN" | ~ernie/git/utilities/print_moves_csv.py > $tempfile ; cat "$csvfile" >> $tempfile ; cat $tempfile | sort --key 5,5 --field-separator=, --reverse --numeric | sort --key=1,1 --field-separator=, --reverse --unique > $tempfile2
