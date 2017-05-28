@@ -80,7 +80,7 @@ def split_trackpoints(trackpoints):
     for index in range(0, len(trackpoints)):
         trackpoint = trackpoints[index]
         # distance to this trackpoint from first one
-        distance_to_point = get_distance_from_trackpoints(trackpoints[0:index + 1])
+        distance_to_point = get_distance_from_trackpoints(trackpoints[0:index + 1]).as_miles()
         print("split_trackpoints: distance_to_point: {0}".format(distance_to_point))
         if distance_to_point < half_distancemiles:
             first_half.append(trackpoint)
