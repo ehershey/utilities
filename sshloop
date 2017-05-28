@@ -2,7 +2,9 @@
 #
 # Loop infinitely, keeping an ssh connection open, restarting it if it exits
 #
-#
+
+# Seconds to delay between connections
+pause=5
 while true
 do
   args="$*"
@@ -11,7 +13,11 @@ do
     then
       xtitle ssh ${args/* /}
     fi
+  date=$(date)
   ssh "$@"
-  sleep 5
+  echo connected since: $date
+  date
+  echo sleeping $pause seconds
+  sleep $pause
   date
 done
