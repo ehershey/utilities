@@ -53,6 +53,10 @@ get_address() {
   #
   returned_title="$(echo -n "$returned_title" | sed 's/^[ 	]*//'; )"
 
+  # Remove trailing "  real estate"
+  #
+  returned_title="$(echo -n "$returned_title" | sed 's/[  ]*Real Estate$//'; )"
+
   echo "$returned_title"
 }
 
