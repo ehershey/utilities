@@ -68,8 +68,8 @@ def test_trackpoint_split():
     assert len(last_half_trackpoints) == 6
 
 
-def test_single_depth():
+def test_no_negative_split():
     activity = erniegps.read_activity('/home/ernie/Dropbox/Apps/tapiriik/2014-04-29_Walking (1).tcx')
     activity = erniegps.process_activity(activity)
-    assert activity.get('is_negative_split') is True
-    assert activity.get('negative_split_depth') == 1
+    assert activity.get('is_negative_split') is False
+    assert activity.get('negative_split_depth') == 0
