@@ -3,10 +3,12 @@
 Utilities for gps data
 """
 
-
+import dateutil.parser
+import ggps
+import logging
 import m26
 import math
-import ggps
+import pytz
 
 MAX_SPLIT_DEPTH = 30
 
@@ -39,7 +41,6 @@ def get_speed_from_trackpoints(trackpoints):
 
     if len(trackpoints) < 1:
         return m26.Speed(m26.Distance(0), m26.ElapsedTime(0))
-        #raise ActivityException("Must give at least one trackpoints to calculate speed")
 
     first_trackpoint = trackpoints[0]
     last_trackpoint = trackpoints[-1]
@@ -58,8 +59,8 @@ def get_speed_from_trackpoints(trackpoints):
     diff_distance = get_distance_from_trackpoints(trackpoints)
     diff_etime = m26.ElapsedTime(last_etime.secs - first_etime.secs)
 
-    print("diff_distance: {0}".format(diff_distance))
-    print("diff_etime: {0}".format(diff_etime))
+    logging.debug("diff_distance: {0}".format(diff_distance))
+    logging.debug("diff_etime: {0}".format(diff_etime))
 
     speed = m26.Speed(diff_distance, diff_etime)
     return speed
@@ -71,8 +72,8 @@ def split_trackpoints(trackpoints):
 
     diff_distancemiles = get_distance_from_trackpoints(trackpoints).as_miles()
     half_distancemiles = diff_distancemiles / 2
-    print("split_trackpoints: diff_distancemiles: {0}".format(diff_distancemiles))
-    print("split_trackpoints: half_distancemiles: {0}".format(half_distancemiles))
+    logging.debug("split_trackpoints: diff_distancemiles: {0}".format(diff_distancemiles))
+    logging.debug("split_trackpoints: half_distancemiles: {0}".format(half_distancemiles))
 
     crossed_half = False
     first_half = []
@@ -81,7 +82,7 @@ def split_trackpoints(trackpoints):
         trackpoint = trackpoints[index]
         # distance to this trackpoint from first one
         distance_to_point = get_distance_from_trackpoints(trackpoints[0:index + 1]).as_miles()
-        print("split_trackpoints: distance_to_point: {0}".format(distance_to_point))
+        logging.debug("split_trackpoints: distance_to_point: {0}".format(distance_to_point))
         if distance_to_point < half_distancemiles:
             first_half.append(trackpoint)
         else:
@@ -107,32 +108,38 @@ def read_activity(filename):
     tcx_handler.parse(filename)
 
     trackpoints = tcx_handler.trackpoints
+    activity_type = tcx_handler.activity_type
+    notes = tcx_handler.notes
     activity['trackpoints'] = trackpoints
+    activity['activity_type'] = activity_type
+    activity['notes'] = notes
+    activity['verbose_starttime'] = dateutil.parser.parse(trackpoints[0].get('time')).astimezone(pytz.timezone("EST5EDT")).strftime("%H:%M")
+    activity['verbose_distance'] = "{0:.02f} miles".format(get_distance_from_trackpoints(trackpoints).as_miles())
     return activity
 
 
 def process_activity(activity):
     trackpoints = activity['trackpoints']
     (first_half_trackpoints, last_half_trackpoints) = split_trackpoints(trackpoints)
-    print("len(trackpoints): {0}".format(len(trackpoints)))
-    print("len(first_half_trackpoints): {0}".format(len(first_half_trackpoints)))
-    print("len(last_half_trackpoints): {0}".format(len(last_half_trackpoints)))
+    logging.debug("len(trackpoints): {0}".format(len(trackpoints)))
+    logging.debug("len(first_half_trackpoints): {0}".format(len(first_half_trackpoints)))
+    logging.debug("len(last_half_trackpoints): {0}".format(len(last_half_trackpoints)))
 
-    print("get_pace(trackpoints): {0}".format(get_pace(trackpoints)))
-    print("get_pace(first_half_trackpoints): {0}".format(get_pace(first_half_trackpoints)))
-    print("get_pace(last_half_trackpoints): {0}".format(get_pace(last_half_trackpoints)))
+    logging.debug("get_pace(trackpoints): {0}".format(get_pace(trackpoints)))
+    logging.debug("get_pace(first_half_trackpoints): {0}".format(get_pace(first_half_trackpoints)))
+    logging.debug("get_pace(last_half_trackpoints): {0}".format(get_pace(last_half_trackpoints)))
 
     first_half_speed = get_speed_from_trackpoints(first_half_trackpoints).mph()
     last_half_speed = get_speed_from_trackpoints(last_half_trackpoints).mph()
 
-    print("first_half_speed:", first_half_speed)
-    print("last_half_speed:", last_half_speed)
+    logging.debug("first_half_speed:", first_half_speed)
+    logging.debug("last_half_speed:", last_half_speed)
     if last_half_speed > first_half_speed:
         activity['is_negative_split'] = True
-        print("yes")
+        logging.debug("yes")
     else:
         activity['is_negative_split'] = False
-        print("no")
+        logging.debug("no")
 
     # Determine how many levels into the last half of the track show
     # negative splits - e.g. is the second half also a negative split
@@ -141,26 +148,31 @@ def process_activity(activity):
     negative_split = True
     while negative_split is True and negative_split_depth < MAX_SPLIT_DEPTH:
         (first_half_trackpoints, last_half_trackpoints) = split_trackpoints(trackpoints)
-        print("")
-        print("negative_split_depth: {0}".format(negative_split_depth))
-        print("len(trackpoints): {0}".format(len(trackpoints)))
-        print("len(first_half_trackpoints): {0}".format(len(first_half_trackpoints)))
-        print("len(last_half_trackpoints): {0}".format(len(last_half_trackpoints)))
+        logging.debug("")
+        logging.debug("negative_split_depth: {0}".format(negative_split_depth))
+        logging.debug("len(trackpoints): {0}".format(len(trackpoints)))
+        logging.debug("len(first_half_trackpoints): {0}".format(len(first_half_trackpoints)))
+        logging.debug("len(last_half_trackpoints): {0}".format(len(last_half_trackpoints)))
         if True:  # len(first_half_trackpoints) and len(last_half_trackpoints):
             first_half_speed = get_speed_from_trackpoints(first_half_trackpoints).mph()
             last_half_speed = get_speed_from_trackpoints(last_half_trackpoints).mph()
 
-            print("first_half_speed:", first_half_speed)
-            print("last_half_speed:", last_half_speed)
+            logging.debug("first_half_speed:", first_half_speed)
+            logging.debug("last_half_speed:", last_half_speed)
             if last_half_speed > first_half_speed:
-                print("yes")
+                logging.debug("yes")
                 negative_split = True
                 negative_split_depth += 1
             else:
-                print("no")
+                logging.debug("no")
                 negative_split = False
             trackpoints = last_half_trackpoints
         else:
             negative_split = False
     activity['negative_split_depth'] = negative_split_depth
+
+    # Trackpoints no longer needed
+    #
+    del(activity['trackpoints'])
+
     return activity
