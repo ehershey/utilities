@@ -32,13 +32,25 @@ for basename in os.listdir(activity_dir):
         print("Processing filename: {0}".format(filename))
 
         activity = collection.find_one({"filename": filename})
-        if activity is None or 'activity_version' not in activity or activity['activity_version'] < ACTIVITY_VERSION:
+        create_activity = False
+        create_activity_reason = None
+        if activity is None:
+            create_activity = True
+            create_activity_reason = "No activity in DB"
+        elif 'activity_version' not in activity:
+            create_activity = True
+            create_activity_reason = "No version in DB"
+        elif activity['activity_version'] < ACTIVITY_VERSION:
+            create_activity = True
+            create_activity_reason = "Version in DB too low ({0} < {0})".format(activity['activity_version'], ACTIVITY_VERSION)
+
+        if create_activity:
             activity = erniegps.read_activity(filename)
             activity = erniegps.process_activity(activity)
 
             activity['activity_version'] = ACTIVITY_VERSION
 
-            print("Created activity")
+            print("Created activity ( {0} )".format(create_activity_reason))
 
             inserted_id = collection.insert_one(activity)
             logging.debug("inserted_id: {0}".format(inserted_id))
