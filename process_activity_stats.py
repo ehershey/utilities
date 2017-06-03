@@ -26,12 +26,17 @@ db = client[db_name]
 
 collection = db[collection_name]
 
+collection.create_index("filename", unique=True)
+
+created_count = 0
+
 for basename in os.listdir(activity_dir):
     filename = os.path.join(activity_dir, basename)
     if "tcx" in filename:
         print("Processing filename: {0}".format(filename))
 
-        activity = collection.find_one({"filename": filename})
+        activity_query = {"filename": filename}
+        activity = collection.find_one(activity_query)
         create_activity = False
         create_activity_reason = None
         if activity is None:
@@ -42,7 +47,8 @@ for basename in os.listdir(activity_dir):
             create_activity_reason = "No version in DB"
         elif activity['activity_version'] < ACTIVITY_VERSION:
             create_activity = True
-            create_activity_reason = "Version in DB too low ({0} < {0})".format(activity['activity_version'], ACTIVITY_VERSION)
+            create_activity_reason = "Version in DB too low ({0} < {0})".format(
+                activity['activity_version'], ACTIVITY_VERSION)
 
         if create_activity:
             activity = erniegps.read_activity(filename)
@@ -52,17 +58,22 @@ for basename in os.listdir(activity_dir):
 
             print("Created activity ( {0} )".format(create_activity_reason))
 
-            inserted_id = collection.insert_one(activity)
-            logging.debug("inserted_id: {0}".format(inserted_id))
+            result = collection.replace_one(
+                activity_query, activity, upsert=True)
+            upserted_id = result.upserted_id
+            logging.debug("upserted_id: {0}".format(upserted_id))
+            created_count += 1
 
             # exit()
         else:
             print("Found activity")
         print("is_negative_split: {0}".format(activity['is_negative_split']))
-        print("negative_split_depth: {0}".format(activity['negative_split_depth']))
+        print("negative_split_depth: {0}".format(activity[
+            'negative_split_depth']))
         print(u"notes: {0}".format(activity['notes']))
         print("activity_type: {0}".format(activity['activity_type']))
         print("verbose_starttime: {0}".format(activity['verbose_starttime']))
         print("verbose_distance: {0}".format(activity['verbose_distance']))
     else:
         print("Skipping filename: {0}".format(filename))
+print("created_count: {0}".format(created_count))
