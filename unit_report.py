@@ -21,8 +21,11 @@ resting_daily_calories = 1700
 
 home = expanduser("~ernie")
 
-connection = pymongo.Connection('localhost', 27017)
-db = connection.ernie_org
+#connection = pymongo.Connection('localhost', 27017)
+#db = connection.ernie_org
+client = pymongo.MongoClient("mongodb://localhost:27017")
+database = client.get_database("ernie_org")
+nutrition_summary_collection = database.get_collection("nutrition_summary")
 
 today = datetime.datetime.now()
 yesterday = datetime.datetime.now() - datetime.timedelta(days=1)
@@ -44,19 +47,19 @@ previous_day = current_day - 1
 # current_day = "%02d" % (current_day)
 # previous_day = "%02d" % (previous_day)
 
-today_summary = db.nutrition_summary.find_one(
+today_summary = nutrition_summary_collection.find_one(
     {"date": today.strftime("%B %-d, %Y")})
-yesterday_summary = db.nutrition_summary.find_one(
+yesterday_summary = nutrition_summary_collection.find_one(
     {"date": yesterday.strftime("%B %-d, %Y")})
 
 date_regex_previous_year = re.compile(", %d".format(previous_year))
 date_regex_current_year = re.compile(", %d".format(current_year))
 
-nutrition_previous_year_average = db.nutrition_summary.aggregate([{"$match": {"date": date_regex_previous_year}}, {
+nutrition_previous_year_average = nutrition_summary_collection.aggregate([{"$match": {"date": date_regex_previous_year}}, {
                                                         "$group": {"_id": str(previous_year), "Average": {"$avg": "$calories_numeric"}}}])
-nutrition_current_year_average = db.nutrition_summary.aggregate([{"$match": {"date": date_regex_current_year}}, {
+nutrition_current_year_average = nutrition_summary_collection.aggregate([{"$match": {"date": date_regex_current_year}}, {
                                                         "$group": {"_id": str(current_year), "Average": {"$avg": "$calories_numeric"}}}])
-nutrition_current_year_total = db.nutrition_summary.aggregate([{"$match": {"date": date_regex_current_year}}, {
+nutrition_current_year_total = nutrition_summary_collection.aggregate([{"$match": {"date": date_regex_current_year}}, {
                                                       "$group": {"_id": str(current_year), "Total": {"$sum": "$calories_numeric"}}}])
 
 TEMPLATE_FILENAME = "%s/unit-report-template.html" % os.path.dirname(
@@ -109,6 +112,9 @@ units_average_2days = os.popen(
 
 sys.stderr.write("done with cuts\n")
 
+if not units_today_last_year:
+    units_today_last_year = "0"
+
 units_today_previous_year_diff = float(units_today) - float(units_average_previous_year)
 units_yesterday_previous_year_diff = float(units_yesterday) - float(units_average_previous_year)
 units_average_previous_year_diff = float(units_average) - float(units_average_previous_year)
@@ -122,6 +128,7 @@ units_average_current_year_previous_year_diff = float(
     units_average_current_year) - float(units_average_previous_year)
 sys.stderr.write('utly: ' + units_today_last_year + "\n")
 sys.stderr.write('uapy: ' + units_average_previous_year + "\n")
+sys.stderr.write("units_today_last_year: {0}\n".format(units_today_last_year))
 units_today_last_year_previous_year_diff = float(units_today_last_year) - float(units_average_previous_year)
 
 units_today_30days_diff = float(units_today) - float(units_average_30days)
