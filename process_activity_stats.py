@@ -5,6 +5,7 @@
 # When they come in, do some analysis and
 # email results to myself.
 
+import erniemail
 import erniegps
 import logging
 import os
@@ -16,6 +17,10 @@ db_url = 'mongodb://localhost:27017/'
 
 db_name = 'ernie_org'
 collection_name = 'stat_activities'
+
+recipient = 'activity-stats@ernie.org'
+
+sender = recipient
 
 # re-process activities without this version #
 ACTIVITY_VERSION = 1
@@ -33,7 +38,7 @@ created_count = 0
 for basename in os.listdir(activity_dir):
     filename = os.path.join(activity_dir, basename)
     if "tcx" in filename:
-        print("Processing filename: {0}".format(filename))
+        logging.debug("Processing filename: {0}".format(filename))
 
         activity_query = {"filename": filename}
         activity = collection.find_one(activity_query)
@@ -65,15 +70,19 @@ for basename in os.listdir(activity_dir):
             created_count += 1
 
             # exit()
+
+            print("is_negative_split: {0}".format(activity['is_negative_split']))
+            print("negative_split_depth: {0}".format(activity[
+                'negative_split_depth']))
+            print(u"notes: {0}".format(activity['notes']))
+            print("activity_type: {0}".format(activity['activity_type']))
+            print("verbose_starttime: {0}".format(activity['verbose_starttime']))
+            print("verbose_distance: {0}".format(activity['verbose_distance']))
+
+            erniemail.notify(activity, recipient, sender)
         else:
-            print("Found activity")
-        print("is_negative_split: {0}".format(activity['is_negative_split']))
-        print("negative_split_depth: {0}".format(activity[
-            'negative_split_depth']))
-        print(u"notes: {0}".format(activity['notes']))
-        print("activity_type: {0}".format(activity['activity_type']))
-        print("verbose_starttime: {0}".format(activity['verbose_starttime']))
-        print("verbose_distance: {0}".format(activity['verbose_distance']))
+            logging.debug("Found activity")
+
     else:
         print("Skipping filename: {0}".format(filename))
 print("created_count: {0}".format(created_count))
