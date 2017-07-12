@@ -84,7 +84,7 @@ fi
 description=$(grep -A 20 Description $tempfile | tail +3 | grep -v -- +----------------- | sed 's/^ *| //' | sed 's/  *|$//')
 echo "description: >$description<"
 
-title=$(grep ^$YEAR $tempfile | awk '{print $3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13}')
+title=$(grep ^$YEAR $tempfile | awk '{print $3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$13,$15,$16,$17,$18,$19,$20,$21}')
 echo "title: $title"
 
 if [[ ! "$title" ]]
