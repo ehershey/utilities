@@ -18,12 +18,14 @@ EVENTBRITE_DATE_SELECTOR="span.dtstart"
 ACTIVE_TITLE_SELECTOR='h1[itemprop=name]'
 ACTIVE_DATE_SELECTOR='meta[itemprop=startDate]'
 
-GENERIC_TITLE_SELECTOR="title"
-GENERIC_TITLE_SELECTOR2="meta[property=og:title]"
+GENERIC_TITLE_SELECTOR="meta[property=og:title]"
+GENERIC_TITLE_SELECTOR2="title"
 GENERIC_DATE_SELECTOR="div.field"
 GENERIC_DATE_SELECTOR2="div.date"
 GENERIC_DATE_SELECTOR3=".hero-subheading"
-GENERIC_DATE_SELECTOR3="time.clrfix"
+GENERIC_DATE_SELECTOR4="time.clrfix"
+GENERIC_DATE_SELECTOR5="h3.tve_p_center"
+GENERIC_DATE_SELECTOR6="meta[property=og:description]"
 
 set -o nounset
 set -o errexit
@@ -76,7 +78,7 @@ get_race_title() {
 
   if [ ! "$returned_title" ]
   then
-    returned_title="$($CURL "$url" | $PUP "$GENERIC_TITLE_SELECTOR" text{})"
+    returned_title="$($CURL "$url" | $PUP "$GENERIC_TITLE_SELECTOR" attr{content})"
   fi
 
   if [ ! "$returned_title" ]
@@ -141,8 +143,27 @@ get_race_date() {
 
   if [ ! "$returned_date" ]
   then
+    returned_date="$($CURL "$url" | $PUP "$GENERIC_DATE_SELECTOR4" text{})"
+  fi
+
+  if [ ! "$returned_date" ]
+  then
+    returned_date="$($CURL "$url" | $PUP "$GENERIC_DATE_SELECTOR5" text{} | head -1)"
+  fi
+
+  # try active selector before generic selector 6, since generic selector 6 can catch a lot more
+  #
+  if [ ! "$returned_date" ]
+  then
     returned_date="$($CURL "$url" | $PUP "$ACTIVE_DATE_SELECTOR" attr{content} | head -1)"
   fi
+
+  if [ ! "$returned_date" ]
+  then
+    returned_date="$($CURL "$url" | $PUP "$GENERIC_DATE_SELECTOR6" attr{content})"
+  fi
+
+
 
   returned_date="$(echo -n "$returned_date" | tr A-Z a-z | sed 's/start time://g' | sed 's/start\.//g')"
   returned_date="$(echo -n "$returned_date" | tr \\n \ )"
@@ -260,6 +281,15 @@ expected_date="22 april 2018"
 url_to_test="https://www.virginmoneylondonmarathon.com/en-gb/"
 
 test_url "$url_to_test" "$expected_title" "$expected_date"
+
+
+expected_title="Yosemite Half Marathon"
+expected_date="may 12, 2018"
+url_to_test="http://www.yosemitehalfmarathon.com/"
+
+test_url "$url_to_test" "$expected_title" "$expected_date"
+
+
 
 expected_date="march 18, 2018"
 returned_date="$(get_race_date "https://nycruns.com/races/?race=nycruns-spring-fling-5k-10k")"
