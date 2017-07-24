@@ -191,7 +191,10 @@ get_race_date() {
   returned_date="$(echo -n "$returned_date" | sed 's/;.*//g')"
   returned_date="$(echo -n "$returned_date" | sed 's/ *|.*//g')"
   returned_date="$(echo -n "$returned_date" | sed 's/^[ 	]*//'; )"
-  returned_date="$(echo -n "$returned_date" | sed 's/[ 	]*$//'; )"
+
+  # includes weird whitespace chars - should replace with named character class
+  #
+  returned_date="$(echo -n "$returned_date" | sed 's/[ 	  ]*$//'; )"
   returned_date="$(echo -n "$returned_date" | sed 's/ for both.*$//'; )"
   returned_date="$(echo -n "$returned_date" | sed 's/ for the.*$//'; )"
   returned_date="$(echo -n "$returned_date" | sed 's/ from / /'; )"
@@ -294,7 +297,7 @@ test_url "$url_to_test" "$expected_title" "$expected_date"
 
 
 expected_title="Yosemite Half Marathon"
-expected_date="may 12, 2018"
+expected_date="may 12th, 2018"
 url_to_test="http://www.yosemitehalfmarathon.com/"
 
 test_url "$url_to_test" "$expected_title" "$expected_date"
