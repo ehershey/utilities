@@ -26,6 +26,7 @@ GENERIC_DATE_SELECTOR3=".hero-subheading"
 GENERIC_DATE_SELECTOR4="time.clrfix"
 GENERIC_DATE_SELECTOR5="h3.tve_p_center"
 GENERIC_DATE_SELECTOR6="meta[property=og:description]"
+GENERIC_DATE_SELECTOR7="section.fullheader div.container div.message p"
 
 set -o nounset
 set -o errexit
@@ -89,6 +90,10 @@ get_race_title() {
   # Discard pipe and following text
   #
   returned_title="$(echo -n "$returned_title" | sed 's/ *|.*//' )"
+
+  # Discard arrow char and following text
+  #
+  returned_title="$(echo -n "$returned_title" | sed 's/ *».*//' )"
 
   # Discard dash and following text
   #
@@ -161,6 +166,11 @@ get_race_date() {
   if [ ! "$returned_date" ]
   then
     returned_date="$($CURL "$url" | $PUP "$GENERIC_DATE_SELECTOR6" attr{content})"
+  fi
+
+  if [ ! "$returned_date" ]
+  then
+    returned_date="$($CURL "$url" | $PUP "$GENERIC_DATE_SELECTOR7" text{} | head -1)"
   fi
 
 
