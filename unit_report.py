@@ -94,10 +94,13 @@ sys.stderr.write("cmd: grep ^%d-%02d-%02d %s | sed 's/.*,//' \n" % (previous_yea
 units_today_last_year = os.popen(
     "grep ^%d-%02d-%02d %s | sed 's/.*,//' " % (previous_year, current_month, current_day, MOVES_CSV_FILENAME)).read().rstrip()
 sys.stderr.write("in cuts 1\n")
+sys.stderr.write("cmd: grep ^%d- %s | sed 's/.*,//' | awk '{ total += $1; count++ } END { print total/count }'" % (previous_year, MOVES_CSV_FILENAME))
 units_average_previous_year = os.popen(
     "grep ^%d- %s | sed 's/.*,//' | awk '{ total += $1; count++ } END { print total/count }'" % (previous_year, MOVES_CSV_FILENAME)).read().rstrip()
+sys.stderr.write("in cuts 1.1\n")
 units_average_current_year = os.popen(
     "grep ^%d- %s | sed 's/.*,//' | awk '{ total += $1; count++ } END { print total/count }'" % (current_year, MOVES_CSV_FILENAME)).read().rstrip()
+sys.stderr.write("in cuts 1.2\n")
 units_current_year_total = os.popen(
     "grep ^%d- %s | sed 's/.*,//' | awk '{ total += $1; count++ } END { print total }'" % (current_year, MOVES_CSV_FILENAME)).read().rstrip()
 sys.stderr.write("in cuts 2\n")
@@ -114,6 +117,9 @@ sys.stderr.write("done with cuts\n")
 
 if not units_today_last_year:
     units_today_last_year = "0"
+
+if not units_average_previous_year:
+    units_average_previous_year = "0"
 
 units_today_previous_year_diff = float(units_today) - float(units_average_previous_year)
 units_yesterday_previous_year_diff = float(units_yesterday) - float(units_average_previous_year)
