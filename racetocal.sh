@@ -304,13 +304,11 @@ test_url "$url_to_test" "$expected_title" "$expected_date"
 
 
 
+expected_title="Spring Fling 5k 10k"
 expected_date="march 18, 2018"
-returned_date="$(get_race_date "https://nycruns.com/races/?race=nycruns-spring-fling-5k-10k")"
-if [ "$returned_date" != "$expected_date" ]
-then
-  echo "Test command failed! Got $returned_date, expected $expected_date"
-  exit 2
-fi
+url_to_test="https://nycruns.com/races/?race=nycruns-spring-fling-5k-10k"
+
+test_url "$url_to_test" "$expected_title" "$expected_date"
 
 expected_date="april 22, 2017 8:00am"
 returned_date="$(get_race_date "https://nycruns.com/races/?race=nycruns-prospect-park-10k")"
