@@ -1,16 +1,24 @@
 #!/usr/bin/env python
+#
+# Output calorie report based on moves data in database
+# Requires $MOVES_ACCESS_TOKEN and MONGODB_URI environment variables
+#
 import argparse
 import datetime
+import dateutil.parser
 import os
 import os.path
-import pymongo
-import re
+from pymongo import MongoClient
 import sys
 import time
 from os.path import expanduser
 
+COLLECTION = "summaries"
+DB = "moves"
+
 
 parser = argparse.ArgumentParser(description='Generate calorie report')
+parser.add_argument('--for-date', help='Date to generate report for', required = False)
 args = parser.parse_args()
 
 RUNNING_CALORIE_MULTIPLIER = 118
@@ -21,14 +29,26 @@ resting_daily_calories = 1700
 
 home = expanduser("~ernie")
 
-#connection = pymongo.Connection('localhost', 27017)
-#db = connection.ernie_org
-client = pymongo.MongoClient("mongodb://localhost:27017")
-database = client.get_database("ernie_org")
-nutrition_summary_collection = database.get_collection("nutrition_summary")
+if "MOVES_ACCESS_TOKEN" not in os.environ:
+    raise Exception("No $MOVES_ACCESS_TOKEN defined.")
+if "MONGODB_URI" not in os.environ:
+    raise Exception("No $MONGODB_URI defined.")
+MOVES_ACCESS_TOKEN = os.environ["MOVES_ACCESS_TOKEN"]
+MONGODB_URI = os.environ["MONGODB_URI"]
 
-today = datetime.datetime.now()
-yesterday = datetime.datetime.now() - datetime.timedelta(days=1)
+client = MongoClient(MONGODB_URI)
+
+db = client[DB]
+
+collection = db[COLLECTION]
+
+if args.for_date:
+    today = dateutil.parser.parse(args.for_date).replace(hour=12)
+else:
+    today = datetime.datetime.now()
+
+yesterday = today - datetime.timedelta(days=1)
+day_before_yesterday = yesterday - datetime.timedelta(days=1)
 
 current_year = today.year
 previous_year = current_year - 1
@@ -47,21 +67,6 @@ previous_day = current_day - 1
 # current_day = "%02d" % (current_day)
 # previous_day = "%02d" % (previous_day)
 
-today_summary = nutrition_summary_collection.find_one(
-    {"date": today.strftime("%B %-d, %Y")})
-yesterday_summary = nutrition_summary_collection.find_one(
-    {"date": yesterday.strftime("%B %-d, %Y")})
-
-date_regex_previous_year = re.compile(", %d".format(previous_year))
-date_regex_current_year = re.compile(", %d".format(current_year))
-
-nutrition_previous_year_average = nutrition_summary_collection.aggregate([{"$match": {"date": date_regex_previous_year}}, {
-                                                        "$group": {"_id": str(previous_year), "Average": {"$avg": "$calories_numeric"}}}])
-nutrition_current_year_average = nutrition_summary_collection.aggregate([{"$match": {"date": date_regex_current_year}}, {
-                                                        "$group": {"_id": str(current_year), "Average": {"$avg": "$calories_numeric"}}}])
-nutrition_current_year_total = nutrition_summary_collection.aggregate([{"$match": {"date": date_regex_current_year}}, {
-                                                      "$group": {"_id": str(current_year), "Total": {"$sum": "$calories_numeric"}}}])
-
 TEMPLATE_FILENAME = "%s/unit-report-template.html" % os.path.dirname(
     os.path.realpath(__file__))
 MOVES_CSV_FILENAME = "%s/Dropbox/Web/moves.csv" % home
@@ -72,23 +77,39 @@ placeholder = {}
 
 sys.stderr.write("starting cuts\n")
 
-units_today = os.popen("sed 's/.*,//' %s  | head -2 | tail -1" %
-                       MOVES_CSV_FILENAME).read().rstrip()
-sys.stderr.write("in cuts 0.3\n")
-biked_today_cmd = "cut -f3 -d, %s  | head -2 | tail -1 | tr -d a-z" % MOVES_CSV_FILENAME
-sys.stderr.write("in cuts 0.3, cmd: %s\n" % biked_today_cmd)
-biked_today = os.popen(biked_today_cmd).read().rstrip()
-sys.stderr.write("in cuts 0.3, cmd: %s\n" % biked_today_cmd)
-sys.stderr.write("in cuts 0.4\n")
-ran_today = os.popen("cut -f5 -d, %s  | head -2 | tail -1 | tr -d a-z" %
-                     MOVES_CSV_FILENAME).read().rstrip()
-sys.stderr.write("in cuts 0.5\n")
-walked_today = os.popen("cut -f2 -d, %s  | head -2 | tail -1 | tr -d a-z" %
-                        MOVES_CSV_FILENAME).read().rstrip()
-units_average = os.popen(
-    "sed 's/.*,//' %s| awk '{ total += $1; count++ } END { print total/count }'" % MOVES_CSV_FILENAME).read().rstrip()
+today_summary = collection.find_one({"$and": [{"Date": {"$lte": today}}, {"Date": {"$gt": yesterday}} ]})
+
+if today_summary:
+    units_today = ("%d" % today_summary['Calories'])
+else:
+    units_today = 0
+
+sys.stderr.write("units_today from db: {0}\n".format(units_today))
+
+
+units_average_cursor = collection.aggregate([{"$group": {"_id": None, "average": { "$avg": "$Calories" } } } ] );
+
+try:
+    units_average_result = units_average_cursor.next()
+    units_average = units_average_result['average']
+except StopIteration as e:
+    units_average = 0
+
+sys.stderr.write("units_average from db: {0}\n".format(units_average))
+
 units_yesterday = os.popen(
     "sed 's/.*,//' %s  | head -3 | tail -1" % MOVES_CSV_FILENAME).read().rstrip()
+
+sys.stderr.write("units_yesterday from csv: {0}\n".format(units_yesterday))
+
+yesterday_summary = collection.find_one({"$and": [{"Date": {"$lte": yesterday}}, {"Date": {"$gt": day_before_yesterday}} ]})
+
+if yesterday_summary:
+    units_yesterday = ("%d" % yesterday_summary['Calories'])
+else:
+    units_yesterday = 0
+
+sys.stderr.write("units_yesterday from db: {0}\n".format(units_yesterday))
 
 sys.stderr.write("cmd: grep ^%d-%02d-%02d %s | sed 's/.*,//' \n" % (previous_year, current_month, current_day, MOVES_CSV_FILENAME))
 units_today_last_year = os.popen(
