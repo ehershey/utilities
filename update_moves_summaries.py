@@ -46,6 +46,8 @@ def process_url(url):
 
     r = requests.get(url)
     if r.status_code != 200:
+        print("Bad status code")
+        print("r.text: {text}".format(text = r.text))
         raise Exception("Bad status code: {code}".format(code = r.status_code))
     # print( r.json())
 
