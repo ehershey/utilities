@@ -21,9 +21,13 @@ DB = "moves"
 
 parser = argparse.ArgumentParser(description='Update Database from Moves API')
 parser.add_argument('--redo', action='store_true', required=False, help='Load old data', default = False);
+parser.add_argument('--month', required=False, help='Month for which to load old data (format: NN)', type=int);
+parser.add_argument('--year', required=False, help='Year for which to load old data (format: NN)', type=int);
 args = parser.parse_args()
 
 redo = args.redo
+month = args.month
+year = args.year
 
 #
 if "MOVES_ACCESS_TOKEN" not in os.environ:
@@ -39,6 +43,14 @@ client = MongoClient(MONGODB_URI)
 db = client[DB]
 
 collection = db[COLLECTION]
+
+
+def process_month(year, month):
+    url = "https://api.moves-app.com/api/1.1/user/summary/daily/{year}{month:02d}?access_token={token}".format(token=MOVES_ACCESS_TOKEN, month = month, year = year)
+    try:
+       process_url(url)
+    except Exception as error:
+        print("Error: {error}".format(error=error))
 
 
 def process_url(url):
@@ -130,14 +142,20 @@ def process_url(url):
 
 
 if redo:
-    for year in range(2013,datetime.datetime.now().year+1):
-        for month in range(1,13):
-            url = "https://api.moves-app.com/api/1.1/user/summary/daily/{year}{month:02d}?access_token={token}".format(token=MOVES_ACCESS_TOKEN, month = month, year = year)
-            try:
-                process_url(url)
-            except Exception as error:
-                print("Error: {error}".format(error=error))
-
+    if year:
+        if month:
+            process_month(year, month)
+        else:
+            for month in range(1,13):
+                process_month(year, month)
+    else:
+        if month:
+            for year in range(2013,datetime.datetime.now().year+1):
+                process_month(year, month)
+        else:
+            for year in range(2013,datetime.datetime.now().year+1):
+                for month in range(1,13):
+                    process_month(year, month)
 else:
     url = "https://api.moves-app.com/api/1.1/user/summary/daily?pastDays=10&access_token={token}".format(token=MOVES_ACCESS_TOKEN)
     process_url(url)
