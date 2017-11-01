@@ -1,7 +1,7 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2.7
 #
 # Output calorie report based on moves data in database
-# Requires $MOVES_ACCESS_TOKEN and MONGODB_URI environment variables
+# Requires MONGODB_URI environment variable
 #
 import argparse
 import datetime
@@ -29,11 +29,8 @@ resting_daily_calories = 1700
 
 home = expanduser("~ernie")
 
-if "MOVES_ACCESS_TOKEN" not in os.environ:
-    raise Exception("No $MOVES_ACCESS_TOKEN defined.")
 if "MONGODB_URI" not in os.environ:
     raise Exception("No $MONGODB_URI defined.")
-MOVES_ACCESS_TOKEN = os.environ["MOVES_ACCESS_TOKEN"]
 MONGODB_URI = os.environ["MONGODB_URI"]
 
 client = MongoClient(MONGODB_URI)
@@ -59,6 +56,10 @@ previous_month = current_month - 1
 current_day = today.day
 previous_day = current_day - 1
 
+today_last_year = today.replace(year=previous_year)
+yesterday_last_year = today_last_year - datetime.timedelta(days=1)
+
+
 # zero padding
 #
 # current_month = "%02d" % (current_month)
@@ -79,6 +80,8 @@ sys.stderr.write("starting cuts\n")
 
 today_summary = collection.find_one({"$and": [{"Date": {"$lte": today}}, {"Date": {"$gt": yesterday}} ]})
 
+sys.stderr.write("today_summary: {0}\n".format(today_summary))
+
 if today_summary:
     units_today = ("%d" % today_summary['Calories'])
 else:
@@ -97,12 +100,9 @@ except StopIteration as e:
 
 sys.stderr.write("units_average from db: {0}\n".format(units_average))
 
-units_yesterday = os.popen(
-    "sed 's/.*,//' %s  | head -3 | tail -1" % MOVES_CSV_FILENAME).read().rstrip()
-
-sys.stderr.write("units_yesterday from csv: {0}\n".format(units_yesterday))
-
 yesterday_summary = collection.find_one({"$and": [{"Date": {"$lte": yesterday}}, {"Date": {"$gt": day_before_yesterday}} ]})
+
+sys.stderr.write("yesterday_summary: {0}\n".format(yesterday_summary))
 
 if yesterday_summary:
     units_yesterday = ("%d" % yesterday_summary['Calories'])
@@ -111,16 +111,61 @@ else:
 
 sys.stderr.write("units_yesterday from db: {0}\n".format(units_yesterday))
 
-sys.stderr.write("cmd: grep ^%d-%02d-%02d %s | sed 's/.*,//' \n" % (previous_year, current_month, current_day, MOVES_CSV_FILENAME))
-units_today_last_year = os.popen(
-    "grep ^%d-%02d-%02d %s | sed 's/.*,//' " % (previous_year, current_month, current_day, MOVES_CSV_FILENAME)).read().rstrip()
-sys.stderr.write("in cuts 1\n")
-sys.stderr.write("cmd: grep ^%d- %s | sed 's/.*,//' | awk '{ total += $1; count++ } END { print total/count }'" % (previous_year, MOVES_CSV_FILENAME))
-units_average_previous_year = os.popen(
-    "grep ^%d- %s | sed 's/.*,//' | awk '{ total += $1; count++ } END { print total/count }'" % (previous_year, MOVES_CSV_FILENAME)).read().rstrip()
+today_last_year_summary = collection.find_one({"$and": [{"Date": {"$lte": today_last_year}}, {"Date": {"$gt": yesterday_last_year}} ]})
+
+sys.stderr.write("today_last_year_summary: {0}\n".format(today_last_year_summary))
+
+if today_last_year_summary:
+    units_today_last_year = ("%d" % today_last_year_summary['Calories'])
+else:
+    units_today_last_year = 0
+
+sys.stderr.write("units_today_last_year from db: {0}\n".format(units_today_last_year))
+
+last_day_of_previous_year = today_last_year.replace(month=12, day=31)
+
+# use last day of two years ago to account for db dates being 00:00, so anything > last day of two years ago
+# will only include last year, not two years ago
+
+last_day_of_year_before_previous_year = today_last_year.replace(month=1, day=1) - datetime.timedelta(days = -1)
+
+units_average_previous_year_cursor = collection.aggregate([{"$match": { "$and": [{"Date": {"$lte": last_day_of_previous_year}}, {"Date": {"$gt": last_day_of_year_before_previous_year}}]}}, {"$group": {"_id": None, "average": { "$avg": "$Calories" } } } ] );
+
+try:
+    units_average_previous_year_result = units_average_previous_year_cursor.next()
+    units_average_previous_year = units_average_previous_year_result['average']
+except StopIteration as e:
+    units_average_previous_year = 0
+
+sys.stderr.write("units_average_previous_year from db: {0}\n".format(units_average_previous_year))
+
+last_day_of_current_year = today.replace(month=12, day=31)
+
+# use last day of last year to account for db dates being 00:00, so anything > last day of last year
+# will only include this year
+
+last_day_of_previous_year = today.replace(month=1, day=1) - datetime.timedelta(days = -1)
+
+
+units_average_current_year_cursor = collection.aggregate([{"$match": { "$and": [{"Date": {"$lte": last_day_of_current_year}}, {"Date": {"$gt": last_day_of_previous_year}}]}}, {"$group": {"_id": None, "average": { "$avg": "$Calories" } } } ] );
+
+try:
+    units_average_current_year_result = units_average_current_year_cursor.next()
+    units_average_current_year = units_average_current_year_result['average']
+except StopIteration as e:
+    units_average_current_year = 0
+
+sys.stderr.write("units_average_current_year from db: {0}\n".format(units_average_current_year))
+
+
+
+
 sys.stderr.write("in cuts 1.1\n")
 units_average_current_year = os.popen(
     "grep ^%d- %s | sed 's/.*,//' | awk '{ total += $1; count++ } END { print total/count }'" % (current_year, MOVES_CSV_FILENAME)).read().rstrip()
+
+sys.stderr.write("units_average_current_year from csv: {0}\n".format(units_average_current_year))
+
 sys.stderr.write("in cuts 1.2\n")
 units_current_year_total = os.popen(
     "grep ^%d- %s | sed 's/.*,//' | awk '{ total += $1; count++ } END { print total }'" % (current_year, MOVES_CSV_FILENAME)).read().rstrip()
@@ -142,34 +187,34 @@ if not units_today_last_year:
 if not units_average_previous_year:
     units_average_previous_year = "0"
 
-units_today_previous_year_diff = float(units_today) - float(units_average_previous_year)
-units_yesterday_previous_year_diff = float(units_yesterday) - float(units_average_previous_year)
-units_average_previous_year_diff = float(units_average) - float(units_average_previous_year)
-units_average_7days_previous_year_diff = float(
-    units_average_7days) - float(units_average_previous_year)
-units_average_30days_previous_year_diff = float(
-    units_average_30days) - float(units_average_previous_year)
-units_average_2days_previous_year_diff = float(
-    units_average_2days) - float(units_average_previous_year)
-units_average_current_year_previous_year_diff = float(
-    units_average_current_year) - float(units_average_previous_year)
-sys.stderr.write('utly: ' + units_today_last_year + "\n")
-sys.stderr.write('uapy: ' + units_average_previous_year + "\n")
+units_today_previous_year_diff = "{:.2f}".format(float(units_today) - float(units_average_previous_year))
+units_yesterday_previous_year_diff = "{:.2f}".format(float(units_yesterday) - float(units_average_previous_year))
+units_average_previous_year_diff = "{:.2f}".format(float(units_average) - float(units_average_previous_year))
+units_average_7days_previous_year_diff = "{:.2f}".format(float(
+    units_average_7days) - float(units_average_previous_year))
+units_average_30days_previous_year_diff = "{:.2f}".format(float(
+    units_average_30days) - float(units_average_previous_year))
+units_average_2days_previous_year_diff = "{:.2f}".format(float(
+    units_average_2days) - float(units_average_previous_year))
+units_average_current_year_previous_year_diff = "{:.2f}".format(float(
+    units_average_current_year) - float(units_average_previous_year))
+sys.stderr.write("utly: {units_today_last_year}\n".format(units_today_last_year = units_today_last_year))
+sys.stderr.write("uapy: {units_average_previous_year}\n".format(units_average_previous_year = units_average_previous_year))
 sys.stderr.write("units_today_last_year: {0}\n".format(units_today_last_year))
-units_today_last_year_previous_year_diff = float(units_today_last_year) - float(units_average_previous_year)
+units_today_last_year_previous_year_diff = "{:.2f}".format(float(units_today_last_year) - float(units_average_previous_year))
 
-units_today_30days_diff = float(units_today) - float(units_average_30days)
-units_yesterday_30days_diff = float(units_yesterday) - float(units_average_30days)
-units_average_30days_diff = float(units_average) - float(units_average_30days)
-units_average_7days_30days_diff = float(
-    units_average_7days) - float(units_average_30days)
-units_average_2days_30days_diff = float(
-    units_average_2days) - float(units_average_30days)
-units_average_current_year_30days_diff = float(
-    units_average_current_year) - float(units_average_30days)
-units_average_previous_year_30days_diff = float(
-    units_average_previous_year) - float(units_average_30days)
-units_today_last_year_30days_diff = float(units_today_last_year) - float(units_average_30days)
+units_today_30days_diff = "{:.2f}".format(float(units_today) - float(units_average_30days))
+units_yesterday_30days_diff = "{:.2f}".format(float(units_yesterday) - float(units_average_30days))
+units_average_30days_diff = "{:.2f}".format(float(units_average) - float(units_average_30days))
+units_average_7days_30days_diff = "{:.2f}".format(float(
+    units_average_7days) - float(units_average_30days))
+units_average_2days_30days_diff = "{:.2f}".format(float(
+    units_average_2days) - float(units_average_30days))
+units_average_current_year_30days_diff = "{:.2f}".format(float(
+    units_average_current_year) - float(units_average_30days))
+units_average_previous_year_30days_diff = "{:.2f}".format(float(
+    units_average_previous_year) - float(units_average_30days))
+units_today_last_year_30days_diff = "{:.2f}".format(float(units_today_last_year) - float(units_average_30days))
 
 minutes_since_moves_update = (datetime.datetime.now(
 ) - datetime.datetime.fromtimestamp(os.path.getmtime(MOVES_CSV_FILENAME))).seconds / 60
@@ -177,9 +222,9 @@ minutes_since_moves_update = (datetime.datetime.now(
 placeholder['units_today'] = units_today
 placeholder['units_today_last_year'] = units_today_last_year
 placeholder['units_yesterday'] = units_yesterday
-placeholder['units_average'] = units_average
+placeholder['units_average'] = "{:.2f}".format(units_average)
 placeholder['units_average_30days'] = units_average_30days
-placeholder['units_average_previous_year'] = units_average_previous_year
+placeholder['units_average_previous_year'] = "{:.2f}".format(units_average_previous_year)
 placeholder['units_average_7days'] = units_average_7days
 placeholder['units_average_2days'] = units_average_2days
 placeholder['now'] = time.ctime()
