@@ -3,3 +3,4 @@ requests
 boto
 pymongo
 simplejson
+py-dateutil
