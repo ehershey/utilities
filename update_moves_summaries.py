@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2.7
 # Update moves summary collection with values from Moves App
 #
 # Requires $MOVES_ACCESS_TOKEN and MONGODB_URI environment variables
