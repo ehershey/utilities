@@ -3,5 +3,11 @@
 # Tell iTunes and Spotify to stop playing
 #
 
-osascript -e 'tell application "iTunes" to stop'
-osascript -e 'tell application "Spotify" to pause'
+if [ "`ps auwx | grep /iTunes.app/`" ]
+then
+    osascript -e 'tell application "iTunes" to stop'
+fi
+if [ "`ps auwx | grep /Spotify.app/`" ]
+then
+    osascript -e 'tell application "Spotify" to pause'
+fi
