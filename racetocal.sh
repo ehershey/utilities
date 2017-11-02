@@ -270,11 +270,6 @@ test_url() {
   fi
 }
 
-url_to_test='http://www.active.com/new-york-ny/running/distance-running-races/stache-dash-nyc-5k-10k-2016?int='
-expected_title="Stache Dash NYC 5K / 10K"
-expected_date="2016-11-12t05:00:00"
-
-test_url "$url_to_test" "$expected_title" "$expected_date"
 
 url_to_test="https://nycruns.com/races/?race=queens-half"
 expected_title="NYCRUNS Flushing Meadows Half Marathon & 5K"
