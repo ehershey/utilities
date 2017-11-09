@@ -300,19 +300,10 @@ test_url "$url_to_test" "$expected_title" "$expected_date"
 
 
 expected_title="NYCRUNS Spring Fling 5K & 10K"
-expected_date="march 17, 2018"
+expected_date="march 17, 2018 8:30am"
 url_to_test="https://nycruns.com/races/?race=nycruns-spring-fling-5k-10k"
 
 test_url "$url_to_test" "$expected_title" "$expected_date"
-
-expected_date="april 22, 2017 8:00am"
-returned_date="$(get_race_date "https://nycruns.com/races/?race=nycruns-prospect-park-10k")"
-if [ "$returned_date" != "$expected_date" ]
-then
-  echo "Test command failed! Got $returned_date, expected $expected_date"
-  exit 2
-fi
-
 
 
 expected_title="Run the River 5K"
