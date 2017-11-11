@@ -18,6 +18,8 @@ LOGGER = logging.getLogger(name = 'put_csv_in_sheet')
 
 LOGGER.setLevel(logging.INFO)
 
+logging.getLogger('googleapiclient.discovery_cache').setLevel(logging.ERROR)
+
 LOGGER.info("Starting")
 
 try:
