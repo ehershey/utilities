@@ -14,7 +14,7 @@ PATH=/home/ernie/Dropbox/Misc/venv.eahdroplet1/bin:/usr/bin:/bin:/usr/local/bin:
 #15 0 * * * ~/git/utilities/post_training_goal_to_numerous.py  >> /tmp/post_training_goal_to_numerous.log 2>&1
 #* * * * * ~/git/utilities/post_todoist_count_to_numerous.py  >> /tmp/post_todoist_count_to_numerous.log 2>&1
 */15 * * * * ~/git/utilities/save_myfitnesspal_data.js  >> /tmp/save_myfitnesspal_data.log 2>&1
-*/10 * * * * ~/git/utilities/update_moves_summaries.py  >> /tmp/update_moves_summaries.log 2>&1
+*/10 * * * * ~/git/utilities/update_moves_summaries.py  --spreadsheet_id $MARATHON_SPREADSHEET_ID --sheet_name "All moves data" >> /tmp/update_moves_summaries.log 2>&1
 */10 * * * * ~/git/utilities/update_moves_csv.sh  >> /tmp/update_moves_csv.log 2>&1
 */5 * * * * pkill -0 -x dropbox || echo "Dropbox not running on $(hostname)"
 */5 * * * * curl --silent "https://api.moves-app.com/api/v1/user/activities/daily?pastDays=7&access_token=$MOVES_ACCESS_TOKEN" | /home/ernie/git/utilities/save_moves_activities.js >> /tmp/save_moves_activities.log 2>&1

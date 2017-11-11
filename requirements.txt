@@ -4,3 +4,4 @@ boto
 pymongo
 simplejson
 py-dateutil
+google-api-python-client
