@@ -178,9 +178,15 @@ def insert_record_into_sheet(record):
     row = []
     for header in headers:
         if header in record:
-            row.append({"userEnteredValue": { "stringValue": str(record[header]) } })
+            value = record[header]
+            if type(value) == float or type(value) == int:
+                value_type = "numberValue"
+            else:
+                value_type = "stringValue"
+                value = str(value)
+            row.append({"userEnteredValue": { value_type: value } })
         else:
-            row.append({"userEnteredValue": { "stringValue": str(0) } } )
+            row.append({"userEnteredValue": { "numberValue": 0 } } )
     LOGGER.debug("row: {row}".format(row=row))
 
     batch_update_spreadsheet_request_body = {
