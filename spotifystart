@@ -1,7 +1,6 @@
 #!/bin/bash
 #
-# Tell iTunes and Spotify to stop playing
+# Tell Spotify to start playing
 #
 
-osascript -e 'tell application "iTunes" to stop'
-osascript -e 'tell application "Spotify" to pause'
+osascript -e 'tell application "Spotify" to play'
