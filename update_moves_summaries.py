@@ -29,10 +29,11 @@ COLLECTION = "summaries"
 DB = "moves"
 
 # If modifying these scopes, delete your previously saved credentials
-# at ~/.credentials/sheets.googleapis.com-python-quickstart.json
+# in update_moves_summaries_credentials.json in the same directory as this script
+#
 SCOPES = 'https://www.googleapis.com/auth/spreadsheets'
 CLIENT_SECRET_FILE = os.path.dirname(__file__) + '/client_secret.json'
-CREDENTIALS_FILE = os.path.dirname(__file__) + '/sheets.googleapis.com-python-quickstart.json'
+CREDENTIALS_FILE = os.path.dirname(__file__) + '/update_moves_summaries_credentials.json'
 APPLICATION_NAME = 'update_moves_summaries.py'
 
 logging.basicConfig(format=("%(asctime).19s %(levelname)s %(filename)s:"
