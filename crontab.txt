@@ -1,7 +1,9 @@
 #
-# DO NOT EDIT BY HAND
+# DO NOT EDIT CRONTAB BY HAND
 #
-# LOAD WITH load_crontab_secondary.sh
+# EDIT crontab.txt 
+#
+# LOAD WITH load_crontab.sh
 #
 
 PATH=/home/ernie/Dropbox/Misc/venv.eahdroplet1/bin:/usr/bin:/bin:/usr/local/bin:/sbin:/usr/sbin:/usr/local/sbin

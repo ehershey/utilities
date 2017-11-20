@@ -1,5 +1,5 @@
 #!/bin/bash
-# load crontab from crontab-secondary.txt and crontab.env
+# load crontab from crontab and crontab.env
 #
 CRON_USER=ernie
 FILEHOME=/home/ernie/git/utilities
@@ -18,9 +18,9 @@ then
   exit 3
 fi
 
-if [ ! -e "$FILEHOME/crontab.env" -o ! -e "$FILEHOME/crontab-secondary.txt" ]
+if [ ! -e "$FILEHOME/crontab.env" -o ! -e "$FILEHOME/crontab.txt" ]
 then
-  echo "Can't find crontab.env or crontab-secondary.txt in $FILEHOME"
+  echo "Can't find crontab.env or crontab.txt in $FILEHOME"
   exit 2
 fi
-cat "$FILEHOME/crontab.env" "$FILEHOME/crontab-secondary.txt" | $command
+cat "$FILEHOME/crontab.env" "$FILEHOME/crontab.txt" | $command
