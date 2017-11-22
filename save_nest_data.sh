@@ -17,4 +17,4 @@ else
   echo "Can't find auth file: $auth_file"
   exit 1
 fi
-curl --silent --show-error --location https://developer-api.nest.com/devices/thermostats/$NEST_DEVICE_ID.json\?auth\=$NEST_ACCESS_TOKEN | mongoimport --db nest --collection thermostat_log
+curl --silent --show-error --location https://developer-api.nest.com/devices/thermostats/$NEST_DEVICE_ID.json\?auth\=$NEST_ACCESS_TOKEN | mongoimport --db nest --collection thermostat_log --quiet
