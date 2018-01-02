@@ -6,6 +6,7 @@ NYRR_TITLE_SELECTOR="h2.title"
 NYRR_DATE_SELECTOR="p.full-width span"
 
 NYCRUNS_TITLE_SELECTOR=".race-display-name"
+NYCRUNS_TITLE_SELECTOR2="h1._title"
 NYCRUNS_DATE_SELECTOR=".race-display-date"
 NYCRUNS_ADDRESS_SELECTOR=".race-display-address"
 
@@ -69,6 +70,11 @@ get_race_title() {
 
   if [ ! "$returned_title" ]
   then
+    returned_title="$($CURL "$url" | $PUP "$NYCRUNS_TITLE_SELECTOR2" text{})"
+  fi
+
+  if [ ! "$returned_title" ]
+  then
     returned_title="$($CURL "$url" | $PUP "$RNR_TITLE_SELECTOR" text{})"
   fi
 
@@ -103,9 +109,13 @@ get_race_title() {
   #
   returned_title="$(echo -n "$returned_title" | sed 's/[ 	]*$//' )"
 
+  # Trim leading whitespace
+  #
+  returned_title="$(echo -n "$returned_title" | sed 's/^[ 	]*//' )"
+
   # Grab only first line
   #
-  returned_title="$(echo -n "$returned_title" | head -1 )"
+  returned_title="$(echo -n "$returned_title" | grep . | head -1 )"
 
   # Remove leading "Home" text
   #
