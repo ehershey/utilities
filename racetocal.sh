@@ -271,9 +271,9 @@ test_url() {
 }
 
 
-url_to_test="https://nycruns.com/races/?race=queens-half"
-expected_title="NYCRUNS Flushing Meadows Half Marathon & 5K"
-expected_date="april 16, 2017 8:00am"
+url_to_test="https://nycruns.com/races/?race=paine-to-pain-trail-half-marathon-2018"
+expected_title="Paine to Pain Trail Half Marathon"
+expected_date="october 07, 2018 9:00 am"
 
 test_url "$url_to_test" "$expected_title" "$expected_date"
 
