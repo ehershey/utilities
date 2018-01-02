@@ -8,6 +8,7 @@ NYRR_DATE_SELECTOR="p.full-width span"
 NYCRUNS_TITLE_SELECTOR=".race-display-name"
 NYCRUNS_TITLE_SELECTOR2="h1._title"
 NYCRUNS_DATE_SELECTOR=".race-display-date"
+NYCRUNS_DATE_SELECTOR2="._date , ._subtitle"
 NYCRUNS_ADDRESS_SELECTOR=".race-display-address"
 
 RNR_DATE_SELECTOR="h2:contains(\"General Info\") + p + p"
@@ -129,6 +130,11 @@ get_race_date() {
   if [ ! "$returned_date" ]
   then
     returned_date="$($CURL "$url" | $PUP "$NYCRUNS_DATE_SELECTOR" text{})"
+  fi
+
+  if [ ! "$returned_date" ]
+  then
+    returned_date="$($CURL "$url" | $PUP "$NYCRUNS_DATE_SELECTOR2" text{})"
   fi
 
   if [ ! "$returned_date" ]
@@ -283,7 +289,7 @@ test_url() {
 
 url_to_test="https://nycruns.com/races/?race=paine-to-pain-trail-half-marathon-2018"
 expected_title="Paine to Pain Trail Half Marathon"
-expected_date="october 07, 2018 9:00 am"
+expected_date="sunday, october 7, 2018 9:00 am"
 
 test_url "$url_to_test" "$expected_title" "$expected_date"
 
