@@ -316,7 +316,7 @@ test_url "$url_to_test" "$expected_title" "$expected_date"
 
 
 expected_title="NYCRUNS Spring Fling 5K & 10K"
-expected_date="march 17, 2018 8:30am"
+expected_date="saturday, march 17, 2018 8:30am"
 url_to_test="https://nycruns.com/races/?race=nycruns-spring-fling-5k-10k"
 
 test_url "$url_to_test" "$expected_title" "$expected_date"
