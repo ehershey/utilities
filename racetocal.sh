@@ -307,7 +307,7 @@ url_to_test="https://www.virginmoneylondonmarathon.com/en-gb/"
 test_url "$url_to_test" "$expected_title" "$expected_date"
 
 
-expected_title="Yosemite Half Marathon"
+expected_title="Yosemite Half Marathon (Direct)"
 expected_date="may 12th, 2018"
 url_to_test="http://www.yosemitehalfmarathon.com/"
 
