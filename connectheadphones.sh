@@ -22,7 +22,7 @@ fi
 
 if which blueutil > /dev/null 2>&1
 then
-  blueutil power 1
+  blueutil --power=1
 fi
 
 osascript  <<END
