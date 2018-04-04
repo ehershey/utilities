@@ -69,10 +69,10 @@ for basename in os.listdir(activity_dir):
 
             print("Created activity ( {0} )".format(create_activity_reason))
 
-            #result = collection.replace_one(
-                #activity_query, activity, upsert=True)
-            #upserted_id = result.upserted_id
-            #logging.debug("upserted_id: {0}".format(upserted_id))
+            result = collection.replace_one(
+                activity_query, activity, upsert=True)
+            upserted_id = result.upserted_id
+            logging.debug("upserted_id: {0}".format(upserted_id))
             created_count += 1
 
             # exit()
