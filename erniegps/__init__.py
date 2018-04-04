@@ -115,6 +115,9 @@ def read_activity(filename):
     activity['notes'] = notes
     activity['verbose_startdate'] = dateutil.parser.parse(trackpoints[0].get('time')).astimezone(pytz.timezone("EST5EDT")).strftime("%Y-%m-%d")
     activity['verbose_starttime'] = dateutil.parser.parse(trackpoints[0].get('time')).astimezone(pytz.timezone("EST5EDT")).strftime("%H:%M")
+    activity['starttime'] = dateutil.parser.parse(trackpoints[0].get('time')).astimezone(pytz.timezone("EST5EDT"))
+    activity['endtime'] = dateutil.parser.parse(trackpoints[len(trackpoints) - 1].get('time')).astimezone(pytz.timezone("EST5EDT"))
+    activity['verbose_duration'] = activity['endtime'] - activity['starttime']
     activity['verbose_distance'] = "{0:.02f} miles".format(get_distance_from_trackpoints(trackpoints).as_miles())
     return activity
 
