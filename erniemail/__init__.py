@@ -6,7 +6,7 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 
 
-def notify(activity, recipient, sender):
+def activity_notify(activity, recipient, sender):
 
     string = u"""New Activity Found!
 
@@ -24,6 +24,12 @@ def notify(activity, recipient, sender):
 
     body = "{0}".format(string)
     subject = "New Activity Processed"
+
+    send_message(body, subject, recipient, sender)
+
+
+def send_message(body, subject, recipient, sender):
+
     # Create message container - the correct MIME type is multipart/alternative.
     msg = MIMEMultipart('alternative')
 
