@@ -5,6 +5,7 @@
 # When they come in, do some analysis and
 # email results to myself.
 
+import argparse
 import erniemail
 import erniegps
 import logging
@@ -25,6 +26,10 @@ sender = recipient
 # re-process activities without this version #
 ACTIVITY_VERSION = 1
 
+parser = argparse.ArgumentParser(description='Process Tapiriik activities and send stats emails')
+parser.add_argument('--filter', required=False, help='Case insensitive regex to limit processed filenames', type=str)
+args = parser.parse_args()
+
 client = MongoClient(db_url)
 
 db = client[db_name]
@@ -37,7 +42,7 @@ created_count = 0
 
 for basename in os.listdir(activity_dir):
     filename = os.path.join(activity_dir, basename)
-    if "tcx" in filename:
+    if "tcx" in filename and (args.filter is None or args.filter.lower() in filename.lower()):
         logging.debug("Processing filename: {0}".format(filename))
 
         activity_query = {"filename": filename}
@@ -56,6 +61,7 @@ for basename in os.listdir(activity_dir):
                 activity['activity_version'], ACTIVITY_VERSION)
 
         if create_activity:
+            print("reading filename: {0}".format(filename))
             activity = erniegps.read_activity(filename)
             activity = erniegps.process_activity(activity)
 
@@ -63,10 +69,10 @@ for basename in os.listdir(activity_dir):
 
             print("Created activity ( {0} )".format(create_activity_reason))
 
-            result = collection.replace_one(
-                activity_query, activity, upsert=True)
-            upserted_id = result.upserted_id
-            logging.debug("upserted_id: {0}".format(upserted_id))
+            #result = collection.replace_one(
+                #activity_query, activity, upsert=True)
+            #upserted_id = result.upserted_id
+            #logging.debug("upserted_id: {0}".format(upserted_id))
             created_count += 1
 
             # exit()
@@ -77,9 +83,11 @@ for basename in os.listdir(activity_dir):
             print(u"notes: {0}".format(activity['notes']))
             print("activity_type: {0}".format(activity['activity_type']))
             print("verbose_starttime: {0}".format(activity['verbose_starttime']))
+            print("verbose_startdate: {0}".format(activity['verbose_startdate']))
+            print("verbose_duration: {0}".format(activity['verbose_duration']))
             print("verbose_distance: {0}".format(activity['verbose_distance']))
 
-            erniemail.notify(activity, recipient, sender)
+            erniemail.activity_notify(activity, recipient, sender)
         else:
             logging.debug("Found activity")
 
