@@ -19,8 +19,8 @@ curl  --data "grant_type=authorization_code&code=$AUTH_CODE&client_id=$CLIENT_ID
 # response looks like:
 {"access_token":"xxxxx","token_type":"bearer","expires_in":15551999,"refresh_token":"yyyyy","user_id":zzzzzzzzz}
 
-6) Set access token to $MOVES_ACCESS_TOKEN
-
+6) Set access token to $MOVES_ACCESS_TOKEN and save refresh token for next refresh
 
 Refreshing access token:
+# (Still generates new access token but doesn't require re-authing in app or using browser)
 curl --data "grant_type=refresh_token&refresh_token=$REFRESH_TOKEN&client_id=$CLIENT_ID&client_secret=$CLIENT_SECRET" https://api.moves-app.com/oauth/v1/access_token
