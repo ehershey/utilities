@@ -99,6 +99,11 @@ def get_units_today(collection, yesterday=datetime.datetime.now() - timedelta(da
     return units_today
 
 
+def get_units_average_current_year(collection):
+    units_average_current_year = int(get_average_between_two_dates(collection, last_day_of_previous_year, last_day_of_current_year))
+    return units_average_current_year
+
+
 if __name__ == '__main__':
 
     client = MongoClient(MONGODB_URI)
@@ -153,7 +158,7 @@ if __name__ == '__main__':
 
     last_day_of_previous_year = today.replace(month=1, day=1) - timedelta(days=1)
 
-    units_average_current_year = int(get_average_between_two_dates(collection, last_day_of_previous_year, last_day_of_current_year))
+    units_average_current_year = get_units_average_current_year(collection)
 
     units_average_7days = get_7day_average(collection, today)
     units_average_2days = get_2day_average(collection, today)
