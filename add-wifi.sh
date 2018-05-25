@@ -12,6 +12,10 @@ do
   if networksetup -getairportnetwork $INTERFACE
   then
         network=$(networksetup -getairportnetwork $INTERFACE | cut -f2- -d: | sed 's/^ *//')
+        if [ "$network" ]
+        then
+          break
+        fi
   fi
 done
 echo "Adding to $WIFIDOC"
@@ -20,7 +24,7 @@ then
   echo "WARNING: Appears to be duplicate"
 fi
 echo "Network appears to be: $network"
-password="$(security find-generic-password -wa $network)"
+password="$(security find-generic-password -wa "$network")"
 echo "Password appears to be: $password"
 echo -n "Enter location name: "
 read location
