@@ -98,6 +98,7 @@ def get_units_today(collection, yesterday=datetime.datetime.now() - timedelta(da
     units_today = int(get_average_between_two_dates(collection, yesterday, today))
     return units_today
 
+
 if __name__ == '__main__':
 
     client = MongoClient(MONGODB_URI)
@@ -148,7 +149,7 @@ if __name__ == '__main__':
     last_day_of_current_year = today.replace(month=12, day=31)
 
     # use last day of last year to account for db dates being 00:00, so anything > last day of last year
-     # will only include this year
+    # will only include this year
 
     last_day_of_previous_year = today.replace(month=1, day=1) - timedelta(days=1)
 
@@ -217,6 +218,3 @@ if __name__ == '__main__':
 
     formated = template.format(**placeholder)
     print formated
-
-
-#def test_get_
