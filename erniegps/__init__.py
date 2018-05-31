@@ -17,7 +17,7 @@ MAX_SPLIT_DEPTH = 30
 #
 PERCENTAGE_MARGIN_SPLIT_ADVANTAGE = 10
 
-logging.basicConfig(level=logging.DEBUG)
+# logging.basicConfig(level=logging.DEBUG)
 
 
 class ActivityException(Exception):
