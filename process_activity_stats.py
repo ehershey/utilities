@@ -28,6 +28,7 @@ ACTIVITY_VERSION = 1
 
 parser = argparse.ArgumentParser(description='Process Tapiriik activities and send stats emails')
 parser.add_argument('--filter', required=False, help='Case insensitive regex to limit processed filenames', type=str)
+parser.add_argument('--redo', default=False, help='Process activity whether in DB already or not', action='store_true')
 args = parser.parse_args()
 
 client = MongoClient(db_url)
@@ -59,6 +60,9 @@ for basename in os.listdir(activity_dir):
             create_activity = True
             create_activity_reason = "Version in DB too low ({0} < {0})".format(
                 activity['activity_version'], ACTIVITY_VERSION)
+        elif args.redo:
+            create_activity = True
+            create_activity_reason = "Redo flag passed"
 
         if create_activity:
             print("reading filename: {0}".format(filename))
@@ -92,5 +96,5 @@ for basename in os.listdir(activity_dir):
             logging.debug("Found activity")
 
     else:
-        print("Skipping filename: {0}".format(filename))
+        logging.debug("Skipping filename: {0}".format(filename))
 print("created_count: {0}".format(created_count))
