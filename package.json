@@ -50,7 +50,7 @@
     "phantomjs": "^1.9.10",
     "request": "^2.40.0",
     "strftime": "^0.8.2",
-    "uglify-js": "~2.4.12",
+    "uglify-js": " ~> 2.6.0",
     "zombie": "^4.0.8"
   }
 }
