@@ -10,7 +10,7 @@ PATH=/home/ernie/Dropbox/Misc/venv.eahdroplet1/bin:/usr/bin:/bin:/usr/local/bin:
 
 */5 * * * * (curl --silent "https://api.moves-app.com/api/1.1/user/storyline/daily?pastDays=1&trackPoints=true&access_token=$MOVES_ACCESS_TOKEN" | tee /tmp/curlout.tmp | ~/git/utilities/moves_to_geojson.sh "Moves API" |  mongoimport --db ernie_org --collection gps_log --writeConcern '{w: 0}' ) >> /tmp/moves_to_gps_log.log 2>&1
 */15 * * * * ~/git/utilities/average_unit_checker.py >> /tmp/average_unit_checker.log 2>&1
-*/5 * * * * ~/git/utilities/check_moves_outofdate.sh >> /tmp/check_moves_outofdate.log 2>&1
+# */5 * * * * ~/git/utilities/check_moves_outofdate.sh >> /tmp/check_moves_outofdate.log 2>&1
 */15 * * * * (chown :apache ~/git/goeverywhere/unit_report.html ; chmod g+rw ~/git/goeverywhere/unit_report.html ; ~/git/utilities/generate_unit_report.sh  ) >> /tmp/unit_report.log
 #15 0 * * * ~/git/utilities/post_year_ago_weight_to_numerous.py  >> /tmp/post_year_ago_weight_to_numerous.log 2>&1
 #15 0 * * * ~/git/utilities/post_training_goal_to_numerous.py  >> /tmp/post_training_goal_to_numerous.log 2>&1
@@ -18,7 +18,7 @@ PATH=/home/ernie/Dropbox/Misc/venv.eahdroplet1/bin:/usr/bin:/bin:/usr/local/bin:
 */15 * * * * ~/git/utilities/save_myfitnesspal_data.js  >> /tmp/save_myfitnesspal_data.log 2>&1
 */10 * * * * ~/git/utilities/update_moves_summaries.py  --spreadsheet_id $MARATHON_SPREADSHEET_ID --sheet_name "All moves data" >> /tmp/update_moves_summaries.log
 */10 * * * * ~/git/utilities/update_moves_csv.sh  >> /tmp/update_moves_csv.log
-*/5 * * * * pkill -0 -x dropbox || echo "Dropbox not running on $(hostname)"
+*/5 * * * * pkill -0 -x dropbox || pkill -0 -x Dropbox || pkill -0 dropbox_py3 || echo "Dropbox not running on $(hostname)"
 */5 * * * * curl --silent "https://api.moves-app.com/api/v1/user/activities/daily?pastDays=7&access_token=$MOVES_ACCESS_TOKEN" | /home/ernie/git/utilities/save_moves_activities.js >> /tmp/save_moves_activities.log 2>&1
 */15 * * * * /home/ernie/git/utilities/save_nest_data.sh >> /tmp/save_nest_data.log
 * * * * * /home/ernie/git/utilities/process_activity_stats.py >> /tmp/process_activity_stats.log
