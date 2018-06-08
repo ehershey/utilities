@@ -1,18 +1,27 @@
 #!/bin/sh
 #
-# List Bluetooth devices by status in MacOS on the command line
+# List Bluetooth devices by status and type in MacOS on the command line
 # requires /usr/local/bin/xmlstarlet (http://xmlstar.sourceforge.net/)
 # Usage:
-# lsbt [ -c | --connected ] [ -n | --numeric ] [ <device name> | <device mac address> ]
+# lsbt [ -c | --connected ] [ -a | --audio ] [ -n | --numeric ] [ <device name> | <device mac address> ]
 #
 # Device name filtering ignores special characters and case
 #
 # * List names of all paired devices
 #   lsbt
+#
 # * List names of all connected devices
 #   lsbt -c
+#
+# * List names of all connected audio devices
+#   lsbt -c -a
+#
+# * List names of all known audio devices
+#   lsbt --audio
+#
 # * List mac addresses of all connected devices
 #   lsbt --connected --numeric
+#
 # * List single device
 #   lsbt "ODT Privates"
 #   lsbt 78:4F:43:75:C1:28
@@ -38,6 +47,7 @@ then
 fi
 
 connected_only=""
+audio_only=""
 numeric_output=""
 device=""
 
@@ -46,6 +56,9 @@ do
   if [ "$1" = "-c" -o "$1" = "--connected" ]
   then
     connected_only="1"
+  elif [ "$1" = "-a" -o "$1" = "--audio" ]
+  then
+    audio_only="1"
   elif [ "$1" = "-n" -o "$1" = "--numeric" ]
   then
     numeric_output="1"
@@ -61,6 +74,15 @@ then
 else
   connected_criterion=''
 fi
+
+if [ "$audio_only" ]
+then
+  audio_criterion='[contains(dict/key[text() = "device_services"]/following-sibling::string[1]/text(), "Audio")]'
+else
+  audio_criterion=''
+fi
+
+
 
 if [ "$numeric_output" ]
 then
@@ -83,4 +105,4 @@ fi
 # strip out network reference to avoid xmlstarlet stderr noise
 #
 # Redirect system_profilter stderr for this message: 2018-04-07 15:42:05.926 system_profiler[70736:84221333] Exception NSInvalidArgumentException thrown while decoding IOBluetoothSDPServiceRecord
-system_profiler -xml SPBluetoothDataType 2>/dev/null| grep -v DOCTYPE | /usr/local/bin/xmlstarlet sel --text --template --match '/plist/array/dict/key[text() = "_items"]/following-sibling::array[1]/dict/key[text() = "device_title"]/following-sibling::array[1]/dict'"${connected_criterion}/${final_xpath_component}" --value-of . --nl | $output_filter1 | eval "$output_filter2"
+system_profiler -xml SPBluetoothDataType 2>/dev/null| grep -v DOCTYPE | /usr/local/bin/xmlstarlet sel --text --template --match '/plist/array/dict/key[text() = "_items"]/following-sibling::array[1]/dict/key[text() = "device_title"]/following-sibling::array[1]/dict'"${connected_criterion}${audio_criterion}/${final_xpath_component}" --value-of . --nl | $output_filter1 | eval "$output_filter2"
