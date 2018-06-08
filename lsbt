@@ -1,0 +1,86 @@
+#!/bin/sh
+#
+# List Bluetooth devices by status in MacOS on the command line
+# requires /usr/local/bin/xmlstarlet (http://xmlstar.sourceforge.net/)
+# Usage:
+# lsbt [ -c | --connected ] [ -n | --numeric ] [ <device name> | <device mac address> ]
+#
+# Device name filtering ignores special characters and case
+#
+# * List names of all paired devices
+#   lsbt
+# * List names of all connected devices
+#   lsbt -c
+# * List mac addresses of all connected devices
+#   lsbt --connected --numeric
+# * List single device
+#   lsbt "ODT Privates"
+#   lsbt 78:4F:43:75:C1:28
+#
+
+set -o errexit
+set -o nounset
+set -o pipefail
+
+if ! which -s xmlstarlet
+then
+  echo "Missing required utility: xmlstarlet" >&2
+  /bin/echo -n "Install (will run: brew install xmlstarlet)? (y/N)" >&2
+  read ans
+    echo
+  if [ "$ans" == "y" ]
+  then
+    brew install xmlstarlet
+  else
+    echo "Aborting.">&2
+    exit 8
+  fi
+fi
+
+connected_only=""
+numeric_output=""
+device=""
+
+while [ "${1:-}" ]
+do
+  if [ "$1" = "-c" -o "$1" = "--connected" ]
+  then
+    connected_only="1"
+  elif [ "$1" = "-n" -o "$1" = "--numeric" ]
+  then
+    numeric_output="1"
+  else
+    device="$1"
+  fi
+  shift
+done
+
+if [ "$connected_only" ]
+then
+  connected_criterion='[dict/key[text() = "device_isconnected"]/following-sibling::string[1]/text() = "attrib_Yes"]'
+else
+  connected_criterion=''
+fi
+
+if [ "$numeric_output" ]
+then
+  final_xpath_component='dict/key[text() = "device_addr"]/following-sibling::string[1]'
+  output_filter1="tr - :"
+else
+  final_xpath_component="key"
+  output_filter1="cat"
+fi
+
+
+if [ "$device" ]
+then
+  device="$(echo $device  |sed 's/[^0-9a-zA-Z ]/./g')"
+  output_filter2="grep -xi \"$device\""
+else
+  output_filter2="cat"
+fi
+
+# strip out network reference to avoid xmlstarlet stderr noise
+#
+# Redirect system_profilter stderr for this message: 2018-04-07 15:42:05.926 system_profiler[70736:84221333] Exception NSInvalidArgumentException thrown while decoding IOBluetoothSDPServiceRecord
+system_profiler -xml SPBluetoothDataType 2>/dev/null| grep -v DOCTYPE | /usr/local/bin/xmlstarlet sel --text --template --match '/plist/array/dict/key[text() = "_items"]/following-sibling::array[1]/dict/key[text() = "device_title"]/following-sibling::array[1]/dict'"${connected_criterion}/${final_xpath_component}" --value-of . --nl | $output_filter1 | eval "$output_filter2"
