@@ -78,6 +78,12 @@ else
   fi
 fi
 
+if ! lsbt "$DEVICE_NAME" >/dev/null
+then
+  echo "Can't find device in device list - is it paired?"
+  exit 3
+fi
+
 osascript  <<END
 -- activate application "SystemUIServer"
 tell application "System Events"
