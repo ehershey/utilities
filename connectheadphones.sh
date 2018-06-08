@@ -84,6 +84,10 @@ then
   exit 3
 fi
 
+# Normalize device name (for case and weird chars, to match name exactly in menu)
+#
+DEVICE_NAME="$(lsbt "$DEVICE_NAME")"
+
 osascript  <<END
 -- activate application "SystemUIServer"
 tell application "System Events"
