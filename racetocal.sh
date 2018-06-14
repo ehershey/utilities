@@ -98,9 +98,9 @@ get_race_title() {
   #
   returned_title="$(echo -n "$returned_title" | sed 's/ *|.*//' )"
 
-  # Discard arrow char and following text
+  # Discard arrow char and following text ("Â" from archive.org)
   #
-  returned_title="$(echo -n "$returned_title" | sed 's/ *».*//' )"
+  returned_title="$(echo -n "$returned_title" | sed 's/ *[Â»].*//' )"
 
   # Discard dash and following text
   #
@@ -118,9 +118,9 @@ get_race_title() {
   #
   returned_title="$(echo -n "$returned_title" | grep . | head -1 )"
 
-  # Remove leading "Home" text
+  # Remove leading "Home" text (â€“ from archive.org)
   #
-  returned_title="$(echo -n "$returned_title" | sed 's/Home [–-] //')"
+  returned_title="$(echo -n "$returned_title" | sed 's/Home [â€“–-]* //')"
   echo "$returned_title"
 }
 
@@ -302,7 +302,8 @@ test_url "$url_to_test" "$expected_title" "$expected_date"
 
 expected_title="Virgin Money London Marathon"
 expected_date="22 april 2018"
-url_to_test="https://www.virginmoneylondonmarathon.com/en-gb/"
+#url_to_test="https://www.virginmoneylondonmarathon.com/en-gb/"
+url_to_test="https://web.archive.org/web/20180401061548/https://www.virginmoneylondonmarathon.com/en-gb/"
 
 test_url "$url_to_test" "$expected_title" "$expected_date"
 
@@ -310,17 +311,18 @@ test_url "$url_to_test" "$expected_title" "$expected_date"
 #expected_title="Yosemite Half Marathon (Direct)"
 expected_title="Yosemite Half Marathon"
 expected_date="may 12th, 2018"
-url_to_test="http://www.yosemitehalfmarathon.com/"
+#url_to_test="http://www.yosemitehalfmarathon.com/"
+url_to_test="https://web.archive.org/web/20171022082812/https://vacationraces.com/half-marathons/yosemite/"
 
 test_url "$url_to_test" "$expected_title" "$expected_date"
 
 
 
-expected_title="NYCRUNS Spring Fling 5K & 10K"
-expected_date="saturday, march 17, 2018 8:30am"
-url_to_test="https://nycruns.com/races/?race=nycruns-spring-fling-5k-10k"
-
-test_url "$url_to_test" "$expected_title" "$expected_date"
+#expected_title="NYCRUNS Spring Fling 5K & 10K"
+#expected_date="saturday, march 17, 2018 8:30am"
+#url_to_test="https://nycruns.com/races/?race=nycruns-spring-fling-5k-10k"
+#
+#test_url "$url_to_test" "$expected_title" "$expected_date"
 
 
 expected_title="Run the River 5K"
