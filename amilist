@@ -2,7 +2,7 @@
 #
 # amilist
 #
-# List images in EC2 with caching. All arguments are case-independent grep patterns to filter by.
+# List images in EC2 with caching. All arguments are case-insensitive grep patterns to filter by.
 #
 # Example:
 # amilist suse packer

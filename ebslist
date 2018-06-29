@@ -2,7 +2,7 @@
 #
 # ebslist
 #
-# List Volumes in EC2 with caching. All arguments are case-independent grep patterns to filter by.
+# List Volumes in EC2 with caching. All arguments are case-insensitive grep patterns to filter by.
 #
 # Example:
 # ebslist suse packer

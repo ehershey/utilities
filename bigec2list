@@ -1,0 +1,27 @@
+#!/bin/bash
+#
+# bigec2list
+#
+# List instances in EC2 with caching across multiple profiles. All arguments are passed to ec2list.
+#
+# Example:
+# bigec2list running ernie-keypair1 sometagvalue
+#
+#
+set -o nounset
+#set -o pipefail
+set -o errexit
+
+function aws-get-profiles() {
+   (
+   grep \\[ ~/.aws/credentials ;
+   grep \\[profile ~/.aws/config | sed 's/profile //'
+   ) | tr -d [] | sort -u | sed 's/\#.*//g' | grep .
+}
+
+for profile in `aws-get-profiles`
+do
+  EC2LIST_CACHE_TIMEOUT=86400 AWS_PROFILE="$profile" ec2list "$@" 2>/dev/null | sed "s/^/$profile,/g"
+done
+
+
