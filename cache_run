@@ -32,6 +32,17 @@ fi
 
 cachefile="$cachedir"/`echo "$key_extra$cmd" | sed 's/[^0-9a-zA-Z_-]/_/g'`
 
+log() {
+  LOG="/tmp/cache_run.log"
+#  date >> $LOG
+# echo "$*" >> $LOG
+}
+
+log "cache_life: $cache_life"
+log "cachefile: $cachefile"
+log "cmd: $cmd"
+
+
 if [ -e "$cachefile.out" -a -e "$cachefile.err" ]
 then
 	# check if content has expired using stdout file
