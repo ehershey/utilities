@@ -5,7 +5,7 @@
 # List AWS entities with caching and simple text formatting.
 #
 # Usage:
-# awslist <itemname> <apimethod> [ <filter pattern> [ <filter pattern> ... ] ]
+# awslist <itemname> <apicategory> <apimethod> [ <filter pattern> [ <filter pattern> ... ] ]
 #
 # Example:
 # awslist vpc describe-vpcs aws30
@@ -16,17 +16,19 @@ set -o pipefail
 set -o errexit
 
 
-if [ ! "${2:-}" ]
+if [ ! "${3:-}" ]
 then
-  echo "usage: awslist <itemname> <apimethod> [ <filter pattern> [ <filter pattern> ... ] ]"
+  echo "usage: awslist <itemname> <apicategory> <apimethod> [ <filter pattern> [ <filter pattern> ... ] ]"
   exit 2
 fi
 
 
 thing_being_listed="$1"
-api_call="$2"
+api_category="$2"
+api_method="$3"
 basename="$(basename "$0")"
 
+shift
 shift
 shift
 
@@ -59,7 +61,7 @@ log "timeout: $timeout"
 
 # use the userid hitting aws as a cache subkey so instance lists from different accounts will be cached separately
 #
-CACHE_SUB_KEY="$(cache_run 99999999 "aws sts get-caller-identity --query 'UserId' --output text" "${AWS_ACCESS_KEY_ID:-}-.-${AWS_PROFILE:-}" )"-${thing_being_listed}-${api_call}
+CACHE_SUB_KEY="$(cache_run 99999999 "aws sts get-caller-identity --query 'UserId' --output text" "${AWS_ACCESS_KEY_ID:-}-.-${AWS_PROFILE:-}" )"-${thing_being_listed}-${api_method}
 
 tempfile=$(mktemp /tmp/$basename.XXXXXX)
 tempfile2=$(mktemp /tmp/$basename.XXXXXX)
@@ -70,10 +72,11 @@ for region in $regions
 do
   if [ ! "$printed_header" ]
     then
-      cache_run $timeout "aws --region $region ec2 "${api_call}" | format_${thing_being_listed}_json.js" $CACHE_SUB_KEY >> $tempfile &
+      echo -n "Region," >> $tempfile
+      cache_run $timeout "aws --region $region "${api_category}" "${api_method}" | format_${thing_being_listed}_json.js" $CACHE_SUB_KEY >> $tempfile
       printed_header=1
     else
-      cache_run $timeout "aws --region $region ec2 "${api_call}" | format_${thing_being_listed}_json.js" $CACHE_SUB_KEY | tail -n +2 >> $tempfile &
+      cache_run $timeout "aws --region $region "${api_category}" "${api_method}" | format_${thing_being_listed}_json.js" $CACHE_SUB_KEY | tail -n +2 | sed "s/^/$region,/g" >> $tempfile &
     fi
 done
 wait
