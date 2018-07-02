@@ -1,8 +1,10 @@
 #!/usr/bin/env python
 #
-# Email when daily calorie expenditure passes various thresholds
+# Email when daily calorie expenditure passes various thresholds:
+# Half of any of the averages below
 # Seven day average
 # Thirty day average
+# This year average
 # Overall average
 # Double overall average
 #
@@ -49,11 +51,17 @@ calories_30days = unit_report.get_30day_average(collection)
 
 sys.stderr.write("calories_30days from db: {0}\n".format(calories_30days))
 
+calories_average_current_year = unit_report.get_units_average_current_year(collection)
+
+sys.stderr.write("calories_average_current_year from db: {0}\n".format(calories_average_current_year))
+
 
 LOCKFILE = "/tmp/mailed_calorie_message.lock"
 LOCKFILE_DOUBLE = "/tmp/mailed_double_calorie_message.lock"
+LOCKFILE_HALF = "/tmp/mailed_half_calorie_message.lock"
 LOCKFILE_7DAYS = "/tmp/mailed_7days_calorie_message.lock"
 LOCKFILE_30DAYS = "/tmp/mailed_30days_calorie_message.lock"
+LOCKFILE_YEAR = "/tmp/mailed_year_calorie_message.lock"
 
 if calories_today > calories_average:
     if not os.path.exists(LOCKFILE):
@@ -78,6 +86,29 @@ else:
     if os.path.exists(LOCKFILE_DOUBLE):
         sys.stderr.write("resetting lockfile for double average\n")
         os.unlink(LOCKFILE_DOUBLE)
+
+# if we haven't mailed about a half-hit yet, check against all the averages
+#
+if not os.path.exists(LOCKFILE_HALF):
+    body = None
+    if calories_today > calories_average / 2:
+        body = "Surpassed HALF of overall calorie average! (today: {0}, half average: {1})".format(calories_today, calories_average / 2)
+    elif calories_today > calories_7days / 2:
+        body = "Surpassed HALF of 7 day calorie average! (today: {0}, half average: {1})".format(calories_today, calories_7days / 2)
+    elif calories_today > calories_30days / 2:
+        body = "Surpassed HALF of 30 day calorie average! (today: {0}, half average: {1})".format(calories_today, calories_30days / 2)
+    elif calories_today > calories_average_current_year / 2:
+        body = "Surpassed HALF of current year calorie average! (today: {0}, half average: {1})".format(calories_today, calories_average_current_year / 2)
+    else:
+        if os.path.exists(LOCKFILE_DOUBLE):
+            sys.stderr.write("resetting lockfile for half average\n")
+            os.unlink(LOCKFILE_DOUBLE)
+    if body is not None:
+        sys.stderr.write("emailing about half average\n")
+        erniemail.send_message(body, subject, recipient, sender)
+        with open(LOCKFILE_HALF, 'a'):
+            os.utime(LOCKFILE_HALF, None)
+
 
 if calories_today > calories_7days:
     if not os.path.exists(LOCKFILE_7DAYS):
