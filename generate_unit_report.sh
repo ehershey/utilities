@@ -2,7 +2,7 @@
 
 set -o errexit
 
-date >&2
+date
 
 SCRIPT=~ernie/git/utilities/unit_report.py
 REPORT=~ernie/Dropbox/Web/goeverywhere/unit_report.html
@@ -33,9 +33,9 @@ echo "new_md5: $new_md5"
 
 if [ -s "$tempfile" -a "$old_md5" != "$new_md5" ]
 then
-  echo "Generating new report" >&2
+  echo "Generating new report"
   cat "$tempfile" > "$REPORT"
 else
-  echo "Not generating new report" >&2
+  echo "Not generating new report"
 fi
 
