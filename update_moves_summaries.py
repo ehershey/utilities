@@ -23,8 +23,6 @@ import sys
 import time
 
 
-
-
 COLLECTION = "summaries"
 DB = "moves"
 
@@ -40,22 +38,22 @@ logging.basicConfig(format=("%(asctime).19s %(levelname)s %(filename)s:"
                                     "%(lineno)s %(message)s "))
 
 # reuse oauth app name for logging config
-LOGGER = logging.getLogger(name = APPLICATION_NAME)
+LOGGER = logging.getLogger(name=APPLICATION_NAME)
 
 
 logging.getLogger('googleapiclient.discovery_cache').setLevel(logging.ERROR)
 
-LOGGER.info("Starting")
+LOGGER.debug("Starting")
 
 
 parser = argparse.ArgumentParser(description='Update Database from Moves API')
-parser.add_argument('--verbose', action='store_true', required=False, help='Show verbose logging', default = False);
-parser.add_argument('--redo', action='store_true', required=False, help='Load old data', default = False);
-parser.add_argument('--limit', required=False, help='Process at most this many days', type=int);
-parser.add_argument('--month', required=False, help='Month for which to load old data (format: NN)', type=int);
-parser.add_argument('--year', required=False, help='Year for which to load old data (format: NN)', type=int);
-parser.add_argument('--spreadsheet_id', required=False, help='Google Sheets document ID to update');
-parser.add_argument('--sheet_name', required=False, help='Google Sheets sheet name (within sheet document) to update');
+parser.add_argument('--verbose', action='store_true', required=False, help='Show verbose logging', default=False)
+parser.add_argument('--redo', action='store_true', required=False, help='Load old data', default=False)
+parser.add_argument('--limit', required=False, help='Process at most this many days', type=int)
+parser.add_argument('--month', required=False, help='Month for which to load old data (format: NN)', type=int)
+parser.add_argument('--year', required=False, help='Year for which to load old data (format: NN)', type=int)
+parser.add_argument('--spreadsheet_id', required=False, help='Google Sheets document ID to update')
+parser.add_argument('--sheet_name', required=False, help='Google Sheets sheet name (within sheet document) to update')
 args = parser.parse_args()
 
 redo = args.redo
@@ -95,6 +93,7 @@ collection = db[COLLECTION]
 
 processed_num = 0
 
+
 def get_credentials():
     """Gets valid user credentials from storage.
 
@@ -113,10 +112,11 @@ def get_credentials():
         flow.user_agent = APPLICATION_NAME
         if flags:
             credentials = tools.run_flow(flow, store, flags)
-        else: # Needed only for compatibility with Python 2.6
+        else:  # Needed only for compatibility with Python 2.6
             credentials = tools.run(flow, store)
         LOGGER.debug('Storing credentials to ' + credential_path)
     return credentials
+
 
 def insert_record_into_sheet(record):
     http = google_credentials.authorize(httplib2.Http())
@@ -137,7 +137,7 @@ def insert_record_into_sheet(record):
             found_sheet_id = sheet['properties']['sheetId']
     if found_sheet:
             LOGGER.debug("Found sheet in spreadsheet")
-            LOGGER.debug("found_sheet: {found_sheet}".format(found_sheet = found_sheet))
+            LOGGER.debug("found_sheet: {found_sheet}".format(found_sheet=found_sheet))
     else:
         raise Exception("Couldn't find sheet named: {name}".format(name=sheet_name))
 
@@ -155,14 +155,14 @@ def insert_record_into_sheet(record):
     row_num = 0
     matching_row_num = None
     for date in dates_in_sheet[1:]:
-        row_num+=1
+        row_num += 1
         # unwind the list within a list (dates_in_sheet is a range with one column)
         #
         if len(date) > 0:
             date = date[0]
             LOGGER.debug("date: {date}".format(date=date))
             try:
-                if dateutil.parser.parse(date).replace(hour = 0, minute = 0, second = 0) == record_date.replace(hour = 0, minute = 0 , second = 0):
+                if dateutil.parser.parse(date).replace(hour=0, minute=0, second=0) == record_date.replace(hour=0, minute=0, second=0):
                     LOGGER.debug("match!")
                     matching_row_num = row_num
                     break
@@ -185,9 +185,9 @@ def insert_record_into_sheet(record):
             else:
                 value_type = "stringValue"
                 value = str(value)
-            row.append({"userEnteredValue": { value_type: value } })
+            row.append({"userEnteredValue": {value_type: value}})
         else:
-            row.append({"userEnteredValue": { "numberValue": 0 } } )
+            row.append({"userEnteredValue": {"numberValue": 0}})
     LOGGER.debug("row: {row}".format(row=row))
 
     batch_update_spreadsheet_request_body = {
@@ -215,8 +215,8 @@ def insert_record_into_sheet(record):
                     })
         matching_row_num = 1
 
-    #updateRange = ""
-    #updateRange = '{sheet_name}!A{row_num}'.format(sheet_name = sheet_name, row_num = matching_row_num)
+    # updateRange = ""
+    # updateRange = '{sheet_name}!A{row_num}'.format(sheet_name=sheet_name, row_num=matching_row_num)
     updateRange = {
             "sheetId":
             found_sheet_id,
@@ -225,34 +225,31 @@ def insert_record_into_sheet(record):
             "endRowIndex":
             matching_row_num + 1,
             }
- 
+
     batch_update_spreadsheet_request_body['requests'].append(
                      {
                          "updateCells":
                          {
                              "range": updateRange,
-                             #"fields": "Date, Walking",
-                             #"fields": ", ".join(headers),
-                             #"rows":  row ,
-                             #"fields": "0", # Date, Walking, Walking Seconds",
-                             "fields": "*", 
-                             "rows": [ { "values": [ row ] } ],
+                             # "fields": "Date, Walking",
+                             # "fields": ", ".join(headers),
+                             # "rows":  row ,
+                             # "fields": "0", # Date, Walking, Walking Seconds",
+                             "fields": "*",
+                             "rows": [{"values": [row]}],
                          }
                      })
-
-
 
     update_request = service.spreadsheets().batchUpdate(spreadsheetId=spreadsheet_id, body=batch_update_spreadsheet_request_body)
     update_response = update_request.execute()
 
-    LOGGER.debug("response: {response}".format(response = response))
-
+    LOGGER.debug("response: {response}".format(response=response))
 
 
 def process_month(year, month):
-    url = "https://api.moves-app.com/api/1.1/user/summary/daily/{year}{month:02d}?access_token={token}".format(token=MOVES_ACCESS_TOKEN, month = month, year = year)
+    url = "https://api.moves-app.com/api/1.1/user/summary/daily/{year}{month:02d}?access_token={token}".format(token=MOVES_ACCESS_TOKEN, month=month, year=year)
     try:
-       process_url(url)
+        process_url(url)
     except Exception as error:
         LOGGER.error("Error: {error}".format(error=error))
 
@@ -263,8 +260,8 @@ def process_url(url):
     r = requests.get(url)
     if r.status_code != 200:
         LOGGER.error("Bad status code")
-        LOGGER.error("r.text: {text}".format(text = r.text))
-        raise Exception("Bad status code: {code}".format(code = r.status_code))
+        LOGGER.error("r.text: {text}".format(text=r.text))
+        raise Exception("Bad status code: {code}".format(code=r.status_code))
 
     response = r.json()
 
@@ -288,7 +285,6 @@ def process_url(url):
     verbose_activity_name_list = list(set(sorted(verbose_activity_names.values())))
 
     verbose_activity_name_list.append(UNKNOWN_ACTIVITY_BUCKET_VERBOSE_NAME)
-
 
     if hasattr(datetime.datetime, 'strptime'):
         # python 2.6
@@ -338,20 +334,20 @@ def process_url(url):
                 # sys.stdout.write("%.2f" % duration_seconds)
 
         record['Calories'] = float(calories)
-        LOGGER.info("record: {record}".format(record = record))
-        # sys.stdout.write(",%d" % calories)
+        LOGGER.debug("record: {record}".format(record=record))
+        # sys.stdout.write(", %d" % calories)
         # sys.stdout.write("\n")
         filter = {"Date": record['Date']}
         result = collection.replace_one(filter, record, upsert=True)
-        LOGGER.info("Inserted into DB!")
+        LOGGER.debug("Inserted into DB!")
 
         if spreadsheet_id and sheet_name:
             insert_record_into_sheet(record)
-            LOGGER.info("Inserted into spreadsheet!")
+            LOGGER.debug("Inserted into spreadsheet!")
 
         global processed_num
         processed_num += 1
-        LOGGER.info("processed {processed_num} days (limit: {limit})".format(processed_num = processed_num, limit = limit))
+        LOGGER.debug("processed {processed_num} days (limit: {limit})". format(processed_num=processed_num, limit=limit))
 
         if args.limit and processed_num >= args.limit:
             exit()
@@ -364,17 +360,16 @@ if redo:
         if month:
             process_month(year, month)
         else:
-            for month in range(1,13):
+            for month in range(1, 13):
                 process_month(year, month)
     else:
         if month:
-            for year in range(2013,datetime.datetime.now().year+1):
+            for year in range(2013, datetime.datetime.now().year + 1):
                 process_month(year, month)
         else:
-            for year in range(2013,datetime.datetime.now().year+1):
-                for month in range(1,13):
+            for year in range(2013, datetime.datetime.now().year + 1):
+                for month in range(1, 13):
                     process_month(year, month)
 else:
     url = "https://api.moves-app.com/api/1.1/user/summary/daily?pastDays=10&access_token={token}".format(token=MOVES_ACCESS_TOKEN)
     process_url(url)
-
