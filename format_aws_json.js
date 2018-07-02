@@ -21,10 +21,10 @@ process.stdin.on('data', function(chunk) {
 
 // tags to include in output (case insensitive) (actual ec2 tags)
 //
-var output_tags = [ "Name", "Username", "Hostname", "started_by", "distro", "comments", "mode", "owner","expire-on", "noreap" ];
+var output_tags = [ "Name" ]
 
 // json fields to include in output (case sensitive) (not tags, standard ec2 metadata)
-var output_fields = [ "State.Name", "InstanceId", "InstanceType", "KeyName", "PublicDnsName", "ImageId", "SpotInstanceRequestId", "Placement.AvailabilityZone", "VpcId", "Platform", "LaunchTime" ]
+var output_fields = [ "State.Name", "InstanceId", "InstanceType", "KeyName", "PublicDnsName", "ImageId", "Placement.AvailabilityZone", "VpcId", "LaunchTime", "PublicIpAddress", "PrivateIpAddress" ]
 
 process.stdin.on('end', function() {
 
