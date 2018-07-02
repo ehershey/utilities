@@ -99,9 +99,24 @@ def get_units_today(collection, yesterday=datetime.datetime.now() - timedelta(da
     return units_today
 
 
-def get_units_average_current_year(collection):
+def get_units_average_current_year(collection, today=datetime.datetime.now()):
+    last_day_of_previous_year = get_last_day_of_previous_year(today=today)
+    last_day_of_current_year = get_last_day_of_current_year(today=today)
     units_average_current_year = int(get_average_between_two_dates(collection, last_day_of_previous_year, last_day_of_current_year))
     return units_average_current_year
+
+
+def get_last_day_of_previous_year(today=datetime.datetime.now()):
+    # use last day of last year to account for db dates being 00:00, so anything > last day of last year
+    # will only include this year
+
+    last_day_of_previous_year = today.replace(month=1, day=1) - timedelta(days=1)
+    return last_day_of_previous_year
+
+
+def get_last_day_of_current_year(today=datetime.datetime.now()):
+    last_day_of_current_year = today.replace(month=12, day=31)
+    return last_day_of_current_year
 
 
 if __name__ == '__main__':
@@ -142,23 +157,16 @@ if __name__ == '__main__':
 
     units_today_last_year = int(get_average_between_two_dates(collection, yesterday_last_year, today_last_year))
 
-    last_day_of_previous_year = today_last_year.replace(month=12, day=31)
-
     # use last day of two years ago to account for db dates being 00:00, so anything > last day of two years ago
     # will only include last year, not two years ago
 
     last_day_of_year_before_previous_year = today_last_year.replace(month=1, day=1) - timedelta(days=1)
 
+    last_day_of_previous_year = get_last_day_of_previous_year(today=today)
+
     units_average_previous_year = int(get_average_between_two_dates(collection, last_day_of_year_before_previous_year, last_day_of_previous_year))
 
-    last_day_of_current_year = today.replace(month=12, day=31)
-
-    # use last day of last year to account for db dates being 00:00, so anything > last day of last year
-    # will only include this year
-
-    last_day_of_previous_year = today.replace(month=1, day=1) - timedelta(days=1)
-
-    units_average_current_year = get_units_average_current_year(collection)
+    units_average_current_year = get_units_average_current_year(collection, today=today)
 
     units_average_7days = get_7day_average(collection, today)
     units_average_2days = get_2day_average(collection, today)
