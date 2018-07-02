@@ -10,8 +10,9 @@ def activity_notify(activity, recipient, sender):
 
     string = u"""New Activity Found!
 
-    Started: {4}
-    Distance: {5}
+    Started: {4}, {5}
+    Duration: {6}
+    Distance: {7}
 
     Is Negative Split: {0}
     Negative Split_depth: {1}
@@ -20,7 +21,8 @@ def activity_notify(activity, recipient, sender):
     Activity Type: {3}
     """.format(activity['is_negative_split'], activity['negative_split_depth'],
                activity['notes'], activity['activity_type'],
-               activity['verbose_starttime'], activity['verbose_distance'])
+               activity['verbose_starttime'], activity['verbose_startdate'],
+               activity['verbose_duration'], activity['verbose_distance'])
 
     body = "{0}".format(string)
     subject = "New Activity Processed"
