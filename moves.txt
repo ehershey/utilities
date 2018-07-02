@@ -12,14 +12,19 @@ open "https://api.moves-app.com/oauth/v1/authorize?response_type=code&client_id=
 
 http://moves.ernie.org/redirect?code=xxxxxxxxxxx&state=
 
-5) Pull code out, set to $AUTH_CODE and run:
+5) Pull code out and set to $AUTH_CODE
+
+# copy URL, then run
+export AUTH_CODE="$(pbpaste | sed 's/.*code=\(.*\)\&.*/\1/')"
+
+6) Get tokens from API:
 
 curl  --data "grant_type=authorization_code&code=$AUTH_CODE&client_id=$CLIENT_ID&client_secret=$CLIENT_SECRET&redirect_uri=http://moves.ernie.org/redirect" "https://api.moves-app.com/oauth/v1/access_token"
 
 # response looks like:
 {"access_token":"xxxxx","token_type":"bearer","expires_in":15551999,"refresh_token":"yyyyy","user_id":zzzzzzzzz}
 
-6) Set access token to $MOVES_ACCESS_TOKEN and save refresh token for next refresh
+7) Set access token to $MOVES_ACCESS_TOKEN and save refresh token for next refresh
 
 Refreshing access token:
 # (Still generates new access token but doesn't require re-authing in app or using browser)
