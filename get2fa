@@ -8,14 +8,32 @@
 #
 # Optional command line argument - name of file to load from $DIR_2FA/ (default is .secret_2fa)
 #
+# Default is TOTP but if "#HOTP:TRUE" exists on a line in the file, HOTP will be used instead
 
 set -o nounset
-set -o pipefail
-set -o errexit
+#set -o verbose
+#set -o pipefail
+#set -o errexit
 
 if [ ! "${DIR_2FA:-}" ]
 then
   DIR_2FA=~
+fi
+
+CLIPBOARD_BACKUP=$DIR_2FA/".2fa-clipboard.txt"
+
+if [ "${1:-}" = "-r" ]
+then
+  if [ -e "$CLIPBOARD_BACKUP" ]
+  then
+    # restore clipboard
+    pbcopy < "$CLIPBOARD_BACKUP"
+    echo "Clipboard restored"
+    exit 0
+  else
+    echo "No clipboard file ($CLIPBOARD_BACKUP)"
+    exit 2
+  fi
 fi
 
 if [ "${1:-}" ]
@@ -25,9 +43,23 @@ else
   KEYFILE="$DIR_2FA/.secret_2fa"
 fi
 
+if [ ! -e "$KEYFILE" ]
+then
+  echo "File not found: $KEYFILE"
+  exit 3
+fi
+
 LAST_ENTRY_FILE=~/".2fa-last-${1:-}.txt"
+LAST_COUNTER_FILE=$DIR_2FA/".2fa-counter-${1:-}.txt"
 
 SECRET_2FA="$(grep -v ^\# "$KEYFILE" | tr -d \ )"
+
+HOTP=""
+if grep -qx \#HOTP:TRUE "$KEYFILE"
+then
+  HOTP="true"
+fi
+
 
 if [ -e "$LAST_ENTRY_FILE" ]
 then
@@ -38,17 +70,37 @@ else
   last_entry=""
 fi
 
+if [ -e "$LAST_COUNTER_FILE" ]
+then
+  last_counter=$(cat $LAST_COUNTER_FILE)
+  echo "Found last counter:"
+  echo "$last_counter"
+else
+  last_counter="-1"
+fi
+new_counter=$last_counter
+
+
 new_entry=""
 
 echo -n "Generating new 2fa password"
 while [[ "$new_entry" == "$last_entry" || ! "$new_entry" ]]
 do
+  new_counter=$(expr $new_counter + 1)
   echo -n "."
-  new_entry=$(oathtool --totp -b $SECRET_2FA)
+  if [ ! -z "$HOTP" ]
+  then
+    new_entry=$(oathtool --hotp -b $SECRET_2FA -c $new_counter)
+  else
+    new_entry=$(oathtool --totp -b $SECRET_2FA)
+  fi
 done
 echo
 
+pbpaste > "$CLIPBOARD_BACKUP"
 echo $new_entry
 touch "$LAST_ENTRY_FILE"
+touch "$LAST_COUNTER_FILE"
 echo "$new_entry" > "$LAST_ENTRY_FILE"
+echo "$new_counter" > "$LAST_COUNTER_FILE"
 echo $new_entry | pbcopy
