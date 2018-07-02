@@ -5,3 +5,6 @@ pymongo
 simplejson
 py-dateutil
 google-api-python-client
+ggps==0.1.12
+pytz
+tzlocal
