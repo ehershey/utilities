@@ -1,16 +1,20 @@
 #!/bin/bash
 #
-# vpclist
+# subnetlist
 #
-# List VPC's with caching. All arguments are case-insensitive grep patterns to filter by.
+# List Subnet's with caching. All arguments are case-insensitive grep patterns to filter by.
 #
 # Example:
-# vpclist vpc30
+# subnetlist subnet30
 #
 #
 set -o nounset
 set -o pipefail
 set -o errexit
+
+thing_being_listed="subnet"
+api_call="describe-subnets"
+basename="$(basename "$0")"
 
 if [ \( ! "${AWS_SECRET_ACCESS_KEY:-}" -o ! "${AWS_ACCESS_KEY_ID:-}" \) -a ! "${AWS_PROFILE:-}" ]
 then
@@ -22,17 +26,17 @@ fi
 #
 DEFAULT_TIMEOUT=300
 
-# allow overriding output cache timeout by specifying $VPCLIST_CACHE_TIMEOUT
+# allow overriding output cache timeout by specifying $SUBNETLIST_CACHE_TIMEOUT
 #
-if [ "${VPCLIST_CACHE_TIMEOUT:-}" ]
+if [ "${SUBNETLIST_CACHE_TIMEOUT:-}" ]
 then
-  timeout=$VPCLIST_CACHE_TIMEOUT
+  timeout=$SUBNETLIST_CACHE_TIMEOUT
 else
   timeout=$DEFAULT_TIMEOUT
 fi
 
 log() {
-  LOG="/tmp/vpclist.log"
+  LOG="/tmp/$basename.log"
   #date >> $LOG
   #echo "$*" >> $LOG
 }
@@ -43,8 +47,8 @@ log "timeout: $timeout"
 #
 CACHE_SUB_KEY="$(cache_run 99999999 "aws sts get-caller-identity --query 'UserId' --output text" "${AWS_ACCESS_KEY_ID:-}-.-${AWS_PROFILE:-}" )"
 
-tempfile=$(mktemp /tmp/vpclist.XXXXXX)
-tempfile2=$(mktemp /tmp/vpclist.XXXXXX)
+tempfile=$(mktemp /tmp/$basename.XXXXXX)
+tempfile2=$(mktemp /tmp/$basename.XXXXXX)
 
 regions=$(cache_run 9999999 "aws ec2 describe-regions  --query Regions[*].RegionName --output text" $CACHE_SUB_KEY | sed 's/ap-northeast-2//')
 printed_header=""
@@ -52,10 +56,10 @@ for region in $regions
 do
   if [ ! "$printed_header" ]
     then
-      cache_run $timeout "aws --region $region ec2 describe-vpcs | format_vpc_json.js" $CACHE_SUB_KEY >> $tempfile &
+      cache_run $timeout "aws --region $region ec2 "${api_call}" | format_${thing_being_listed}_json.js" $CACHE_SUB_KEY >> $tempfile &
       printed_header=1
     else
-      cache_run $timeout "aws --region $region ec2 describe-vpcs | format_vpc_json.js" $CACHE_SUB_KEY | tail -n +2 >> $tempfile &
+      cache_run $timeout "aws --region $region ec2 "${api_call}" | format_${thing_being_listed}_json.js" $CACHE_SUB_KEY | tail -n +2 >> $tempfile &
     fi
 done
 wait
