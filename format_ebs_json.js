@@ -1,8 +1,8 @@
 #!/usr/bin/env node
-// Format ebs ec2 describe-volumes output into csv data - volume_name, size, type, etc...
+// Format aws ec2 describe-volumes output into csv data - volume_name, size, type, etc...
 //
 // Example usage:
-// ebs ec2 describe-volumes | ./format_ebs_json.js
+// aws ec2 describe-volumes | ./format_ebs_json.js
 //
 
 var stdin_chunks = []
