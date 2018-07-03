@@ -371,5 +371,5 @@ if redo:
                 for month in range(1, 13):
                     process_month(year, month)
 else:
-    url = "https://api.moves-app.com/api/1.1/user/summary/daily?pastDays=10&access_token={token}".format(token=MOVES_ACCESS_TOKEN)
+    url = "https://api.moves-app.com/api/1.1/user/summary/daily?pastDays=7&access_token={token}".format(token=MOVES_ACCESS_TOKEN)
     process_url(url)
