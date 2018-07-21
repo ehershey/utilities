@@ -5,10 +5,9 @@ Test erniegps module
 """
 
 
+import os
 import erniegps
 import m26
-import os
-import pytest
 
 
 def test_zero_speed():
@@ -72,7 +71,7 @@ def test_no_negative_split():
 
 
 def test_empty_distance():
-    """ This track has a trackpoint with no distance that will break an unpatch ggps module """
+    """ This track has a trackpoint with no distance that will break an unpatched ggps module """
     activity = erniegps.read_activity('{0}/Dropbox/Apps/tapiriik/2011-02-03_Running.tcx'.format(os.environ['HOME']))
     trackpoints = activity['trackpoints']
 

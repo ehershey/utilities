@@ -3,11 +3,11 @@
 Utilities for gps data
 """
 
+import logging
+import math
 import dateutil.parser
 import ggps
-import logging
 import m26
-import math
 import pytz
 
 MAX_SPLIT_DEPTH = 30
@@ -18,15 +18,6 @@ MAX_SPLIT_DEPTH = 30
 PERCENTAGE_MARGIN_SPLIT_ADVANTAGE = 10
 
 # logging.basicConfig(level=logging.DEBUG)
-
-
-class ActivityException(Exception):
-
-    def __init__(self):
-        Exception.__init__(self)
-
-    def __init__(self, msg):
-        Exception.__init__(self, msg)
 
 
 def get_distance_from_trackpoints(trackpoints):
