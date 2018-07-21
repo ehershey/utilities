@@ -45,7 +45,9 @@ def get_speed_from_trackpoints(trackpoints):
 
     # pull time and distance differences between first and last trackpoints
     #
-    # 'elapsedtime': '00:55:22', 'runcadencex2': '170', u'time': u'2017-05-23T00:03:28.000Z', 'distancemiles': '6.13382732075'
+    # 'elapsedtime': '00:55:22', 'runcadencex2': '170', u'time': u'2017-05-23T00:03:28.000Z',
+    # 'distancemiles': '6.13382732075'
+    #
     first_elapsedtime = first_trackpoint.get('elapsedtime')
 
     first_etime = m26.ElapsedTime(first_elapsedtime)
@@ -57,30 +59,29 @@ def get_speed_from_trackpoints(trackpoints):
     diff_distance = get_distance_from_trackpoints(trackpoints)
     diff_etime = m26.ElapsedTime(last_etime.secs - first_etime.secs)
 
-    logging.debug("diff_distance: {0}".format(diff_distance))
-    logging.debug("diff_etime: {0}".format(diff_etime))
+    logging.debug("diff_distance: %f", diff_distance)
+    logging.debug("diff_etime: %s", diff_etime)
 
     speed = m26.Speed(diff_distance, diff_etime)
     return speed
 
 
 def split_trackpoints(trackpoints):
-    last_trackpoint = trackpoints[-1]
-    first_trackpoint = trackpoints[0]
-
+    """
+    Take a trackpoint array; return in two halves
+    """
     diff_distancemiles = get_distance_from_trackpoints(trackpoints).as_miles()
     half_distancemiles = diff_distancemiles / 2
-    logging.debug("split_trackpoints: diff_distancemiles: {0}".format(diff_distancemiles))
-    logging.debug("split_trackpoints: half_distancemiles: {0}".format(half_distancemiles))
+    logging.debug("split_trackpoints: diff_distancemiles: %f", diff_distancemiles)
+    logging.debug("split_trackpoints: half_distancemiles: %f", half_distancemiles)
 
-    crossed_half = False
     first_half = []
     last_half = []
     for index in range(0, len(trackpoints)):
         trackpoint = trackpoints[index]
         # distance to this trackpoint from first one
         distance_to_point = get_distance_from_trackpoints(trackpoints[0:index + 1]).as_miles()
-        logging.debug("split_trackpoints: distance_to_point: {0}".format(distance_to_point))
+        logging.debug("split_trackpoints: distance_to_point: %f", distance_to_point)
         if distance_to_point < half_distancemiles:
             first_half.append(trackpoint)
         else:
@@ -90,17 +91,26 @@ def split_trackpoints(trackpoints):
 
 
 def format_pace(speed):
+    """
+    Given a speed, return a human readable string representing pace
+    """
     spm = speed.seconds_per_mile()
-    mm = int(math.floor(spm / 60.0))
-    ss = int(spm - (mm * 60.0))
-    return "{0:.0f}:{0:02.0f}".format(mm, ss)
+    minutes = int(math.floor(spm / 60.0))
+    seconds = int(spm - (minutes * 60.0))
+    return "{0:.0f}:{1:02.0f}".format(minutes, seconds)
 
 
 def get_pace(trackpoints):
+    """
+    Return human readable pace for set of trackpoints
+    """
     return format_pace(get_speed_from_trackpoints(trackpoints))
 
 
 def read_activity(filename):
+    """
+    Read file, return activity object
+    """
     activity = {"filename": filename}
     tcx_handler = ggps.TcxHandler()
     tcx_handler.parse(filename)
@@ -111,12 +121,17 @@ def read_activity(filename):
     activity['trackpoints'] = trackpoints
     activity['activity_type'] = activity_type
     activity['notes'] = notes
-    activity['verbose_startdate'] = dateutil.parser.parse(trackpoints[0].get('time')).astimezone(pytz.timezone("EST5EDT")).strftime("%Y-%m-%d")
-    activity['verbose_starttime'] = dateutil.parser.parse(trackpoints[0].get('time')).astimezone(pytz.timezone("EST5EDT")).strftime("%H:%M")
-    activity['starttime'] = dateutil.parser.parse(trackpoints[0].get('time')).astimezone(pytz.timezone("EST5EDT"))
-    activity['endtime'] = dateutil.parser.parse(trackpoints[len(trackpoints) - 1].get('time')).astimezone(pytz.timezone("EST5EDT"))
+    activity['verbose_startdate'] = dateutil.parser.parse(
+        trackpoints[0].get('time')).astimezone(pytz.timezone("EST5EDT")).strftime("%Y-%m-%d")
+    activity['verbose_starttime'] = dateutil.parser.parse(
+        trackpoints[0].get('time')).astimezone(pytz.timezone("EST5EDT")).strftime("%H:%M")
+    activity['starttime'] = dateutil.parser.parse(
+        trackpoints[0].get('time')).astimezone(pytz.timezone("EST5EDT"))
+    activity['endtime'] = dateutil.parser.parse(
+        trackpoints[len(trackpoints) - 1].get('time')).astimezone(pytz.timezone("EST5EDT"))
     activity['verbose_duration'] = str(activity['endtime'] - activity['starttime'])
-    activity['verbose_distance'] = "{0:.02f} miles".format(get_distance_from_trackpoints(trackpoints).as_miles())
+    activity['verbose_distance'] = "{0:.02f} miles".format(
+        get_distance_from_trackpoints(trackpoints).as_miles())
     return activity
 
 
@@ -128,13 +143,13 @@ def get_is_negative_split(trackpoints):
     the start and the end (for warm ups and cool downs).
     """
     (first_half_trackpoints, last_half_trackpoints) = split_trackpoints(trackpoints)
-    logging.debug("len(trackpoints): {0}".format(len(trackpoints)))
-    logging.debug("len(first_half_trackpoints): {0}".format(len(first_half_trackpoints)))
-    logging.debug("len(last_half_trackpoints): {0}".format(len(last_half_trackpoints)))
+    logging.debug("len(trackpoints): %f", len(trackpoints))
+    logging.debug("len(first_half_trackpoints): %f", len(first_half_trackpoints))
+    logging.debug("len(last_half_trackpoints): %f", len(last_half_trackpoints))
 
-    logging.debug("get_pace(trackpoints): {0}".format(get_pace(trackpoints)))
-    logging.debug("get_pace(first_half_trackpoints): {0}".format(get_pace(first_half_trackpoints)))
-    logging.debug("get_pace(last_half_trackpoints): {0}".format(get_pace(last_half_trackpoints)))
+    logging.debug("get_pace(trackpoints): %f", get_pace(trackpoints))
+    logging.debug("get_pace(first_half_trackpoints): %f", get_pace(first_half_trackpoints))
+    logging.debug("get_pace(last_half_trackpoints): %f", get_pace(last_half_trackpoints))
 
     first_half_speed = get_speed_from_trackpoints(first_half_trackpoints).mph()
     last_half_speed = get_speed_from_trackpoints(last_half_trackpoints).mph()
@@ -160,9 +175,14 @@ def get_is_negative_split(trackpoints):
         for start_points_to_trim in range(max_points_to_trim + 1):
             for end_points_to_trim in range(max_points_to_trim - start_points_to_trim + 1):
 
-                logging.debug("checking trackpoints[ start_points_to_trim : len(trackpoints) - end_points_to_trim ]")
-                logging.debug("(checking trackpoints[ {0} : {1} - {2}]".format(str(start_points_to_trim), str(len(trackpoints)), str(end_points_to_trim)))
-                if start_points_to_trim > 0 and end_points_to_trim > 0 and get_is_negative_split(trackpoints[start_points_to_trim: len(trackpoints) - end_points_to_trim]):
+                logging.debug("""checking trackpoints[ start_points_to_trim : len(trackpoints) -
+                    end_points_to_trim ]""")
+                logging.debug("""(checking trackpoints[ %s : %d - %d]""",
+                              start_points_to_trim, len(trackpoints), end_points_to_trim)
+                if start_points_to_trim > 0 and end_points_to_trim > 0 and\
+                    get_is_negative_split(
+                            trackpoints[
+                                start_points_to_trim: len(trackpoints) - end_points_to_trim]):
                     logging.debug("yes")
                     return True
 
@@ -173,6 +193,9 @@ def get_is_negative_split(trackpoints):
 
 
 def process_activity(activity):
+    """
+    Analyze an activity object and check level of negative splits
+    """
     trackpoints = activity['trackpoints']
 
     if get_is_negative_split(trackpoints):
@@ -188,7 +211,7 @@ def process_activity(activity):
     negative_split = True
     while negative_split is True and negative_split_depth < MAX_SPLIT_DEPTH:
         logging.debug("")
-        logging.debug("negative_split_depth: {0}".format(negative_split_depth))
+        logging.debug("negative_split_depth: %f", negative_split_depth)
         if get_is_negative_split(trackpoints):
             negative_split = True
             negative_split_depth += 1
@@ -199,6 +222,6 @@ def process_activity(activity):
 
     # Trackpoints no longer needed
     #
-    del(activity['trackpoints'])
+    del activity['trackpoints']
 
     return activity
