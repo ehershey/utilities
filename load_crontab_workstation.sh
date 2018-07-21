@@ -41,24 +41,40 @@ tempfile2=$(mktemp)
 
 #cat "$FILEHOME/crontab-workstation.txt" | $command
 
+crontab_file="$FILEHOME/crontab-workstation.txt"
 
+# Save old crontab for comparison before overwriting
+#
 $command -l > $tempfile1
-cat "$FILEHOME/crontab-workstation.txt" > $tempfile2
+
+echo "# Below loaded from $crontab_file" > "$tempfile2"
+echo "#" >> "$tempfile2"
+cat "$crontab_file" >> $tempfile2
+
+# Load machine specific addition if present
+#
+extra_file="$FILEHOME/crontab-workstation-$(hostname -s).txt"
+if [ -e "$extra_file" ]
+then
+  echo >> "$tempfile2"
+  echo "# Below loaded from $extra_file" >> "$tempfile2"
+  echo "#" >> "$tempfile2"
+  cat "$extra_file" >> "$tempfile2"
+fi
 if [[ ! "$(diff $tempfile1 $tempfile2)" ]]
 then
   echo "No updates. Aborting."
   exit 1
 fi
 diff $tempfile1 $tempfile2
-rm $tempfile1 $tempfile2
 echo -n "Diff ok? (y/n): "
 read ans
 if [[ "$ans" == "y" ]]
 then
   echo "Loading crontab."
-  cat "$FILEHOME/crontab-workstation.txt" | $command
+  cat "$tempfile2" | $command
 else
   echo Aborting.
 fi
 
-
+rm $tempfile1 $tempfile2
