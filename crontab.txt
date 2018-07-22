@@ -19,6 +19,6 @@ PATH=/home/ernie/Dropbox/Misc/venv.eahdroplet1/bin:/usr/bin:/bin:/usr/local/bin:
 */10 * * * * ~/git/utilities/update_moves_summaries.py  --spreadsheet_id $MARATHON_SPREADSHEET_ID --sheet_name "All moves data" >> /tmp/update_moves_summaries.log
 */10 * * * * ~/git/utilities/update_moves_csv.sh  >> /tmp/update_moves_csv.log
 */5 * * * * pkill -0 -x dropbox || pkill -0 -x Dropbox || pkill -0 dropbox_py3 || echo "Dropbox not running on $(hostname)"
-*/5 * * * * curl --silent "https://api.moves-app.com/api/v1/user/activities/daily?pastDays=7&access_token=$MOVES_ACCESS_TOKEN" | /home/ernie/git/utilities/save_moves_activities.js >> /tmp/save_moves_activities.log 2>&1
+*/5 * * * * curl --silent "https://api.moves-app.com/api/1.1/user/activities/daily?pastDays=7&access_token=$MOVES_ACCESS_TOKEN" | /home/ernie/git/utilities/save_moves_activities.js >> /tmp/save_moves_activities.log 2>&1
 */15 * * * * /home/ernie/git/utilities/save_nest_data.sh >> /tmp/save_nest_data.log
 * * * * * /home/ernie/git/utilities/process_activity_stats.py >> /tmp/process_activity_stats.log
