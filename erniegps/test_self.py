@@ -4,7 +4,6 @@
 Test erniegps module
 """
 
-
 import os
 import erniegps
 import m26
@@ -21,7 +20,6 @@ def test_zero_speed():
     No elapsed time
     Same elapsed time
     """
-
     """
     Point 1 distance: arbitrary
     Point 1 elapsed time: arbitrary
@@ -34,7 +32,9 @@ def test_zero_speed():
     assert speed.mph() == 0
     assert speed.seconds_per_mile() == 0
 
-    assert erniegps.get_speed_from_trackpoints([{"distancemiles": 50}]).seconds_per_mile() == 0
+    assert erniegps.get_speed_from_trackpoints([{
+        "distancemiles": 50
+    }]).seconds_per_mile() == 0
     assert erniegps.get_speed_from_trackpoints([{}]).mph() == 0
     assert erniegps.get_speed_from_trackpoints([{}]).seconds_per_mile() == 0
     assert erniegps.get_speed_from_trackpoints([]).mph() == 0
@@ -42,57 +42,95 @@ def test_zero_speed():
 
 
 def test_zero_distance():
-    assert erniegps.get_distance_from_trackpoints([{"distancemiles": 50}]).as_miles() == m26.Distance(0).as_miles()
-    assert erniegps.get_distance_from_trackpoints([{}]).as_miles() == m26.Distance(0).as_miles()
-    assert erniegps.get_distance_from_trackpoints([{}, {}]).as_miles() == m26.Distance(0).as_miles()
-    assert erniegps.get_distance_from_trackpoints([]).as_miles() == m26.Distance(0).as_miles()
+    """
+    Ensure zero distances come back as zero distances
+    """
+    assert erniegps.get_distance_from_trackpoints([{
+        "distancemiles": 50
+    }]).as_miles() == m26.Distance(0).as_miles()
+    assert erniegps.get_distance_from_trackpoints(
+        [{}]).as_miles() == m26.Distance(0).as_miles()
+    assert erniegps.get_distance_from_trackpoints(
+        [{}, {}]).as_miles() == m26.Distance(0).as_miles()
+    assert erniegps.get_distance_from_trackpoints(
+        []).as_miles() == m26.Distance(0).as_miles()
 
 
-def test_double_read_single_activity():
-    activity = erniegps.read_activity('{0}/Dropbox/Apps/tapiriik/2014-04-29_Walking (1).tcx'.format(os.environ['HOME']))
-    activity = erniegps.read_activity('{0}/Dropbox/Apps/tapiriik/2014-04-29_Walking (1).tcx'.format(os.environ['HOME']))
+def test_double_read_activity():
+    """
+    Make sure reading the same activity file twice works
+    """
+    activity = erniegps.read_activity(
+        '{0}/Dropbox/Apps/tapiriik/2014-04-29_Walking (1).tcx'.format(
+            os.environ['HOME']))
+    activity = erniegps.read_activity(
+        '{0}/Dropbox/Apps/tapiriik/2014-04-29_Walking (1).tcx'.format(
+            os.environ['HOME']))
     trackpoints = activity['trackpoints']
     assert len(trackpoints) == 8
 
 
 def test_trackpoint_split():
-    activity = erniegps.read_activity('{0}/Dropbox/Apps/tapiriik/2014-04-29_Walking (1).tcx'.format(os.environ['HOME']))
+    """ Test simple split """
+    activity = erniegps.read_activity(
+        '{0}/Dropbox/Apps/tapiriik/2014-04-29_Walking (1).tcx'.format(
+            os.environ['HOME']))
     trackpoints = activity['trackpoints']
-    (first_half_trackpoints, last_half_trackpoints) = erniegps.split_trackpoints(trackpoints)
+    (first_half_trackpoints,
+     last_half_trackpoints) = erniegps.split_trackpoints(trackpoints)
     assert len(first_half_trackpoints) == 2
     assert len(last_half_trackpoints) == 6
 
 
 def test_no_negative_split():
-    activity = erniegps.read_activity('{0}/Dropbox/Apps/tapiriik/2014-04-29_Walking (1).tcx'.format(os.environ['HOME']))
+    """ Test simple track without negative split """
+    activity = erniegps.read_activity(
+        '{0}/Dropbox/Apps/tapiriik/2014-04-29_Walking (1).tcx'.format(
+            os.environ['HOME']))
     activity = erniegps.process_activity(activity)
     assert activity.get('is_negative_split') is False
     assert activity.get('negative_split_depth') == 0
 
 
 def test_empty_distance():
-    """ This track has a trackpoint with no distance that will break an unpatched ggps module """
-    activity = erniegps.read_activity('{0}/Dropbox/Apps/tapiriik/2011-02-03_Running.tcx'.format(os.environ['HOME']))
-    trackpoints = activity['trackpoints']
+    """
+    This track has a trackpoint with no distance that will break an unpatched
+    ggps module
+    """
+    erniegps.read_activity(
+        '{0}/Dropbox/Apps/tapiriik/2011-02-03_Running.tcx'.format(
+            os.environ['HOME']))
 
 
 def test_get_activity_type():
-    activity = erniegps.read_activity('{0}/Dropbox/Apps/tapiriik/2017-05-27_New York Running_Running.tcx'.format(os.environ['HOME']))
+    """ Patched ggps supports activity_type """
+    activity = erniegps.read_activity(
+        '{0}/Dropbox/Apps/tapiriik/2017-05-27_New York Running_Running.tcx'.
+        format(os.environ['HOME']))
     assert activity['activity_type'] == "Running"
     assert activity['notes'] == "New York Running"
 
 
 def test_has_verbose_starttime():
-    activity = erniegps.read_activity('{0}/Dropbox/Apps/tapiriik/2017-05-27_New York Running_Running.tcx'.format(os.environ['HOME']))
-    assert type(activity['verbose_starttime']) == str
+    """ Make sure verbose start time gets field added """
+    activity = erniegps.read_activity(
+        '{0}/Dropbox/Apps/tapiriik/2017-05-27_New York Running_Running.tcx'.
+        format(os.environ['HOME']))
+    assert isinstance(activity['verbose_starttime'], str)
     assert activity['verbose_starttime'] == '19:03'
 
 
 def test_has_verbose_distance():
-    activity = erniegps.read_activity('{0}/Dropbox/Apps/tapiriik/2017-05-27_New York Running_Running.tcx'.format(os.environ['HOME']))
-    assert type(activity['verbose_distance']) == str
+    """ Make sure verbose distance field added """
+    activity = erniegps.read_activity(
+        '{0}/Dropbox/Apps/tapiriik/2017-05-27_New York Running_Running.tcx'.
+        format(os.environ['HOME']))
+    assert isinstance(activity['verbose_distance'], str)
     assert activity['verbose_distance'] == '10.13 miles'
 
 
 def test_handle_unicode_notes_char():
-    activity = erniegps.read_activity(u'{0}/Dropbox/Apps/tapiriik/2016-06-01_Słomczyn Running_Running.tcx'.format(os.environ['HOME']))
+    """ Handle unicode characters properly """
+    erniegps.read_activity(
+        u'{0}/Dropbox/Apps/tapiriik/2016-06-01_Słomczyn Running_Running.tcx'.
+        format(os.environ['HOME']))
