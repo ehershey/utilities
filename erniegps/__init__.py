@@ -12,12 +12,10 @@ import pytz
 
 MAX_SPLIT_DEPTH = 30
 
-# How much to try taking off of a track/s beginning and/or end in order to
+# How much to try taking off of a track's beginning and/or end in order to
 # coerce it into a negative split
 #
 PERCENTAGE_MARGIN_SPLIT_ADVANTAGE = 10
-
-# logging.basicConfig(level=logging.DEBUG)
 
 
 def get_distance_from_trackpoints(trackpoints):
@@ -59,7 +57,7 @@ def get_speed_from_trackpoints(trackpoints):
     diff_distance = get_distance_from_trackpoints(trackpoints)
     diff_etime = m26.ElapsedTime(last_etime.secs - first_etime.secs)
 
-    logging.debug("diff_distance: %f", diff_distance)
+    logging.debug("diff_distance: %f", diff_distance.as_miles())
     logging.debug("diff_etime: %s", diff_etime)
 
     speed = m26.Speed(diff_distance, diff_etime)
@@ -77,7 +75,7 @@ def split_trackpoints(trackpoints):
 
     first_half = []
     last_half = []
-    for index in range(0, len(trackpoints)):
+    for index, trackpoint in enumerate(trackpoints):
         trackpoint = trackpoints[index]
         # distance to this trackpoint from first one
         distance_to_point = get_distance_from_trackpoints(trackpoints[0:index + 1]).as_miles()
@@ -112,15 +110,30 @@ def read_activity(filename):
     Read file, return activity object
     """
     activity = {"filename": filename}
-    tcx_handler = ggps.TcxHandler()
-    tcx_handler.parse(filename)
 
-    trackpoints = tcx_handler.trackpoints
-    activity_type = tcx_handler.activity_type
-    notes = tcx_handler.notes
+    if 'tcx' in filename:
+        handler = ggps.TcxHandler()
+    elif 'gpx' in filename:
+        handler = ggps.GpxHandler()
+
+    handler.parse(filename)
+
+    trackpoints = handler.trackpoints
+    activity_type = handler.activity_type
+    notes = handler.notes
     activity['trackpoints'] = trackpoints
     activity['activity_type'] = activity_type
     activity['notes'] = notes
+
+    decorate_activity(activity)
+    return activity
+
+
+def decorate_activity(activity):
+    """ Add verbose versions of things and anything else not related to file reading
+    """
+
+    trackpoints = activity['trackpoints']
     activity['verbose_startdate'] = dateutil.parser.parse(
         trackpoints[0].get('time')).astimezone(pytz.timezone("EST5EDT")).strftime("%Y-%m-%d")
     activity['verbose_starttime'] = dateutil.parser.parse(
@@ -135,60 +148,52 @@ def read_activity(filename):
     return activity
 
 
-def get_is_negative_split(trackpoints):
+def get_is_negative_split(trackpoints, advantage_allowed=True):
     """ Look at the given set of trackpoints and return a boolean indicating whether
     the pace of the second half was faster than the pace of the first half. An attempt
     is made to coerce the trackpoints into a negative split by taking up to
     PERCENTAGE_MARGIN_SPLIT_ADVANTAGE percent of the track points off of the list, including
     the start and the end (for warm ups and cool downs).
     """
-    (first_half_trackpoints, last_half_trackpoints) = split_trackpoints(trackpoints)
-    logging.debug("len(trackpoints): %f", len(trackpoints))
-    logging.debug("len(first_half_trackpoints): %f", len(first_half_trackpoints))
-    logging.debug("len(last_half_trackpoints): %f", len(last_half_trackpoints))
 
-    logging.debug("get_pace(trackpoints): %f", get_pace(trackpoints))
-    logging.debug("get_pace(first_half_trackpoints): %f", get_pace(first_half_trackpoints))
-    logging.debug("get_pace(last_half_trackpoints): %f", get_pace(last_half_trackpoints))
+    (first_half_trackpoints, last_half_trackpoints) = split_trackpoints(trackpoints)
+    logging.debug("advantage_allowed: %d", advantage_allowed)
+    logging.debug("len(trackpoints): %d", len(trackpoints))
+    logging.debug("len(first_half_trackpoints): %d", len(first_half_trackpoints))
+    logging.debug("len(last_half_trackpoints): %d", len(last_half_trackpoints))
+
+    logging.debug("get_pace(trackpoints): %s", get_pace(trackpoints))
+    logging.debug("get_pace(first_half_trackpoints): %s", get_pace(first_half_trackpoints))
+    logging.debug("get_pace(last_half_trackpoints): %s", get_pace(last_half_trackpoints))
 
     first_half_speed = get_speed_from_trackpoints(first_half_trackpoints).mph()
     last_half_speed = get_speed_from_trackpoints(last_half_trackpoints).mph()
 
-    # logging.debug("first_half_speed:", str(first_half_speed))
-    logging.debug("first_half_speed:")
-    logging.debug(str(first_half_speed))
-    # logging.debug("last_half_speed:", str(last_half_speed))
-    logging.debug("last_half_speed:")
-    logging.debug(str(last_half_speed))
+    logging.debug("first_half_speed: %f", first_half_speed)
+    logging.debug("last_half_speed: %f", last_half_speed)
+
     if last_half_speed > first_half_speed:
-        logging.debug("yes")
         return True
     else:
+        if not advantage_allowed:
+            return False
 
         # try removing up to PERCENTAGE_MARGIN_SPLIT_ADVANTAGE points off the beginning or end if
         # it changes from a positive split to a negative split
         #
+        for end_percentage in range(1, PERCENTAGE_MARGIN_SPLIT_ADVANTAGE + 1):
+            end_points_to_trim = len(trackpoints) * end_percentage / 100
+            logging.info("end_percentage: %d", end_percentage)
+            logging.info("end_points_to_trim: %d", end_points_to_trim)
 
-        # May be zero if point count < 10
-        #
-        max_points_to_trim = len(trackpoints) * PERCENTAGE_MARGIN_SPLIT_ADVANTAGE / 100
-        for start_points_to_trim in range(max_points_to_trim + 1):
-            for end_points_to_trim in range(max_points_to_trim - start_points_to_trim + 1):
-
-                logging.debug("""checking trackpoints[ start_points_to_trim : len(trackpoints) -
-                    end_points_to_trim ]""")
-                logging.debug("""(checking trackpoints[ %s : %d - %d]""",
-                              start_points_to_trim, len(trackpoints), end_points_to_trim)
-                if start_points_to_trim > 0 and end_points_to_trim > 0 and\
-                    get_is_negative_split(
-                            trackpoints[
-                                start_points_to_trim: len(trackpoints) - end_points_to_trim]):
-                    logging.debug("yes")
-                    return True
+            if get_is_negative_split(
+                    trackpoints[
+                        0:
+                        len(trackpoints) - end_points_to_trim], False):
+                return True
 
         # despite all efforts, not negative
         #
-        logging.debug("no")
         return False
 
 
@@ -198,12 +203,6 @@ def process_activity(activity):
     """
     trackpoints = activity['trackpoints']
 
-    if get_is_negative_split(trackpoints):
-        activity['is_negative_split'] = True
-    else:
-        logging.debug("no")
-        activity['is_negative_split'] = False
-
     # Determine how many levels into the last half of the track show
     # negative splits - e.g. is the second half also a negative split
     # when treated as its own track
@@ -211,7 +210,7 @@ def process_activity(activity):
     negative_split = True
     while negative_split is True and negative_split_depth < MAX_SPLIT_DEPTH:
         logging.debug("")
-        logging.debug("negative_split_depth: %f", negative_split_depth)
+        logging.debug("negative_split_depth: %d", negative_split_depth)
         if get_is_negative_split(trackpoints):
             negative_split = True
             negative_split_depth += 1
@@ -219,6 +218,8 @@ def process_activity(activity):
             negative_split = False
         trackpoints = split_trackpoints(trackpoints)[1]
     activity['negative_split_depth'] = negative_split_depth
+
+    activity['is_negative_split'] = bool(negative_split_depth >= 1)
 
     # Trackpoints no longer needed
     #
