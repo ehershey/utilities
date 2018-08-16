@@ -71,5 +71,5 @@ then
 	fi
 fi
 trap "rm \"$cachefile.out\" \"$cachefile.err\"" INT
-eval $cmd 2>"$cachefile.err" | tee "$cachefile.out" 
+eval $cmd 2>"$cachefile.err" | tee "$cachefile.out"  || true
 cat "$cachefile.err" >&2
