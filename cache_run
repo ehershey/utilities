@@ -30,7 +30,20 @@ then
 	exit 2
 fi
 
-cachefile="$cachedir"/`echo "$key_extra$cmd" | sed 's/[^0-9a-zA-Z_-]/_/g'`
+
+if which md5 &>/dev/null
+then
+  md5=md5
+elif which md5sum &> /dev/null
+then
+  md5=md5sum
+else
+  # don't use checksum for cache file
+  #
+  md5=cat
+fi
+
+cachefile="$cachedir"/`echo "$key_extra$cmd" | sed 's/[^0-9a-zA-Z_-]/_/g' | $md5 | tr -d \ -`
 
 log() {
   LOG="/tmp/cache_run.log"
