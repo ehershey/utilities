@@ -4,3 +4,6 @@ m26
 pymongo
 pytest
 pytz
+gpxpy
+py-dateutil
+pint
