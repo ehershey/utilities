@@ -58,6 +58,7 @@ def getargs():
 def print_summary(activity):
     """ Output simple activity summary """
 
+    print("filename: {0}".format(activity['filename']))
     print("is_negative_split: {0}".format(activity['is_negative_split']))
     print("negative_split_depth: {0}".format(activity[
         'negative_split_depth']))
@@ -67,6 +68,7 @@ def print_summary(activity):
     print("verbose_startdate: {0}".format(activity['verbose_startdate']))
     print("verbose_duration: {0}".format(activity['verbose_duration']))
     print("verbose_distance: {0}".format(activity['verbose_distance']))
+    print("")
 
 
 def main():

@@ -16,7 +16,10 @@ then
 else
   pattern=.
 fi
-ps -o command -www | grep ^ssh | grep -i "$pattern" > $tempfile
+
+# grep out bastion host nc proxy connections (for example -
+# ssh -q ssh1.vpc1.10gen.cc nc brs-staging-1.vpc1.10gen.cc 22)
+ps -o command -www | grep ^ssh | grep -i "$pattern" | grep -v ssh.*ssh.*nc.*22 > $tempfile
 count=$(wc -l < $tempfile | tr -d \\t\ )
 
 if [[ $count == 0 ]]

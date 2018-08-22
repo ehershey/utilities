@@ -8,22 +8,8 @@
 # amilist suse packer
 #
 #
+api_category="ec2"
+api_call="describe-images"
+fields="State,ImageId,Name,State,Architecture,OwnerId,KernelId,VirtualizationType"
 
-CACHE_SECONDS=300
-
-if [ ! "$AWS_SECRET_ACCESS_KEY" -o ! "$AWS_ACCESS_KEY_ID" ]
-then
-  . ~/amazon-build.sh
-fi
-
-tempfile=$(mktemp /tmp/amilist.XXXXXX)
-tempfile2=$(mktemp /tmp/amilist.XXXXXX)
-cache_run $CACHE_SECONDS "aws ec2 describe-images --owner self | format_ami_json.js" $AWS_ACCESS_KEY_ID > $tempfile
-while [ "$1" ]
-do
-  cat "$tempfile" | grep -i "$1" > "$tempfile2"
-  cat "$tempfile2" > "$tempfile"
-  shift
-done
-
-cat $tempfile
+aws_generic_list "$api_category" "$api_call" "$fields" "$@"

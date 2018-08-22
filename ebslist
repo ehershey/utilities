@@ -9,21 +9,8 @@
 #
 #
 
-CACHE_SECONDS=300
+api_category="ec2"
+api_call="describe-volumes"
+fields="VolumeId,Size,State,VolumeType,AvailabilityZone"
 
-if [ ! "$AWS_SECRET_ACCESS_KEY" -o ! "$AWS_ACCESS_KEY_ID" ]
-then
-  . ~/amazon-build.sh
-fi
-
-tempfile=$(mktemp /tmp/ebslist.XXXXXX)
-tempfile2=$(mktemp /tmp/ebslist.XXXXXX)
-cache_run $CACHE_SECONDS "aws ec2 describe-volumes | format_ebs_json.js" $AWS_ACCESS_KEY_ID > $tempfile
-while [ "$1" ]
-do
-  cat "$tempfile" | grep -i "$1" > "$tempfile2"
-  cat "$tempfile2" > "$tempfile"
-  shift
-done
-
-cat $tempfile
+aws_generic_list "$api_category" "$api_call" "$fields" "$@"

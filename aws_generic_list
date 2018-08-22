@@ -1,0 +1,101 @@
+#!/bin/bash
+#
+# aws_generic_list
+#
+# List AWS entities with caching and simple text formatting.
+#
+# Usage:
+# aws_generic_list <apicategory> <apimethod> <comma separated field list> [ <filter pattern> [ <filter pattern> ... ] ]
+#
+# Example:
+# aws_generic_list ec2 describe-vpcs VpcId,State,CidrBlock,IsDefault,Name vpc30 avail
+#
+#
+set -o nounset
+#set -o pipefail
+set -o errexit
+
+
+if [ ! "${3:-}" ]
+then
+  echo "usage: aws_generic_list <apicategory> <apimethod> <fieldlist> [ <filter pattern> [ <filter pattern> ... ] ]"
+  exit 2
+fi
+
+
+api_category="$1"
+api_method="$2"
+fields="$3"
+basename="$(basename "$0")"
+
+shift
+shift
+shift
+
+if [ \( ! "${AWS_SECRET_ACCESS_KEY:-}" -o ! "${AWS_ACCESS_KEY_ID:-}" \) -a ! "${AWS_PROFILE:-}" ]
+then
+  echo "Must set either: \$AWS_PROFILE or \$AWS_SECRET_ACCESS_KEY and \$AWS_ACCESS_KEY_ID"
+  exit 2
+fi
+
+# default seconds to cache output
+#
+DEFAULT_TIMEOUT=86400
+
+# allow overriding output cache timeout by specifying $AWSLIST_CACHE_TIMEOUT
+#
+if [ "${AWSLIST_CACHE_TIMEOUT:-}" ]
+then
+  timeout=$AWSLIST_CACHE_TIMEOUT
+else
+  timeout=$DEFAULT_TIMEOUT
+fi
+
+log() {
+  LOG="/tmp/$basename.log"
+  #date >> $LOG
+  #echo "$*" >> $LOG
+}
+
+log "timeout: $timeout"
+
+# use the userid hitting aws as a cache subkey so instance lists from different accounts will be cached separately
+#
+CACHE_SUB_KEY="$(cache_run 99999999 "aws sts get-caller-identity --query 'UserId' --output text" "${AWS_ACCESS_KEY_ID:-}-${AWS_PROFILE:-}" )"-${api_method}
+
+tempfile=$(mktemp /tmp/$basename.XXXXXX)
+tempfile2=$(mktemp /tmp/$basename.XXXXXX)
+
+# For any category other than "organizations" iterate over every region unless $AWS_REGION is set. For organizations, just hardcode us-east-1
+#
+if [ "$api_category" = "organizations" ]
+then
+  regions=us-east-1
+elif [ "${AWS_REGION:-}" ]
+then
+  regions="$AWS_REGION"
+else
+  regions="$(cache_run 9999999 "aws ec2 describe-regions  --query Regions[*].RegionName --output text" $CACHE_SUB_KEY | sed 's/ap-northeast-2//')"
+fi
+
+printed_header=""
+for region in $regions
+do
+  if [ ! "$printed_header" ]
+    then
+      echo -n "Region," >> $tempfile
+      cache_run $timeout "aws --region $region "${api_category}" "${api_method}" | format_generic_json.sh $fields" $CACHE_SUB_KEY | head -1 >> $tempfile
+      printed_header=1
+    fi
+    cache_run $timeout "aws --region $region "${api_category}" "${api_method}" | format_generic_json.sh $fields" $CACHE_SUB_KEY | tail -n +2 | sed "s/^/$region,/g" >> $tempfile &
+done
+wait
+while [ "${1:-}" ]
+do
+  cat "$tempfile" | grep -i "$1" > "$tempfile2"
+  cat "$tempfile2" > "$tempfile"
+  shift
+done
+
+cat $tempfile
+

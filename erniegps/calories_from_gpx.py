@@ -40,8 +40,8 @@ def compute_activity_calories(activity_type, duration_secs, distance_meters):
 
     # Ultimately, duration should be used to adjust the multiplier for when
     # the activity took so long or was so fast that it's not reasonable to use
-    # these numbers as simple deltas from basal caloric burn. If you run 10 miles
-    # in ten hours
+    # these numbers as simple deltas from basal caloric burn.
+    #
 
     distance_miles = (distance_meters * UREG.meter).to('miles').magnitude
     logging.debug("duration: %s", datetime.timedelta(seconds=duration_secs))

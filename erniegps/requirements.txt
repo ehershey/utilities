@@ -7,3 +7,4 @@ pytz
 gpxpy
 py-dateutil
 pint
+bson==0.5.6

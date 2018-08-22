@@ -1,0 +1,19 @@
+#!/bin/bash
+#
+# zonelist
+#
+# List AWS zones with caching. All arguments are case-insensitive grep patterns to filter by.
+#
+# Example:
+# zonelist prod
+#
+#
+set -o nounset
+set -o pipefail
+set -o errexit
+
+api_category="route53"
+api_call="list-hosted-zones"
+fields="Id,Name,Config.PrivateZone,Config.Comment"
+
+aws_generic_list "$api_category" "$api_call" "$fields" "$@"

@@ -117,8 +117,8 @@ table,tr,td,th {{
       <td><!--diffignore-->{now} (<span id="html_age"></span>)</td>
     </tr>
     <tr>
-      <td>Moves data updated:</td>
-      <td>{moves_csv_modified} (<span id="moves_age"></span>)</td>
+      <td>Data updated:</td>
+      <td>{moves_csv_modified} (<span id="data_age"></span>)</td>
     </tr>
     <tr>
       <td>New data checked:</td>
@@ -132,11 +132,15 @@ table,tr,td,th {{
   <a class="left" href="?">Refresh</a>
 <div class="main-container">
   <div class="fixer-container">
-  <a class="center" href="moves-notification.cgi">Trigger Server Moves Reload</a>
+  <!--
+    <a class="center" href="moves-notification.cgi">Trigger Server Moves Reload</a>
+  -->
   </div>
 </div>
 
-  <a class="right" href="moves://">Launch Moves App</a><br/>
+  <!--
+    <a class="right" href="moves://">Launch Moves App</a><br/>
+  -->
   <script type="text/javascript">
     var request = new XMLHttpRequest();
     var request_running = false;
@@ -201,7 +205,7 @@ table,tr,td,th {{
 
     setInterval(function() {{
       document.getElementById("html_age").innerHTML = get_date_age("{now}"); // diffignore (ignore comparing against previous html)
-      document.getElementById("moves_age").innerHTML = get_date_age("{moves_csv_modified}");
+      document.getElementById("data_age").innerHTML = get_date_age("{moves_csv_modified}");
       document.getElementById("data_check_age").innerHTML = get_date_age(data_checked_timestamp);
       if(!request_running) {{
       refresh_check_log('request not running');

@@ -1,11 +1,11 @@
 #!/bin/bash
 #
-# subnetlist
+# natgatewaylist
 #
 # List AWS nat gateways with caching. All arguments are case-insensitive grep patterns to filter by.
 #
 # Example:
-# subnetlist subnet30
+# natgatewaylist prod
 #
 #
 set -o nounset
@@ -13,7 +13,7 @@ set -o pipefail
 set -o errexit
 
 api_category="ec2"
-api_call="describe-subnets"
-fields="Name,SubnetId,AvailabilityZone,State,VpcId,MapPublicIpOnLaunch,CidrBlock"
+api_call="describe-nat-gateways"
+fields="NatGatewayId,SubnetId,NatGatewayAddresses[].PublicIp"
 
 aws_generic_list "$api_category" "$api_call" "$fields" "$@"

@@ -20,6 +20,8 @@ EVENTBRITE_DATE_SELECTOR="span.dtstart"
 ACTIVE_TITLE_SELECTOR='h1[itemprop=name]'
 ACTIVE_DATE_SELECTOR='meta[itemprop=startDate]'
 
+TRANSALT_DATE_SELECTOR='time'
+
 GENERIC_TITLE_SELECTOR="meta[property=og:title]"
 GENERIC_TITLE_SELECTOR2="title"
 GENERIC_DATE_SELECTOR="div.field"
@@ -27,8 +29,9 @@ GENERIC_DATE_SELECTOR2="div.date"
 GENERIC_DATE_SELECTOR3=".hero-subheading"
 GENERIC_DATE_SELECTOR4="time.clrfix"
 GENERIC_DATE_SELECTOR5="h3.tve_p_center"
-GENERIC_DATE_SELECTOR6="meta[property=og:description]"
-GENERIC_DATE_SELECTOR7="section.fullheader div.container div.message p"
+GENERIC_DATE_SELECTOR6="h1"
+GENERIC_DATE_SELECTOR7="meta[property=og:description]"
+GENERIC_DATE_SELECTOR8="section.fullheader div.container div.message p"
 
 set -o nounset
 set -o errexit
@@ -55,7 +58,7 @@ fi
 
 # Check argument
 #
-if [ ! "${1:-}" ]
+if [ ! "${1:-}" -a "$(basename "$0")" == "racetocal.sh" ]
 then
   echo "Usage: $0 <URL>"
   exit 1
@@ -134,6 +137,11 @@ get_race_date() {
 
   if [ ! "$returned_date" ]
   then
+    returned_date="$($CURL "$url" | $PUP "$TRANSALT_DATE_SELECTOR" text{})"
+  fi
+
+  if [ ! "$returned_date" ]
+  then
     returned_date="$($CURL "$url" | $PUP "$NYCRUNS_DATE_SELECTOR2" text{})"
   fi
 
@@ -169,10 +177,10 @@ get_race_date() {
 
   if [ ! "$returned_date" ]
   then
-    returned_date="$($CURL "$url" | $PUP "$GENERIC_DATE_SELECTOR5" text{} | head -1)"
+    returned_date="$($CURL "$url" | $PUP "$GENERIC_DATE_SELECTOR5" text{} | tr -d \\n)"
   fi
 
-  # try active selector before generic selector 6, since generic selector 6 can catch a lot more
+  # try specialized selectors before generic selector 6, since generic selector 6 can catch a lot more
   #
   if [ ! "$returned_date" ]
   then
@@ -189,10 +197,15 @@ get_race_date() {
     returned_date="$($CURL "$url" | $PUP "$GENERIC_DATE_SELECTOR7" text{} | head -1)"
   fi
 
+  if [ ! "$returned_date" ]
+  then
+    returned_date="$($CURL "$url" | $PUP "$GENERIC_DATE_SELECTOR8" text{} | head -1)"
+  fi
+
 
 
   returned_date="$(echo -n "$returned_date" | tr A-Z a-z | sed 's/start time://g' | sed 's/start\.//g')"
-  returned_date="$(echo -n "$returned_date" | tr \\n \ )"
+  returned_date="$(echo -n "$returned_date" | tr '[:blank:]'\\n \ )"
   returned_date="$(echo -n "$returned_date" | sed 's/.*will take place on //g')"
   returned_date="$(echo -n "$returned_date" | sed 's/half marathon starts at//g')"
   returned_date="$(echo -n "$returned_date" | sed 's/full marathon starts at//g')"
@@ -207,6 +220,10 @@ get_race_date() {
   returned_date="$(echo -n "$returned_date" | sed 's/;.*//g')"
   returned_date="$(echo -n "$returned_date" | sed 's/ *|.*//g')"
   returned_date="$(echo -n "$returned_date" | sed 's/^[ 	]*//'; )"
+
+  # Berlin date has a lot of space between title and date
+  #
+  returned_date="$(echo -n "$returned_date" | sed 's/.*        *on //'; )"
 
   # includes weird whitespace chars - should replace with named character class
   #
@@ -341,20 +358,23 @@ then
   exit 2
 fi
 
-url="$1"
-
-title="$(get_race_title "$url")"
-date="$(get_race_date "$url")"
-address="$(get_race_address "$url")"
-
-if [ ! "$title" ]
+if [ "$(basename "$0")" == "racetocal.sh" ]
 then
-  echo "Can't determine title"
-  exit 3
+  url="$1"
+
+  title="$(get_race_title "$url")"
+  date="$(get_race_date "$url")"
+  address="$(get_race_address "$url")"
+
+  if [ ! "$title" ]
+  then
+    echo "Can't determine title"
+    exit 3
+  fi
+  if [ ! "$date" ]
+  then
+    echo "Can't determine date"
+    exit 4
+  fi
+  addrace.sh "$title" "$date" "$url" "" "$address"
 fi
-if [ ! "$date" ]
-then
-  echo "Can't determine date"
-  exit 4
-fi
-addrace.sh "$title" "$date" "$url" "" "$address"

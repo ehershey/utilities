@@ -1,0 +1,19 @@
+#!/bin/bash
+#
+# accountlist
+#
+# List AWS accounts with caching. All arguments are case-insensitive grep patterns to filter by.
+#
+# Example:
+# accountlist prod
+#
+#
+set -o nounset
+set -o pipefail
+set -o errexit
+
+api_category="organizations"
+api_call="list-accounts"
+fields="Status,Id,Email,Name"
+
+aws_generic_list "$api_category" "$api_call" "$fields" "$@"

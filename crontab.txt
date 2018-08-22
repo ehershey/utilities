@@ -9,8 +9,7 @@
 PATH=/home/ernie/Dropbox/Misc/venv.eahdroplet1/bin:/usr/bin:/bin:/usr/local/bin:/sbin:/usr/sbin:/usr/local/sbin
 
 */15 * * * * ~/git/utilities/average_unit_checker.py >> /tmp/average_unit_checker.log 2>&1
-*/15 * * * * (chown :apache ~/git/goeverywhere/unit_report.html ; chmod g+rw ~/git/goeverywhere/unit_report.html ; ~/git/utilities/generate_unit_report.sh  ) >> /tmp/unit_report.log
-* * * * * (chown :apache ~/git/goeverywhere/unit_report_nomoves.html ; chmod g+rw ~/git/goeverywhere/unit_report_nomoves.html ; ~/git/utilities/generate_unit_report_nomoves.sh  ) >> /tmp/unit_report_nomoves.log
+* * * * * (chown :apache ~/git/goeverywhere/unit_report.html ; chmod g+rw ~/git/goeverywhere/unit_report.html ; ~/git/utilities/generate_unit_report.sh  ) >> /tmp/unit_report.log
 */15 * * * * ~/git/utilities/save_myfitnesspal_data.js  >> /tmp/save_myfitnesspal_data.log 2>&1
 */10 * * * * ~/git/utilities/update_moves_csv.sh  >> /tmp/update_moves_csv.log
 */5 * * * * pkill -0 -x dropbox || pkill -0 -x Dropbox || pkill -0 dropbox_py3 || echo "Dropbox not running on $(hostname)"

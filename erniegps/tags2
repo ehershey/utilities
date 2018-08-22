@@ -1,0 +1,27 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.8	//
+datetime	test_self.py	/^import datetime$/;"	i
+erniegps	test_self.py	/^import erniegps$/;"	i
+logging	test_self.py	/^import logging$/;"	i
+m26	test_self.py	/^import m26$/;"	i
+os	test_self.py	/^import os$/;"	i
+pytz	test_self.py	/^import pytz$/;"	i
+test_adv_split_slow_start_end	test_self.py	/^def test_adv_split_slow_start_end(caplog):$/;"	f
+test_advantage_split_slow_end	test_self.py	/^def test_advantage_split_slow_end(caplog):$/;"	f
+test_double_read_activity	test_self.py	/^def test_double_read_activity():$/;"	f
+test_empty_distance	test_self.py	/^def test_empty_distance():$/;"	f
+test_end_negative_split	test_self.py	/^def test_end_negative_split():$/;"	f
+test_fake_track	test_self.py	/^def test_fake_track():$/;"	f
+test_get_activity_type	test_self.py	/^def test_get_activity_type():$/;"	f
+test_handle_unicode_notes_char	test_self.py	/^def test_handle_unicode_notes_char():$/;"	f
+test_has_verbose_distance	test_self.py	/^def test_has_verbose_distance():$/;"	f
+test_has_verbose_starttime	test_self.py	/^def test_has_verbose_starttime():$/;"	f
+test_no_negative_split	test_self.py	/^def test_no_negative_split():$/;"	f
+test_start_negative_split	test_self.py	/^def test_start_negative_split():$/;"	f
+test_trackpoint_split	test_self.py	/^def test_trackpoint_split():$/;"	f
+test_zero_distance	test_self.py	/^def test_zero_distance():$/;"	f
+test_zero_speed	test_self.py	/^def test_zero_speed():$/;"	f

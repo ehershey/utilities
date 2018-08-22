@@ -96,7 +96,7 @@ then
   done
 fi
 
-# 3. gpx data intoernie_org.daily_summary
+# 3. gpx data into ernie_org.daily_summary
 #
 if [ "$(find "$gpx_dir/" -name \*.gpx -type f)" ]
 then
@@ -118,7 +118,6 @@ then
         else
           rm "$processing_file"
         fi
-        exit
       fi
     fi
   done

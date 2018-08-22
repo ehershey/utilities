@@ -1,0 +1,19 @@
+#!/bin/bash
+#
+# peeringlist
+#
+# List VPC peering connections with caching. All arguments are case-insensitive grep patterns to filter by.
+#
+# Example:
+# peeringlist vpc30
+#
+#
+set -o nounset
+set -o pipefail
+set -o errexit
+
+api_category="ec2"
+api_call="describe-vpc-peering-connections"
+fields="VpcPeeringConnectionId,Status.Code,RequesterVpcInfo.VpcId,RequesterVpcInfo.OwnerId,RequesterVpcInfo.Region,RequesterVpcInfo.CidrBlock,AccepterVpcInfo.VpcId,AccepterVpcInfo.OwnerId,AccepterVpcInfo.Region,AccepterVpcInfo.CidrBlock,Name"
+
+aws_generic_list "$api_category" "$api_call" "$fields" "$@"

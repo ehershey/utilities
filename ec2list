@@ -12,59 +12,13 @@ set -o nounset
 set -o pipefail
 set -o errexit
 
-if [ \( ! "${AWS_SECRET_ACCESS_KEY:-}" -o ! "${AWS_ACCESS_KEY_ID:-}" \) -a ! "${AWS_PROFILE:-}" ]
-then
-  echo "Must set either: \$AWS_PROFILE or \$AWS_SECRET_ACCESS_KEY and \$AWS_ACCESS_KEY_ID"
-  exit 2
-fi
+api_category="ec2"
+api_call="describe-instances"
+fields="Name,State.Name,InstanceId,InstanceType,KeyName,PublicDnsName,ImageId,Placement.AvailabilityZone,VpcId,LaunchTime,PublicIpAddress,PrivateIpAddress 1"
 
-# default seconds to cache describe-instances output
-#
-DEFAULT_TIMEOUT=300
-
-# allow overriding output cache timeout by specifying $EC2LIST_CACHE_TIMEOUT
-#
 if [ "${EC2LIST_CACHE_TIMEOUT:-}" ]
 then
-  timeout=$EC2LIST_CACHE_TIMEOUT
-else
-  timeout=$DEFAULT_TIMEOUT
+  AWSLIST_CACHE_TIMEOUT=$EC2LIST_CACHE_TIMEOUT
 fi
 
-log() {
-  LOG="/tmp/ec2list.log"
-  #date >> $LOG
-  #echo "$*" >> $LOG
-}
-
-log "timeout: $timeout"
-
-# use the userid hitting aws as a cache subkey so instance lists from different accounts will be cached separately
-#
-CACHE_SUB_KEY="$(cache_run 99999999 "aws sts get-caller-identity --query 'UserId' --output text" "${AWS_ACCESS_KEY_ID:-}-.-${AWS_PROFILE:-}" )"
-
-tempfile=$(mktemp /tmp/ec2list.XXXXXX)
-tempfile2=$(mktemp /tmp/ec2list.XXXXXX)
-
-regions=$(cache_run 9999999 "aws ec2 describe-regions  --query Regions[*].RegionName --output text" $CACHE_SUB_KEY | sed 's/ap-northeast-2//')
-printed_header=""
-for region in $regions
-do
-  if [ ! "$printed_header" ]
-    then
-      cache_run $timeout "aws --region $region ec2 describe-instances | format_aws_json.js" $CACHE_SUB_KEY >> $tempfile &
-      printed_header=1
-    else
-      cache_run $timeout "aws --region $region ec2 describe-instances | format_aws_json.js" $CACHE_SUB_KEY | tail -n +2 >> $tempfile &
-    fi
-done
-wait
-while [ "${1:-}" ]
-do
-  cat "$tempfile" | grep -i "$1" > "$tempfile2"
-  cat "$tempfile2" > "$tempfile"
-  shift
-done
-
-cat $tempfile
-
+aws_generic_list "$api_category" "$api_call" "$fields" "$@"

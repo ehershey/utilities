@@ -12,8 +12,8 @@ set -o nounset
 set -o pipefail
 set -o errexit
 
-thing_being_listed="vpc"
-api_call="describe-vpcs"
 api_category="ec2"
+api_call="describe-vpcs"
+fields="VpcId,State,CidrBlock,IsDefault,Name"
 
-awslist "$thing_being_listed" "$api_category" "$api_call" "$@"
+aws_generic_list "$api_category" "$api_call" "$fields" "$@"

@@ -8,3 +8,4 @@ google-api-python-client
 ggps==0.1.12
 pytz
 tzlocal
+gcalcli==v4.0.0a4

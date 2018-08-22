@@ -58,6 +58,10 @@ done
 #
 cat "$tempfile" | jq 'if has("Tags") then ( .Tags? | from_entries) else { }  end + ( . | del(.Tags?) )' > "$tempfile2"
 
+# Display header
+#
+echo $fields
+
 # Display specified fields
 #
 cat "$tempfile2" | jq -r '('"$field_references"')'
