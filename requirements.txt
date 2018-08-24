@@ -9,3 +9,4 @@ ggps==0.1.12
 pytz
 tzlocal
 gcalcli==v4.0.0a4
+backports.functools-lru-cache==1.5
