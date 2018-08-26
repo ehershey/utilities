@@ -24,6 +24,10 @@ TRANSALT_DATE_SELECTOR='time'
 
 GENERIC_TITLE_SELECTOR="meta[property=og:title]"
 GENERIC_TITLE_SELECTOR2="title"
+
+GENERIC_DATE_SELECTORS="
+meta[property=event:start_time]
+"
 GENERIC_DATE_SELECTOR="div.field"
 GENERIC_DATE_SELECTOR2="div.date"
 GENERIC_DATE_SELECTOR3=".hero-subheading"
@@ -140,6 +144,20 @@ get_race_date() {
     returned_date="$($CURL "$url" | $PUP "$TRANSALT_DATE_SELECTOR" text{})"
   fi
 
+  for date_selector in $GENERIC_DATE_SELECTORS
+  do
+    if [ ! "$returned_date" ]
+    then
+       returned_date="$($CURL "$url" | $PUP "$date_selector" attr{content})"
+    fi
+    if [ ! "$returned_date" ]
+    then
+       returned_date="$($CURL "$url" | $PUP "$date_selector" text{})"
+    fi
+  done
+
+
+
   if [ ! "$returned_date" ]
   then
     returned_date="$($CURL "$url" | $PUP "$NYCRUNS_DATE_SELECTOR2" text{})"
@@ -150,6 +168,7 @@ get_race_date() {
     returned_date="$($CURL "$url" | $PUP "$RNR_DATE_SELECTOR" text{})"
   fi
 
+
   if [ ! "$returned_date" ]
   then
     returned_date="$($CURL "$url" | $PUP "$EVENTBRITE_DATE_SELECTOR" text{})"
@@ -159,6 +178,18 @@ get_race_date() {
   then
     returned_date="$($CURL "$url" | $PUP "$GENERIC_DATE_SELECTOR" text{})"
   fi
+
+  for date_selector in $GENERIC_DATE_SELECTORS
+  do
+    if [ ! "$returned_date" ]
+    then
+       returned_date="$($CURL "$url" | $PUP "$date_selector" attr{content})"
+    fi
+    if [ ! "$returned_date" ]
+    then
+       returned_date="$($CURL "$url" | $PUP "$date_selector" text{})"
+    fi
+  done
 
   if [ ! "$returned_date" ]
   then
@@ -204,6 +235,7 @@ get_race_date() {
 
 
 
+
   returned_date="$(echo -n "$returned_date" | tr A-Z a-z | sed 's/start time://g' | sed 's/start\.//g')"
   returned_date="$(echo -n "$returned_date" | tr '[:blank:]'\\n \ )"
   returned_date="$(echo -n "$returned_date" | sed 's/.*will take place on //g')"
@@ -235,6 +267,12 @@ get_race_date() {
   returned_date="$(echo -n "$returned_date" | sed 's/ begins at / /'; )"
   returned_date="$(echo -n "$returned_date" | sed 's/ to .*//'; )"
   returned_date="$(echo -n "$returned_date" | sed 's/\. .*//'; )"
+
+  # run the river 5k eventbrite 2018 has lots of space and random words in otherwise good date info
+  #
+  # e.g. "sat, october 27, 2018 10:00 am"
+  #
+  returned_date="$(echo -n "$returned_date" | sed 's/.*[^a-z]\([a-z][a-z][a-z]*, [a-z][a-z][a-z]* [0-9][0-9]*, [0-9][0-9][0-9][0-9] [0-9][0-9]*:[0-9][0-9]* [ap]m\).*/\1/' )"
   echo "$returned_date"
 }
 
@@ -253,26 +291,6 @@ get_race_address() {
   returned_address="$(echo -n "$returned_address" | sed 's/^[ 	]*//'; )"
   echo "$returned_address"
 }
-
-
-# Validate selectors and scraping logic
-#
-expected_title="NYRR Al Gordon 4M"
-
-returned_title="$(get_race_title "http://www.nyrr.org/races-and-events/2015/nyrr-al-gordon-4-mile")"
-if [ "$returned_title" != "$expected_title" ]
-then
-  echo "Test command failed! Got $returned_title, expected $expected_title"
-  exit 2
-fi
-
-expected_date="saturday, february 20, 2016 8:00am"
-returned_date="$(get_race_date "http://www.nyrr.org/races-and-events/2016/nyrr-al-gordon-4m")"
-if [ "$returned_date" != "$expected_date" ]
-then
-  echo "Test command failed! Got $returned_date, expected $expected_date"
-  exit 2
-fi
 
 
 # Test get_race_title and get_race_date
@@ -302,6 +320,19 @@ test_url() {
     exit 2
   fi
 }
+
+# Validate selectors and scraping logic
+#
+expected_title="NYRR Al Gordon 4M"
+expected_date="saturday, february 20, 2016 8:00am"
+url_to_test="http://www.nyrr.org/races-and-events/2015/nyrr-al-gordon-4-mile"
+test_url "$url_to_test" "$expected_title" "$expected_date"
+
+expected_date="saturday, february 20, 2016 8:00am"
+expected_title="NYRR Al Gordon 4M"
+url_to_test="http://www.nyrr.org/races-and-events/2016/nyrr-al-gordon-4m"
+test_url "$url_to_test" "$expected_title" "$expected_date"
+
 
 
 url_to_test="https://nycruns.com/races/?race=paine-to-pain-trail-half-marathon-2018"
@@ -343,20 +374,17 @@ test_url "$url_to_test" "$expected_title" "$expected_date"
 
 
 expected_title="Run the River 5K"
-returned_title="$(get_race_title "http://www.eventbrite.com/e/run-the-river-5k-icahn-stadiumrandalls-island-park-registration-17885348559?nomo=1")"
-if [ "$returned_title" != "$expected_title" ]
-then
-  echo "Test command failed! Got $returned_title, expected $expected_title"
-  exit 2
-fi
+expected_date="2015-10-24t08:30:00-04:00"
+url_to_test="http://www.eventbrite.com/e/run-the-river-5k-icahn-stadiumrandalls-island-park-registration-17885348559?nomo=1"
+test_url "$url_to_test" "$expected_title" "$expected_date"
 
-expected_date="saturday, october 24, 2015 8:30 am"
-returned_date="$(get_race_date "http://www.eventbrite.com/e/run-the-river-5k-icahn-stadiumrandalls-island-park-registration-17885348559?nomo=1")"
-if [ "$returned_date" != "$expected_date" ]
-then
-  echo "Test command failed! Got $returned_date, expected $expected_date"
-  exit 2
-fi
+expected_title="Run the River 5K"
+expected_date="sat, october 27, 2018 10:00 am"
+url_to_test="https://www.eventbrite.com/e/run-the-river-5k-registration-45356619871?bbemailid=9327519&bblinkid=110100196&bbejrid=712167945"
+test_url "$url_to_test" "$expected_title" "$expected_date"
+
+
+
 
 if [ "$(basename "$0")" == "racetocal.sh" ]
 then
