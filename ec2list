@@ -14,7 +14,7 @@ set -o errexit
 
 api_category="ec2"
 api_call="describe-instances"
-fields="Name,State.Name,InstanceId,InstanceType,KeyName,PublicDnsName,ImageId,Placement.AvailabilityZone,VpcId,LaunchTime,PublicIpAddress,PrivateIpAddress 1"
+fields="Name,State.Name,InstanceId,InstanceType,KeyName,PublicDnsName,ImageId,SubnetId,Placement.AvailabilityZone,VpcId,LaunchTime,PublicIpAddress,PrivateIpAddress 1"
 
 if [ "${EC2LIST_CACHE_TIMEOUT:-}" ]
 then
