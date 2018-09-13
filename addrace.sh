@@ -23,11 +23,18 @@ fi
 
 YEAR=$(perl -MPOSIX=strftime -MDate::Parse -e 'print(strftime("%Y",localtime(str2time(shift))));' "$DATE")
 
-if ! echo "$DATE" | grep -q "$YEAR"
+NOW_YEAR=$(date +%Y)
+
+if [ "$YEAR" -lt "$NOW_YEAR" ]
 then
-  echo "Year not in date, unsupported ($DATE / $YEAR)"
-  exit 2
+  YEAR=$NOW_YEAR
 fi
+
+#if ! echo "$DATE" | grep -q "$YEAR"
+#then
+  #echo "Year not in date, unsupported ($DATE / $YEAR)"
+  #exit 2
+#fi
 
 DEFAULT_DURATION=120
 DEFAULT_LOCATION="NYC"
