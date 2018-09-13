@@ -81,15 +81,21 @@ def main():
     if args.debug:
         logging.getLogger().setLevel(getattr(logging, "DEBUG"))
 
+    logging.debug("connecting to db")
+
     client = MongoClient(DB_URL)
 
     database = client[DB_NAME]
 
     collection = database[COLLECTION_NAME]
 
+    logging.debug("Ensuring filename index")
+
     collection.create_index("filename", unique=True)
 
     created_count = 0
+
+    logging.debug("Listing files under %s", ACTIVITY_DIR)
 
     for basename in os.listdir(ACTIVITY_DIR):
         filename = os.path.join(ACTIVITY_DIR, basename)
