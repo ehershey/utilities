@@ -52,12 +52,90 @@ def compute_activity_calories(activity_type, duration_secs, distance_meters):
         activity_type=activity_type))
 
 
+def process_track(track):
+    """ Take gpxpy track object and read summary data from it
+    """
+    distance = track.get_moving_data().moving_distance
+    logging.debug("distance: %f", distance)
+    logging.debug("get_points_no(): %f", track.get_points_no())
+    time = track.get_moving_data().moving_time
+    start_time = track.get_time_bounds().start_time
+    if start_time is None:
+        return
+    start_date = start_time.date()
+    end_time = track.get_time_bounds().end_time
+    end_date = end_time.date()
+    if start_date != end_date:
+        # Split into one track for start_date date and one for everything else
+        #
+        new_dates_track = track.clone()
+        logging.debug("track: {track}".format(track=track))
+        logging.debug("new_dates_track: {new_dates_track}".format(new_dates_track=new_dates_track))
+        for segment in track.segments:
+            indexes_to_delete = []
+            for index, point in enumerate(segment.points):
+                if point.time.date() != start_date:
+                    indexes_to_delete.append(index)
+
+            for index_to_delete in reversed(sorted(indexes_to_delete)):
+                del(segment.points[index_to_delete])
+        for segment in new_dates_track.segments:
+            indexes_to_delete = []
+            for index, point in enumerate(segment.points):
+                if point.time.date() == start_date:
+                    indexes_to_delete.append(index)
+
+            for index_to_delete in reversed(sorted(indexes_to_delete)):
+                del(segment.points[index_to_delete])
+
+        process_track(track)
+        process_track(new_dates_track)
+        return None
+    if start_date in SUMMARIES_BY_DATE:
+        summary = SUMMARIES_BY_DATE[start_date]
+    else:
+        summary = dict({
+            "entry_source": ARGS.entry_source,
+            "Date": start_time.replace(hour=0, minute=0, second=0),
+            "Verbose Date": start_time.strftime("%Y-%m-%d"),
+            "GPS Points": 0,
+            "Calories": 0,
+            "Time": 0,
+            "Distance": 0
+            })
+        SUMMARIES_BY_DATE[start_date] = summary
+    tracktype = track.type
+    if not tracktype:
+        tracktype = "none"
+    key = tracktype.capitalize()
+    if key not in summary:
+        summary[key] = distance
+    else:
+        summary[key] += distance
+    key = tracktype.capitalize() + " Seconds"
+    if key not in summary:
+        summary[key] = time
+    else:
+        summary[key] += time
+    calories = compute_activity_calories(
+        activity_type=tracktype,
+        distance_meters=distance,
+        duration_secs=time)
+    logging.debug("calories: %d", calories)
+    summary["Time"] += time
+    summary["Distance"] += distance
+    summary["Calories"] += calories
+    summary["GPS Points"] += track.get_points_no()
+
+
 if __name__ == '__main__':
 
     PARSER = argparse.ArgumentParser(description='gpx to daily summary')
     PARSER.add_argument('--entry-source', help='Entry Source for db entries', default="None")
     PARSER.add_argument('--debug', help='Display debugging info', action='store_true')
     PARSER.add_argument('--filename', help='File to read', default=None)
+    PARSER.add_argument('--allow-multiple', help='Allow multiple date summaries in output',
+                        action='store_true')
     ARGS = PARSER.parse_args()
 
     if ARGS.debug:
@@ -86,50 +164,16 @@ if __name__ == '__main__':
     UREG = pint.UnitRegistry()
 
     for track in GPX.tracks:
-        distance = track.get_moving_data().moving_distance
-        time = track.get_moving_data().moving_time
-        start_time = track.get_time_bounds().start_time
-        if start_time is None:
-            continue
-        start_date = start_time.date()
-        end_time = track.get_time_bounds().end_time
-        end_date = end_time.date()
-        if start_date != end_date:
-            raise Exception("track crosses dates: {start} / {end} / {track}".format(
-                start=start_date,
-                end=end_date,
-                track=track))
-        if start_date in SUMMARIES_BY_DATE:
-            summary = SUMMARIES_BY_DATE[start_date]
-        else:
-            summary = dict({
-                "entry_source": ARGS.entry_source,
-                "Date": start_time.replace(hour=0, minute=0, second=0),
-                "Calories": 0
-                })
-            SUMMARIES_BY_DATE[start_date] = summary
-        tracktype = track.type
-        if not tracktype:
-            tracktype = "none"
-        key = tracktype.capitalize()
-        if key not in summary:
-            summary[key] = 0
-        else:
-            summary[key] += distance
-        key = tracktype.capitalize() + " Seconds"
-        if key not in summary:
-            summary[key] = 0
-        else:
-            summary[key] += time
-        calories = compute_activity_calories(
-            activity_type=tracktype,
-            distance_meters=distance,
-            duration_secs=time)
-        logging.debug("calories: {calories}", calories=calories)
-        summary["Calories"] += calories
-
+        process_track(track)
     # print("time: {time}".format(time=str(datetime.timedelta(seconds=total_secs))))
     # print("total_calories: {total_calories}".format(total_calories=total_calories))
 
-    for summary in SUMMARIES_BY_DATE.values():
+    summaries = SUMMARIES_BY_DATE.values()
+
+    # Unless multiples are explicitly allowed, only print the summary with the most points
+    #
+    if not ARGS.allow_multiple:
+        summaries = sorted(summaries, key=lambda summary: summary["GPS Points"], reverse=True)[0:1]
+
+    for summary in summaries:
         print(json.dumps(summary, default=json_util.default))
