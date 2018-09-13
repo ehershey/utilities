@@ -26,6 +26,7 @@ GENERIC_TITLE_SELECTOR="meta[property=og:title]"
 GENERIC_TITLE_SELECTOR2="title"
 
 GENERIC_DATE_SELECTORS="
+p.text-align-center
 meta[property=event:start_time]
 "
 GENERIC_DATE_SELECTOR="div.field"
@@ -101,9 +102,9 @@ get_race_title() {
     returned_title="$($CURL "$url" | $PUP "$GENERIC_TITLE_SELECTOR2" text{})"
   fi
 
-  # Discard pipe and following text
+  # Discard pipe and preceding text
   #
-  returned_title="$(echo -n "$returned_title" | sed 's/ *|.*//' )"
+  returned_title="$(echo -n "$returned_title" | sed 's/.*| *//' )"
 
   # Discard arrow char and following text ("Â" from archive.org)
   #
@@ -247,7 +248,7 @@ get_race_date() {
   returned_date="$(echo -n "$returned_date" | sed 's/ 10k:*//g')"
   returned_date="$(echo -n "$returned_date" | sed 's/ half:*//g')"
   returned_date="$(echo -n "$returned_date" | sed 's/ 5 miler.*//g')"
-  returned_date="$(echo -n "$returned_date" | sed 's/ - / /g')"
+  returned_date="$(echo -n "$returned_date" | sed 's/ - [0-9][0-9]*:[0-9][0-9] [ap]m//g')"
   returned_date="$(echo -n "$returned_date" | sed 's/[ 	][ 	]*/ /g'; )"
   returned_date="$(echo -n "$returned_date" | sed 's/;.*//g')"
   returned_date="$(echo -n "$returned_date" | sed 's/ *|.*//g')"
@@ -273,6 +274,7 @@ get_race_date() {
   # e.g. "sat, october 27, 2018 10:00 am"
   #
   returned_date="$(echo -n "$returned_date" | sed 's/.*[^a-z]\([a-z][a-z][a-z]*, [a-z][a-z][a-z]* [0-9][0-9]*, [0-9][0-9][0-9][0-9] [0-9][0-9]*:[0-9][0-9]* [ap]m\).*/\1/' )"
+
   echo "$returned_date"
 }
 
@@ -383,6 +385,10 @@ expected_date="sat, october 27, 2018 10:00 am"
 url_to_test="https://www.eventbrite.com/e/run-the-river-5k-registration-45356619871?bbemailid=9327519&bblinkid=110100196&bbejrid=712167945"
 test_url "$url_to_test" "$expected_title" "$expected_date"
 
+url=nyccentury.org
+date="sunday, september 9 6:00 am"
+title="NYC Century"
+test_url "$url" "$title" "$date"
 
 
 
@@ -404,5 +410,10 @@ then
     echo "Can't determine date"
     exit 4
   fi
+  echo "title=\"$title\""
+  echo "date=\"$date\""
+  echo "url=\"$url\""
+  echo "address=\"$address\""
+  set -o xtrace
   addrace.sh "$title" "$date" "$url" "" "$address"
 fi
