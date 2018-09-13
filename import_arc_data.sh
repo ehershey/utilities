@@ -9,6 +9,7 @@
 
 set -o errexit
 set -o nounset
+set -o pipefail
 
 base_dir=~/Dropbox/Misc/arc_import
 incoming_dir="$base_dir/incoming"
@@ -46,7 +47,7 @@ gps_collection='gps_log'
 summary_collection='daily_summary'
 
 gps_import_cmd="mongoimport --db $db --collection $gps_collection"
-summary_import_cmd="mongoimport --db $db --collection $summary_collection"
+summary_import_cmd="mongoimport --db $db --collection $summary_collection --mode=upsert --upsertFields=Date"
 
 # 1. json data, remove as we process it
 #
@@ -96,13 +97,14 @@ then
   done
 fi
 
+#set -o xtrace
 # 3. gpx data into ernie_org.daily_summary
 #
 if [ "$(find "$gpx_dir/" -name \*.gpx -type f)" ]
 then
   # do the same for gpx files again, don't remove them, store completed under new name
   #
-  find "$gpx_dir" -name \*.gpx | while read incoming_file
+  find "$gpx_dir" -name '????-??-??.gpx' | while read incoming_file
   do
     basename="$(basename "$incoming_file")"
     basename="rawgpx-$basename"
