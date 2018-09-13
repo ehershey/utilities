@@ -40,7 +40,7 @@ then
   echo "Title looks funny ($TITLE). Is it a year?"
   exit 2
 fi
-if echo "$TITLE" | grep '^.*/.*/.*'
+if echo "$TITLE" | grep '^[^/]*/[^/]*/[^/]$'
 then
   echo "Title looks funny ($TITLE). Is it a date?"
   exit 2
