@@ -90,6 +90,7 @@ do
     cache_run $timeout "aws --region $region "${api_category}" "${api_method}" | format_generic_json.sh $fields" $CACHE_SUB_KEY | tail -n +2 | sed "s/^/$region,/g" >> $tempfile &
 done
 wait
+head -1 "$tempfile"
 while [ "${1:-}" ]
 do
   cat "$tempfile" | grep -i "$1" > "$tempfile2"
