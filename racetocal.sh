@@ -28,6 +28,7 @@ GENERIC_TITLE_SELECTOR2="title"
 GENERIC_DATE_SELECTORS="
 p.text-align-center
 meta[property=event:start_time]
+div.timer
 "
 GENERIC_DATE_SELECTOR="div.field"
 GENERIC_DATE_SELECTOR2="div.date"
@@ -155,8 +156,11 @@ get_race_date() {
     then
        returned_date="$($CURL "$url" | $PUP "$date_selector" text{})"
     fi
+    if [ ! "$returned_date" ]
+    then
+      returned_date="$($CURL "$url" | $PUP "$date_selector" attr{data-event-date} | head -1)" # loch ness marathon
+    fi
   done
-
 
 
   if [ ! "$returned_date" ]
