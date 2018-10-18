@@ -5,6 +5,8 @@
 # Usage: cache_get <lifetime in seconds> <url>
 #
 
+set -o nounset
+set -o errexit
 cachedir=$HOME/.generic_cache
 
 TIMEOUT=2
@@ -57,4 +59,3 @@ fi
 #echo cache miss >&2
 #lwp-request -m GET -t $TIMEOUT $url | tee $cachefile
 curl --location --silent --connect-timeout $TIMEOUT --header 'User-Agent: Mozilla/5.0' $url | tee $cachefile
-	
