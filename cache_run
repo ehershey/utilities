@@ -1,8 +1,10 @@
 #!/bin/bash
 #
-# Run a command and cache the output. If output from a previous duplicate
-# execution exists from more recent than <lifetime seconds ago, re-use the
-# output.
+# Run a command and cache the output and return code. If output from a previous
+# duplicate execution exists from more recent than <lifetime> seconds ago,
+# re-use the output.
+#
+# <lifetime> can be -1 to specify inifinate expiration
 #
 # usage: cache_run <lifetime> <cmd> [ <extra key component> ]
 #
@@ -56,8 +58,14 @@ log "cachefile: $cachefile"
 log "cmd: $cmd"
 
 
-if [ -e "$cachefile.out" -a -e "$cachefile.err" ]
+if [ -e "$cachefile.out" -a -e "$cachefile.err" -a -e "$cachefile.exitcode" ]
 then
+  if [ "$cache_life" == "-1" ]
+  then
+    cat "$cachefile.out" >&1
+    cat "$cachefile.err" >&2
+    exit $(cat "$cachefile.exitcode")
+  fi
 	# check if content has expired using stdout file
 	#
 	file_mtime=`perl -MFile::stat -e 'print stat("'$cachefile.out'")->mtime'`
@@ -67,9 +75,10 @@ then
 	then
     cat "$cachefile.out" >&1
     cat "$cachefile.err" >&2
-		exit
+    exit $(cat "$cachefile.exitcode")
 	fi
 fi
 trap "rm \"$cachefile.out\" \"$cachefile.err\"" INT
-eval $cmd 2>"$cachefile.err" | tee "$cachefile.out"  || true
+(eval $cmd ; echo $? > "$cachefile.exitcode" ) 2>"$cachefile.err" | tee "$cachefile.out"  || true
 cat "$cachefile.err" >&2
+exit $(cat "$cachefile.exitcode")
