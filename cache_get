@@ -41,21 +41,20 @@ cachefile=$cachedir/`echo "$url" | sed 's/[^0-9a-zA-Z_-]/_/g' | $md5 | tr -d \ -
 
 if [ -e "$cachefile" ]
 then
+  if [ "$cache_life" == "-1" ]
+  then
+    cat $cachefile
+		exit
+  fi
 	# check if content has expired
 	#
-	#file_mtime=`stat -f %m $cachefile`
 	file_mtime=`perl -MFile::stat -e 'print stat("'$cachefile'")->mtime'`
 
 	current_time=`date +%s`
 	if [ `expr $current_time - $file_mtime` -lt $cache_life ]
 	then
-		#echo cache hit >&2
     cat $cachefile
 		exit
 	fi
-#else
-    #echo "did not find file $cachefile" >&2
 fi
-#echo cache miss >&2
-#lwp-request -m GET -t $TIMEOUT $url | tee $cachefile
 curl --location --silent --connect-timeout $TIMEOUT --header 'User-Agent: Mozilla/5.0' $url | tee $cachefile
