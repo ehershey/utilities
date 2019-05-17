@@ -19,7 +19,7 @@ import os
 COLLECTION = "daily_summary"
 DB = "ernie_org"
 
-sender = "average_calorie_checker@ernie.org"
+sender = "average_calorie_checker@eahdroplet4.ernie.org"
 recipient = "average_calorie_checker@ernie.org"
 subject = ""
 
@@ -91,38 +91,38 @@ else:
         sys.stderr.write("resetting lockfile for double average\n")
         os.unlink(LOCKFILE_DOUBLE)
 
-# if we haven't mailed about a half-hit yet, check against all the averages
-#
-if not os.path.exists(LOCKFILE_HALF):
-    body = None
-    if calories_today > calories_average / 2:
-        body_raw = "Surpassed HALF of overall calorie average! (today: {0}, half average: {1})"
-        body = body_raw.format(calories_today, calories_average / 2)
-    elif calories_today > calories_7days / 2:
-        body_raw = "Surpassed HALF of 7 day calorie average! (today: {0}, half average: {1})"
-        body = bodyraw.format(calories_today, calories_7days / 2)
-    elif calories_today > calories_30days / 2:
-        body_raw = "Surpassed HALF of 30 day calorie average! (today: {0}, half average: {1})"
-        body = bodyraw.format(calories_today, calories_30days / 2)
-    elif calories_today > calories_average_current_year / 2:
-        body_raw = "Surpassed HALF of current year calorie average! (today: {0}, half average: {1})"
-        body = bodyraw.format(calories_today, calories_average_current_year / 2)
-    else:
-        if os.path.exists(LOCKFILE_DOUBLE):
-            sys.stderr.write("resetting lockfile for half average\n")
-            os.unlink(LOCKFILE_DOUBLE)
-    if body is not None:
+# this logic doesn't make sense
+# TODO - fix it
+half_body = None
+if calories_today > calories_average / 2:
+    body_raw = "Surpassed HALF of overall calorie average! (today: {0}, half average: {1})"
+    half_body = body_raw.format(calories_today, calories_average / 2)
+elif calories_today > calories_7days / 2:
+    body_raw = "Surpassed HALF of 7 day calorie average! (today: {0}, half average: {1})"
+    half_body = body_raw.format(calories_today, calories_7days / 2)
+elif calories_today > calories_30days / 2:
+    body_raw = "Surpassed HALF of 30 day calorie average! (today: {0}, half average: {1})"
+    half_body = body_raw.format(calories_today, calories_30days / 2)
+elif calories_today > calories_average_current_year / 2:
+    body_raw = "Surpassed HALF of current year calorie average! (today: {0}, half average: {1})"
+    half_body = body_raw.format(calories_today, calories_average_current_year / 2)
+if half_body is not None:
+    if not os.path.exists(LOCKFILE_HALF):
         sys.stderr.write("emailing about half average\n")
-        erniemail.send_message(body, subject, recipient, sender)
+        erniemail.send_message(half_body, subject, recipient, sender)
         with open(LOCKFILE_HALF, 'a'):
             os.utime(LOCKFILE_HALF, None)
+else:
+    if os.path.exists(LOCKFILE_HALF):
+        sys.stderr.write("resetting lockfile for half average\n")
+        os.unlink(LOCKFILE_HALF)
 
 
 if calories_today > calories_7days:
     if not os.path.exists(LOCKFILE_7DAYS):
         sys.stderr.write("emailing about 7 day average\n")
         body_raw = "Surpassed 7 day calorie average! (today: {0}, 7 day average: {1})"
-        body = bodyraw.format(calories_today, calories_7days)
+        body = body_raw.format(calories_today, calories_7days)
         erniemail.send_message(body, subject, recipient, sender)
         with open(LOCKFILE_7DAYS, 'a'):
             os.utime(LOCKFILE_7DAYS, None)
@@ -135,7 +135,7 @@ if calories_today > calories_30days:
     if not os.path.exists(LOCKFILE_30DAYS):
         sys.stderr.write("emailing about 30 day average\n")
         body_raw = "Surpassed 30 day calorie average! (today: {0}, 30 day average: {1})"
-        body = bodyraw.format(calories_today, calories_30days)
+        body = body_raw.format(calories_today, calories_30days)
         erniemail.send_message(body, subject, recipient, sender)
         with open(LOCKFILE_30DAYS, 'a'):
             os.utime(LOCKFILE_30DAYS, None)
