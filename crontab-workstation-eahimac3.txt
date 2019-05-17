@@ -1,5 +1,5 @@
 #0 1 * * * ~/git/utilities/mongodb_autobuild.sh >> /tmp/mongodb_autobuild.log
-0 3 * * * ~/bin/dump_photoindex.sh >> /tmp/dump_photoindex.log
+#0 3 * * * ~/bin/dump_photoindex.sh >> /tmp/dump_photoindex.log
 0 3 * * * ~/bin/dump_employeeindex.sh >> /tmp/dump_employeeindex.log
-* * * * * (cd ~/git/utilities; ~/git/utilities/monitor_iphone.sh ) >> /tmp/monitor_iphone.log
+*/3 * * * * (cd ~/git/utilities; ~/git/utilities/monitor_iphone.sh ) >> /tmp/monitor_iphone.log
 #*/30 * * * * sleep 60 ; killall node iojs
