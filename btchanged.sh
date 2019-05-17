@@ -6,7 +6,7 @@
 
 # TODO support multiple exclude devices
 #
-EXCLUDE="eahmbp"
+EXCLUDE="eahmbp\|eahxs\|Ernie.s.MacBook"
 
 if [ -e ~/.bashrc ]
 then
@@ -38,27 +38,44 @@ then
 fi
 
 $lsbt -c > "$now_list"
+
+TEST=""
+#TEST=1
+
+if [ "$TEST" ]
+then
+  echo 'ODT Privates BLUE' > $now_list
+fi
+
 diff "$last_list" "$now_list" >> "$log"
 
 diff "$last_list" "$now_list" > "$tempfile"
 
 if [ "$EXCLUDE" ]
 then
-  exclude_command="grep -v \"$EXCLUDE\" "
+  exclude_command="grep -vE $EXCLUDE"
 else
   exclude_command="cat"
 fi
 
 
-
-grep ^\< "$tempfile" | sed 's/^< //' | $exclude_command | while read device
+grep ^\< "$tempfile" | sed 's/^< //' | LANG=en_us eval $exclude_command | while read device
 do
   terminal-notifier -title DISCONNECTED -message "$device"
+  echo "DISCONNECTED - $device" >> "$log"
+  echo "set:" >> "$log"
+  set >> "$log"
 done
 
-grep ^\> "$tempfile" | sed 's/^> //' | $exclude_command | while read device
+grep ^\> "$tempfile" | sed 's/^> //' | LANG=en_us eval $exclude_command | while read device
 do
   terminal-notifier -title CONNECTED -message "$device"
+  echo "CONNECTED - $device" >> "$log"
+  echo "env:" >> "$log"
+  env >> "$log"
 done
 
-cp "$now_list" "$last_list"
+if [ ! "$TEST" ]
+then
+  cp "$now_list" "$last_list"
+fi
