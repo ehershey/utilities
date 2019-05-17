@@ -1,4 +1,5 @@
 CALORIES_PER_MILE_BY_ACTIVITY_TYPE = {
+    'bogus': 0,
     'running': 110,
     'walking': 100,
     'cycling': 40,
