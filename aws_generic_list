@@ -40,7 +40,7 @@ fi
 
 # default seconds to cache output
 #
-DEFAULT_TIMEOUT=86400
+DEFAULT_TIMEOUT=-1
 
 # allow overriding output cache timeout by specifying $AWSLIST_CACHE_TIMEOUT
 #
@@ -68,7 +68,7 @@ tempfile2=$(mktemp /tmp/$basename.XXXXXX)
 
 # For any category other than "organizations" iterate over every region unless $AWS_REGION is set. For organizations, just hardcode us-east-1
 #
-if [ "$api_category" = "organizations" ]
+if [ "$api_category" = "organizations" -o "$api_category" = "s3api" ]
 then
   regions=us-east-1
 elif [ "${AWS_REGION:-}" ]
