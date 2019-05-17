@@ -17,6 +17,42 @@ MAX_SPLIT_DEPTH = 30
 PERCENTAGE_MARGIN_SPLIT_ADVANTAGE = 10
 
 
+class Speed(m26.Speed):
+    def __init__(self, d, et):
+        m26.Speed.__init__(self, d, et)
+
+    def seconds_per_mile(self):
+        if self.etime.hours() == 0:
+            return 0.0
+        elif self.dist.as_miles() == 0:
+            return 0.0
+        else:
+            return m26.Speed.seconds_per_mile(self)
+
+    def mph(self):
+        if self.etime.hours() == 0:
+            return 0
+        else:
+            return m26.Speed.mph(self)
+
+
+class TcxHandler(ggps.TcxHandler):
+    def __init__(self):
+        ggps.TcxHandler.__init__(self)
+        self.activity_type = None
+        self.notes = None
+
+    def endElement(self, tag_name):
+        if tag_name == 'Notes':
+            self.notes = self.curr_text
+        ggps.TcxHandler.endElement(self, tag_name)
+
+    def startElement(self, tag_name, attrs):
+        if tag_name == 'Activity' and 'Sport' in attrs.keys():
+            self.activity_type = attrs.get('Sport')
+        ggps.TcxHandler.startElement(self, tag_name, attrs)
+
+
 def get_distance_from_trackpoints(trackpoints):
     """Return an m26.Distance object representing distance over the given trackpoints"""
 
@@ -32,10 +68,10 @@ def get_distance_from_trackpoints(trackpoints):
 
 
 def get_speed_from_trackpoints(trackpoints):
-    """Return an m26.Speed object representing speed over the given trackpoints"""
+    """Return a Speed object representing speed over the given trackpoints"""
 
     if len(trackpoints) < 1:
-        return m26.Speed(m26.Distance(0), m26.ElapsedTime(0))
+        return Speed(m26.Distance(0), m26.ElapsedTime(0))
 
     first_trackpoint = trackpoints[0]
     last_trackpoint = trackpoints[-1]
@@ -59,7 +95,7 @@ def get_speed_from_trackpoints(trackpoints):
     logging.debug("diff_distance: %f", diff_distance.as_miles())
     logging.debug("diff_etime: %s", diff_etime)
 
-    speed = m26.Speed(diff_distance, diff_etime)
+    speed = Speed(diff_distance, diff_etime)
     return speed
 
 
@@ -111,11 +147,17 @@ def read_activity(filename):
     activity = {"filename": filename}
 
     if 'tcx' in filename:
-        handler = ggps.TcxHandler()
+        handler = TcxHandler()
     elif 'gpx' in filename:
         handler = ggps.GpxHandler()
 
-    handler.parse(filename)
+    try:
+        handler.parse(filename)
+    except ValueError as e:
+        if str(e) != 'could not convert string to float: ':
+            logging.debug("re-raising parse error: {e}".format(e=str(e)))
+            raise e
+        logging.debug("swallowing valueerror in file parsing")
 
     trackpoints = handler.trackpoints
     activity_type = handler.activity_type
@@ -194,6 +236,30 @@ def get_is_negative_split(trackpoints, advantage_allowed=True):
         # despite all efforts, not negative
         #
         return False
+
+
+def process_strava_activity(activity):
+    """
+    Convert stravalib activity into a generic dict suitable for mongodb insertion
+    """
+
+    simple_activity = {}
+
+    simple_activity["strava_id"] = activity.id
+    simple_activity["external_id"] = activity.external_id
+    simple_activity["calories"] = activity.calories
+    simple_activity["name"] = activity.name
+    simple_activity["type"] = activity.type
+    simple_activity["distance"] = activity.distance.num
+    simple_activity["distance_unit"] = activity.distance.unit.specifier
+    simple_activity["start_date"] = activity.start_date
+    simple_activity["end_date"] = activity.start_date + activity.elapsed_time
+    simple_activity["start_date_local"] = activity.start_date_local
+    simple_activity["end_date_local"] = activity.start_date_local + activity.elapsed_time
+    simple_activity["moving_time"] = activity.moving_time.seconds
+    simple_activity["elapsed_time"] = activity.elapsed_time.seconds
+
+    return simple_activity
 
 
 def process_activity(activity):
