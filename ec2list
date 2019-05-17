@@ -21,4 +21,5 @@ then
   AWSLIST_CACHE_TIMEOUT=$EC2LIST_CACHE_TIMEOUT
 fi
 
-aws_generic_list "$api_category" "$api_call" "$fields" "$@"
+
+AWSLIST_CACHE_TIMEOUT="${AWSLIST_CACHE_TIMEOUT:-}" aws_generic_list "$api_category" "$api_call" "$fields" "$@"
