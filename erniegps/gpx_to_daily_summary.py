@@ -40,7 +40,16 @@ import pint
 from bson import json_util
 import erniegps.calories
 
+
 from pymongo import MongoClient
+
+def get_db_url():
+    if "MONGODB_URI" in os.environ:
+        return os.environ["MONGODB_URI"]
+    else:
+        return "localhost"
+
+
 
 STRAVA_DB = "strava"
 ACTIVITY_COLLECTION = "activities"
@@ -315,7 +324,7 @@ if __name__ == '__main__':
 
     seen_strava_activity_ids = {}
     if not ARGS.skip_strava:
-        DB_URL = os.environ["MONGODB_URI"]
+        DB_URL = get_db_url()
         mongoclient = MongoClient(DB_URL)
 
         database = mongoclient[STRAVA_DB]
