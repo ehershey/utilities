@@ -1,0 +1,76 @@
+#!/bin/bash
+#
+# Display a QR code for a 2fa token
+#
+# Requires the qrencode binary in $PATH
+#
+# Optional configuration environment variables - $DIR_2FA (default is ~)
+#
+# Optional command line argument - name of file to load from $DIR_2FA/ (default is .secret_2fa)
+#
+# Default is TOTP but if "#HOTP:TRUE" exists on a line in the file, HOTP will be used instead
+#
+# 2fa token can be pgp encrypted and it will be decrypted by the script
+
+set -o nounset
+#set -o verbose
+#set -o pipefail
+#set -o errexit
+
+if [ ! "${DIR_2FA:-}" ]
+then
+  DIR_2FA=~
+fi
+
+if [ "${1:-}" ]
+then
+  KEYFILE="$DIR_2FA/${1:-}"
+  label="${1:-}"
+else
+  KEYFILE="$DIR_2FA/.secret_2fa"
+  label="default"
+fi
+
+if [ ! -e "$KEYFILE" ]
+then
+  echo "File not found: $KEYFILE"
+  exit 3
+fi
+
+LAST_COUNTER_FILE=$DIR_2FA/".2fa-counter-${1:-}.txt"
+
+if file --brief "$KEYFILE" | grep -q PGP
+then
+  SECRET_2FA="$(gpg --decrypt < "$KEYFILE" | grep -v ^\# | tr -d \ )"
+else
+  SECRET_2FA="$(grep -v ^\# "$KEYFILE" | tr -d \ )"
+fi
+
+HOTP=""
+if grep -qx \#HOTP:TRUE "$KEYFILE"
+then
+  HOTP="true"
+fi
+
+if [ -e "$LAST_COUNTER_FILE" ]
+then
+  last_counter=$(cat $LAST_COUNTER_FILE)
+  echo "Found last counter:"
+  echo "$last_counter"
+else
+  last_counter="-1"
+fi
+new_counter=$last_counter
+
+if [ "$HOTP" ]
+then
+  method=hotp
+  counterkeyval="&counter=$new_counter"
+else
+  method=totp
+  counterkeyval=""
+fi
+URL="otpauth://$method/$label?issuer=cli&secret=$SECRET_2FA$counterkeyval"
+
+echo "$URL"
+qrencode "$URL" -t ansi
