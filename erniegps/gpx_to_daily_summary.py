@@ -66,6 +66,10 @@ def get_summary_type_from_strava_type(type):
         summary_type = "hiking"
     elif type == "Workout":
         summary_type = "gym"
+    elif type == "WeightTraining":
+        summary_type = "gym"
+    elif type == "Rowing":
+        summary_type = "rowing"
     else:
         raise Exception("Unrecognized activity type: {type}".format(type=type))
     return summary_type
