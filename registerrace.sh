@@ -51,7 +51,7 @@ fi
 tempfile="$(mktemp /tmp/registerrace.XXXXX)"
 echo $tempfile
 
-gcalcli --cache --calendar "$CALENDAR" search --nolineart --nocolor --detail_description_width 200 "$TITLE (registered) $YEAR" --details all > "$tempfile"
+gcalcli --calendar "$CALENDAR" search --nostarted --military --nocolor "$TITLE (registered) $YEAR" --details all > "$tempfile"
 
 title=$(grep ^$YEAR $tempfile | awk '{print $3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21}')
 echo "title: $title"
@@ -63,9 +63,9 @@ then
   exit 2
 fi
 
-gcalcli --cache --calendar "$CALENDAR" search --nolineart --nocolor --detail_description_width 200 "\"$TITLE\" $YEAR" --details all > "$tempfile"
+gcalcli --calendar "$CALENDAR" search --nostarted --military --nocolor "\"$TITLE\" $YEAR" --details all > "$tempfile"
 
-count=$(grep Description: $tempfile | wc -l)
+count=$(grep Location: $tempfile | wc -l)
 
 if [ "$count" -gt 1 ]
 then
@@ -81,7 +81,8 @@ then
   exit 4
 fi
 
-description=$(grep -A 20 Description $tempfile | tail +3 | grep -v -- +----------------- | sed 's/^ *| //' | sed 's/  *|$//')
+#description=$(grep -A 20 Description $tempfile | tail +3 | grep -v -- +----------------- | grep -v -- ────────── | sed 's/\│//g' )
+description="$(gcalcli --calendar "$CALENDAR" search --tsv --nocolor "\"$TITLE\" $YEAR" --details all | cut -f9 -d\	 | sed 's/<br[^>]*>/ /g' | sed 's/<[^>]*>//g')"
 echo "description: >$description<"
 
 title=$(grep ^$YEAR $tempfile | awk '{print $3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21}')
@@ -96,7 +97,7 @@ fi
 new_title=$(echo "$title" | sed "s/$YEAR/(registered) $YEAR/")
 echo "new_title: $new_title"
 
-new_description="$(echo "$description" | sed "s#Not registered as of ......[0-9]*#Registered on $DATE#" | grep . | tr \\n \ )"
+new_description="$(echo "$description" | sed "s#Not registered as of ......[0-9]*#Registered on $DATE#" | grep . | tr \\n \  | sed 's/\\n/ /g')"
 
 # Account for no "Not registered" note in original event
 #
