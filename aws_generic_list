@@ -75,7 +75,7 @@ elif [ "${AWS_REGION:-}" ]
 then
   regions="$AWS_REGION"
 else
-  regions="$(cache_run 9999999 "aws ec2 describe-regions  --query Regions[*].RegionName --output text" $CACHE_SUB_KEY | sed 's/ap-northeast-2//')"
+  regions="$(cache_run 9999999 "aws ec2 describe-regions  --query Regions[*].RegionName --output text" $CACHE_SUB_KEY | sed 's/ap-northeast-2//' | sed 's/ap-east-1//')"
 fi
 
 printed_header=""
