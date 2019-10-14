@@ -13,5 +13,8 @@ CALORIES_PER_MILE_BY_ACTIVITY_TYPE = {
     'motorcycle': 0,
     'none': 0,
     'boat': 0,
-    'tram': 0
+    'tram': 0,
+    'rowing': 45,
+    'gym': 0,
+    'taxi': 0
     }
