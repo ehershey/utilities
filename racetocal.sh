@@ -2,6 +2,8 @@
 #
 # Add Race to calendar
 #
+# autoupdate_version = 21
+#
 NYRR_TITLE_SELECTOR="h2.title"
 NYRR_DATE_SELECTOR="p.full-width span"
 
@@ -29,6 +31,8 @@ GENERIC_TITLE_SELECTORS="
 p.Style22
 "
 GENERIC_DATE_SELECTORS="
+.race-date
+div.race_detail-meta_list__value
 div.event-date
 p.text-align-center
 meta[property=event:start_time]
@@ -36,6 +40,8 @@ div.timer
 h2.date
 h4.mb32
 p.Style23
+div.wpb_wrapper\ p:parent-of(strong:contains(\"Date\"))
+div.race_detail-result_summary__item__title
 "
 GENERIC_DATE_SELECTOR="div.field"
 GENERIC_DATE_SELECTOR2="div.date"
@@ -54,7 +60,7 @@ set -o pipefail
 #
 if which cache_get &>/dev/null
 then
-  CURL="cache_get -1"
+  CURL="cache_get 86400"
 else
   CURL="curl --silent --location"
 fi
@@ -68,6 +74,15 @@ else
   echo "pup utility required"
   exit 3
 fi
+
+# Make sure gsed is available
+#
+if ! which gsed &>/dev/null
+then
+  echo "gsed utility required (from gnu-sed homebrew package)"
+  exit 3
+fi
+
 
 # Check argument
 #
@@ -193,17 +208,21 @@ get_race_date() {
   do
     if [ ! "$returned_date" ]
     then
-       returned_date="$($CURL "$url" | $PUP "$date_selector" attr{content})"
+      returned_date="$($CURL "$url" | $PUP "$date_selector" attr{content} | grep -v Finishers)"
     fi
     if [ ! "$returned_date" ]
     then
-       returned_date="$($CURL "$url" | $PUP "$date_selector" text{})"
+       returned_date="$($CURL "$url" | $PUP "$date_selector" text{} | grep -v Finishers)"
     fi
     if [ ! "$returned_date" ]
     then
       returned_date="$($CURL "$url" | $PUP "$date_selector" attr{data-event-date} | head -1)" # loch ness marathon
     fi
   done
+
+  # Grab only first two lines
+  #
+  returned_date="$(echo -n "$returned_date" | grep . | head -3 )"
 
 
   if [ ! "$returned_date" ]
@@ -236,11 +255,11 @@ get_race_date() {
   do
     if [ ! "$returned_date" ]
     then
-       returned_date="$($CURL "$url" | $PUP "$date_selector" attr{content})"
+       returned_date="$($CURL "$url" | $PUP "$date_selector" attr{content} | tail -1)"
     fi
     if [ ! "$returned_date" ]
     then
-       returned_date="$($CURL "$url" | $PUP "$date_selector" text{})"
+       returned_date="$($CURL "$url" | $PUP "$date_selector" text{} | tail -1)"
     fi
   done
 
@@ -369,14 +388,20 @@ test_url() {
 
   if [ "$returned_title" != "$expected_title" ]
   then
-    echo "Test command failed! Got $returned_title ($MATCHING_TITLE_SELECTOR), expected $expected_title"
+    echo "Test command failed! Got:"
+    echo ">$returned_title<"
+    echo "expected:"
+    echo ">$expected_title<"
     echo "Test URL: $url_to_test"
     exit 2
   fi
 
   if [ "$returned_date" != "$expected_date" ]
   then
-    echo "Test command failed! Got $returned_date, expected $expected_date"
+    echo "Test command failed! Got:"
+    echo ">$returned_date<"
+    echo "expected:"
+    echo ">$expected_date<"
     echo "Test URL: $url_to_test"
     exit 2
   fi
@@ -384,14 +409,23 @@ test_url() {
 
 # Validate selectors and scraping logic
 #
+
+expected_title="NYRR Grete's Great Gallop 10K"
+expected_date="saturday, october 05 2019"
+#october 5, 2019 8:00 am"
+url_to_test="https://www.nyrr.org/races/nyrrgrete39sgreatgallop10k"
+test_url "$url_to_test" "$expected_title" "$expected_date"
+
 expected_title="NYRR Al Gordon 4M"
 expected_date="saturday, february 20, 2016 8:00am"
-url_to_test="http://www.nyrr.org/races-and-events/2015/nyrr-al-gordon-4-mile"
+#url_to_test="http://www.nyrr.org/races-and-events/2015/nyrr-al-gordon-4-mile"
+url_to_test="http://web.archive.org/web/20170624014508/http://www.nyrr.org/races-and-events/2016/nyrr-al-gordon-4m"
 test_url "$url_to_test" "$expected_title" "$expected_date"
 
 expected_date="saturday, february 20, 2016 8:00am"
 expected_title="NYRR Al Gordon 4M"
-url_to_test="http://www.nyrr.org/races-and-events/2016/nyrr-al-gordon-4m"
+#url_to_test="http://www.nyrr.org/races-and-events/2016/nyrr-al-gordon-4m"
+url_to_test="http://web.archive.org/web/20170624014508/http://www.nyrr.org/races-and-events/2016/nyrr-al-gordon-4m"
 test_url "$url_to_test" "$expected_title" "$expected_date"
 
 
@@ -447,12 +481,16 @@ expected_date="2018-10-27t10:00:00-04:00"
 url_to_test="https://www.eventbrite.com/e/run-the-river-5k-registration-45356619871?bbemailid=9327519&bblinkid=110100196&bbejrid=712167945"
 test_url "$url_to_test" "$expected_title" "$expected_date"
 
-url=nyccentury.org
+url="http://web.archive.org/web/20190413234301/https://nyccentury.org/"
 date="sunday, september 9 6:00 am"
 title="NYC Century"
 test_url "$url" "$title" "$date"
 
 test_url https://web.archive.org/web/20190118081846/http://www.ridetomontauk.com/ 'Ride to Montauk' 'september 14, 2019'
+
+test_url http://web.archive.org/web/20190816170055/https://nytri.org/events/rockaway-beach-tri-duathlon/ 'Rockaway Beach Tri/Duathlon' 'date: sunday, september 22, 2019'
+
+test_url http://web.archive.org/web/20190923170820/https://runsignup.com/Race/NY/Brooklyn/PPTCTurkeyTrot?remMeAttempt=  '2019 PPTC Turkey Trot' 'thu november 28 2019'
 
 if [ "$(basename "$0")" == "racetocal.sh" ]
 then
