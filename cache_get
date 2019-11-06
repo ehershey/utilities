@@ -57,4 +57,4 @@ then
 		exit
 	fi
 fi
-curl --location --silent --connect-timeout $TIMEOUT --header 'User-Agent: Mozilla/5.0' $url | tee $cachefile
+curl --max-time $TIMEOUT --location --silent --connect-timeout $TIMEOUT --header 'User-Agent: Mozilla/5.0' $url | tee $cachefile
