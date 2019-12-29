@@ -7,6 +7,8 @@ FILEHOME=/Users/ernie/git/utilities
 HOSTNAME_PATTERN1="imac"
 HOSTNAME_PATTERN2="mba"
 HOSTNAME_PATTERN3="mbp"
+HOSTNAME_PATTERN4="mb12"
+autoupdate_version = 6
 
 if [ "$CRON_USER" != "$USER" ]
 then
@@ -15,9 +17,9 @@ else
   command="crontab"
 fi
 
-if [ ! "`hostname -s | grep $HOSTNAME_PATTERN1`" -a ! "`hostname -s | grep $HOSTNAME_PATTERN2`" -a ! "`hostname -s | grep $HOSTNAME_PATTERN3`" ]
+if [ ! "`hostname -s | grep $HOSTNAME_PATTERN1`" -a ! "`hostname -s | grep $HOSTNAME_PATTERN2`" -a ! "`hostname -s | grep $HOSTNAME_PATTERN3`" -a ! "`hostname -s | grep $HOSTNAME_PATTERN4`" ]
 then
-  echo "Incorrect hostname: (looks like: $HOSTNAME, should contain: \"$HOSTNAME_PATTERN1\" or \"$HOSTNAME_PATTERN2\" or \"$HOSTNAME_PATTERN3\")"
+  echo "Incorrect hostname: (looks like: $HOSTNAME, should contain: \"$HOSTNAME_PATTERN1\" or \"$HOSTNAME_PATTERN2\" or \"$HOSTNAME_PATTERN3\" or \"$HOSTNAME_PATTERN4\")"
   exit 3
 fi
 
@@ -47,7 +49,20 @@ crontab_file="$FILEHOME/crontab-workstation.txt"
 #
 $command -l > $tempfile1
 
-echo "# Below loaded from $crontab_file" > "$tempfile2"
+crontab_env_file="$FILEHOME/crontab.env"
+
+echo -n > "$tempfile2"
+
+if [ -e "$crontab_env_file" ]
+then
+  echo "# Below loaded from $crontab_env_file" >> "$tempfile2"
+  echo "#" >> "$tempfile2"
+  cat "$crontab_env_file" >> $tempfile2
+fi
+
+
+echo "" >> "$tempfile2"
+echo "# Below loaded from $crontab_file" >> "$tempfile2"
 echo "#" >> "$tempfile2"
 cat "$crontab_file" >> $tempfile2
 
