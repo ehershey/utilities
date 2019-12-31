@@ -79,6 +79,7 @@ else
 fi
 
 printed_header=""
+files=""
 for region in $regions
 do
   if [ ! "$printed_header" ]
@@ -87,9 +88,16 @@ do
       cache_run $timeout "aws --region $region "${api_category}" "${api_method}" | format_generic_json.sh $fields" $CACHE_SUB_KEY | head -1 >> $tempfile
       printed_header=1
     fi
-    cache_run $timeout "aws --region $region "${api_category}" "${api_method}" | format_generic_json.sh $fields" $CACHE_SUB_KEY | tail -n +2 | sed "s/^/$region,/g" >> $tempfile &
+    # full "dumb" async, causes corrupt output
+    #cache_run $timeout "aws --region $region "${api_category}" "${api_method}" | format_generic_json.sh $fields" $CACHE_SUB_KEY | tail -n +2 | sed "s/^/$region,/g" >> $tempfile &
+    # full "dump sync, 2-2.5x slower
+    #cache_run $timeout "aws --region $region "${api_category}" "${api_method}" | format_generic_json.sh $fields" $CACHE_SUB_KEY | tail -n +2 | sed "s/^/$region,/g" >> $tempfile
+    # "smart" async into different files catted together at the end
+    cache_run $timeout "aws --region $region "${api_category}" "${api_method}" | format_generic_json.sh $fields" $CACHE_SUB_KEY | tail -n +2 | sed "s/^/$region,/g" > $tempfile.$region &
+    files="$files $tempfile.$region"
 done
 wait
+cat $files >> "$tempfile" # need >> to keep header (smart async)
 head -1 "$tempfile"
 while [ "${1:-}" ]
 do
