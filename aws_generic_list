@@ -68,7 +68,7 @@ tempfile2=$(mktemp /tmp/$basename.XXXXXX)
 
 # For any category other than "organizations" iterate over every region unless $AWS_REGION is set. For organizations, just hardcode us-east-1
 #
-if [ "$api_category" = "organizations" -o "$api_category" = "s3api" ]
+if [ "$api_category" = "organizations" -o "$api_category" = "s3api" -o "$api_category" = "iam" ]
 then
   regions=us-east-1
 elif [ "${AWS_REGION:-}" ]
