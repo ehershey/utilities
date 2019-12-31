@@ -97,8 +97,17 @@ do
     files="$files $tempfile.$region"
 done
 wait
-cat $files >> "$tempfile" # need >> to keep header (smart async)
-head -1 "$tempfile"
+cat "$tempfile" # header
+cat $files > "$tempfile"
+
+# Probably more optimization to do here
+#
+#if [ ! "${1:-}" ]
+#then
+  #cat "$tempfile" | tail +2 > "$tempfile2"
+  #cat "$tempfile2" > "$tempfile"
+#fi
+
 while [ "${1:-}" ]
 do
   cat "$tempfile" | grep -i "$1" > "$tempfile2"
