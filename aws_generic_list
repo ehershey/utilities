@@ -59,23 +59,53 @@ log() {
 
 log "timeout: $timeout"
 
+# not exactly sure why this is necessary but otherwise the sts call fails with:
+if [ -z "${AWS_PROFILE##*govcloud*}" ]
+then
+  default_region="us-gov-east-1"
+  regionparm=" --region $default_region"
+else
+  default_region="us-east-1"
+  regionparm=""
+fi
+
 # use the userid hitting aws as a cache subkey so instance lists from different accounts will be cached separately
 #
-CACHE_SUB_KEY="$(cache_run 99999999 "aws sts get-caller-identity --query 'UserId' --output text" "${AWS_ACCESS_KEY_ID:-}-${AWS_PROFILE:-}" )"-${api_method}
+CACHE_SUB_KEY="$(cache_run 99999999 "aws sts get-caller-identity$regionparm --query 'UserId' --output text" "${AWS_ACCESS_KEY_ID:-}-${AWS_PROFILE:-}" )"-${api_method}
+if [ "$?" != 0 -o ! "$CACHE_SUB_KEY" ]
+then
+  CACHE_SUB_KEY="$(cache_run 0 "aws sts get-caller-identity$regionparm --query 'UserId' --output text" "${AWS_ACCESS_KEY_ID:-}-${AWS_PROFILE:-}" )"-${api_method}
+  if [ "$?" != 0 -o ! "$CACHE_SUB_KEY" ]
+  then
+    echo "Can't get caller identity"
+    exit 5
+  fi
+fi
+
+
 
 tempfile=$(mktemp /tmp/$basename.XXXXXX)
 tempfile2=$(mktemp /tmp/$basename.XXXXXX)
 
-# For any category other than "organizations" iterate over every region unless $AWS_REGION is set. For organizations, just hardcode us-east-1
+# For any category other than "organizations" iterate over every region unless $AWS_REGION is set. For organizations, just hardcode a region
 #
-if [ "$api_category" = "organizations" -o "$api_category" = "s3api" -o "$api_category" = "iam" ]
+if [ "$api_category" = "organizations" -o "$api_category" = "s3api" -o "$api_category" = "iam" -o \( "$api_category" = "ec2" -a "$api_method" = "describe-regions" \) ]
 then
-  regions=us-east-1
+  regions=$default_region
 elif [ "${AWS_REGION:-}" ]
 then
   regions="$AWS_REGION"
 else
-  regions="$(cache_run 9999999 "aws ec2 describe-regions  --query Regions[*].RegionName --output text" $CACHE_SUB_KEY | sed 's/ap-northeast-2//' | sed 's/ap-east-1//')"
+  regions="$(cache_run 9999999 "aws ec2 describe-regions$regionparm  --query Regions[*].RegionName --output text" $CACHE_SUB_KEY | sed 's/ap-northeast-2//' | sed 's/ap-east-1//')"
+  if [ "$?" != 0 -o ! "$regions" ]
+  then
+    regions="$(cache_run 0 "aws ec2 describe-regions$regionparm  --query Regions[*].RegionName --output text" $CACHE_SUB_KEY | sed 's/ap-northeast-2//' | sed 's/ap-east-1//')"
+    if [ "$?" != 0 -o ! "$regions" ]
+    then
+      echo "Can't get regions"
+      exit 6
+    fi
+  fi
 fi
 
 printed_header=""
