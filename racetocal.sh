@@ -2,7 +2,7 @@
 #
 # Add Race to calendar
 #
-# autoupdate_version = 21
+# autoupdate_version = 38
 #
 NYRR_TITLE_SELECTOR="h2.title"
 NYRR_DATE_SELECTOR="p.full-width span"
@@ -42,6 +42,7 @@ h4.mb32
 p.Style23
 div.wpb_wrapper\ p:parent-of(strong:contains(\"Date\"))
 div.race_detail-result_summary__item__title
+.textwidget
 "
 GENERIC_DATE_SELECTOR="div.field"
 GENERIC_DATE_SELECTOR2="div.date"
@@ -52,6 +53,8 @@ GENERIC_DATE_SELECTOR6="h1"
 GENERIC_DATE_SELECTOR7="meta[property=og:description]"
 GENERIC_DATE_SELECTOR8="section.fullheader div.container div.message p"
 
+CACHE_TIMEOUT_SECONDS=2592000 # 30 days
+
 set -o nounset
 set -o errexit
 set -o pipefail
@@ -60,7 +63,7 @@ set -o pipefail
 #
 if which cache_get &>/dev/null
 then
-  CURL="cache_get 86400"
+  CURL="cache_get $CACHE_TIMEOUT_SECONDS"
 else
   CURL="curl --silent --location"
 fi
@@ -108,6 +111,7 @@ fi
 
 
 get_race_title() {
+  echo -n .>&2
   url="$1"
   returned_title="$($CURL "$url" | $PUP "$NYRR_TITLE_SELECTOR" text{})"
   if [ ! "$returned_title" ]
@@ -161,6 +165,10 @@ get_race_title() {
   #
   returned_title="$(echo -n "$returned_title" | sed 's/.*| *//' )"
 
+  # Remove leading "Home" text (â€“ from archive.org)
+  #
+  returned_title="$(echo -n "$returned_title" | sed 's/Home [â€“–-]* //')"
+
   # Discard arrow char and following text ("Â" from archive.org)
   #
   returned_title="$(echo -n "$returned_title" | sed 's/ *[Â»].*//' )"
@@ -181,10 +189,6 @@ get_race_title() {
   #
   returned_title="$(echo -n "$returned_title" | grep . | head -1 )"
 
-  # Remove leading "Home" text (â€“ from archive.org)
-  #
-  returned_title="$(echo -n "$returned_title" | sed 's/Home [â€“–-]* //')"
-
   # Remove leading "the" text
   #
   returned_title="$(echo -n "$returned_title" | gsed 's/^the //i')"
@@ -197,6 +201,7 @@ get_race_title() {
 }
 
 get_race_date() {
+  echo -n .>&2
   url="$1"
   returned_date="$($CURL "$url" | $PUP "$NYRR_DATE_SELECTOR" text{})"
   if [ ! "$returned_date" ]
@@ -356,53 +361,72 @@ get_race_date() {
   echo "$returned_date"
 }
 
-get_race_address() {
+get_race_location() {
   url="$1"
-  returned_address="$($CURL "$url" | $PUP "$NYCRUNS_ADDRESS_SELECTOR" text{})"
+  returned_location="$($CURL "$url" | $PUP "$NYCRUNS_ADDRESS_SELECTOR" text{})"
 
   # Trim trailing whitespace
   #
-  returned_address="$(echo -n "$returned_address" | sed 's/[ 	]*$//' )"
+  returned_location="$(echo -n "$returned_location" | sed 's/[ 	]*$//' )"
 
   # Grab only last line
   #
-  returned_address="$(echo -n "$returned_address" | tail -1 )"
+  returned_location="$(echo -n "$returned_location" | tail -1 )"
 
-  returned_address="$(echo -n "$returned_address" | sed 's/^[ 	]*//'; )"
-  echo "$returned_address"
+  returned_location="$(echo -n "$returned_location" | sed 's/^[ 	]*//'; )"
+  echo "$returned_location"
 }
 
 
 # Test get_race_title and get_race_date
 #
-# Arguments: <url> <expected title> <expected date>
+# Arguments: <url> <expected title> <expected date> [<expected location>] [<expected pattern>]
 #
 test_url() {
+  if [ "${SKIP_TESTS:-}" ]
+  then
+    return
+  fi
+
+  echo -n .>&2
   url_to_test="$1"
   expected_title="$2"
   expected_date="$3"
+  expected_location="${5:-}"
+  expected_pattern="${4:-}"
 
   returned_title="$(get_race_title "$url_to_test")"
   returned_date="$(get_race_date "$url_to_test")"
+  returned_location="$(get_race_location "$url_to_test")"
 
 
   if [ "$returned_title" != "$expected_title" ]
   then
+    echo # after progress no-newline echos
     echo "Test command failed! Got:"
     echo ">$returned_title<"
     echo "expected:"
     echo ">$expected_title<"
     echo "Test URL: $url_to_test"
+    if [ "$expected_pattern" ]
+      then
+      echo "Expected match pattern: $expected_pattern"
+    fi
     exit 2
   fi
 
   if [ "$returned_date" != "$expected_date" ]
   then
+    echo # after progress no-newline echos
     echo "Test command failed! Got:"
     echo ">$returned_date<"
     echo "expected:"
     echo ">$expected_date<"
     echo "Test URL: $url_to_test"
+    if [ "$expected_pattern" ]
+      then
+      echo "Expected match pattern: $expected_pattern"
+    fi
     exit 2
   fi
 }
@@ -413,7 +437,8 @@ test_url() {
 expected_title="NYRR Grete's Great Gallop 10K"
 expected_date="saturday, october 05 2019"
 #october 5, 2019 8:00 am"
-url_to_test="https://www.nyrr.org/races/nyrrgrete39sgreatgallop10k"
+#url_to_test="https://www.nyrr.org/races/nyrrgrete39sgreatgallop10k"
+url_to_test="http://web.archive.org/web/20191104215923/https://www.nyrr.org/races/nyrrgrete39sgreatgallop10k"
 test_url "$url_to_test" "$expected_title" "$expected_date"
 
 expected_title="NYRR Al Gordon 4M"
@@ -443,12 +468,7 @@ url_to_test="http://web.archive.org/web/20160321034209/http://www.orlenmarathon.
 
 test_url "$url_to_test" "$expected_title" "$expected_date"
 
-expected_title="Virgin Money London Marathon"
-expected_date="22 april 2018"
-#url_to_test="https://www.virginmoneylondonmarathon.com/en-gb/"
-url_to_test="https://web.archive.org/web/20180401061548/https://www.virginmoneylondonmarathon.com/en-gb/"
-
-test_url "$url_to_test" "$expected_title" "$expected_date"
+test_url "https://web.archive.org/web/20180401061548/https://www.virginmoneylondonmarathon.com/en-gb/" "Virgin Money London Marathon" "22 april 2018" "meta[name=description] attr{content}"
 
 
 #expected_title="Yosemite Half Marathon (Direct)"
@@ -491,6 +511,8 @@ test_url https://web.archive.org/web/20190118081846/http://www.ridetomontauk.com
 test_url http://web.archive.org/web/20190816170055/https://nytri.org/events/rockaway-beach-tri-duathlon/ 'Rockaway Beach Tri/Duathlon' 'date: sunday, september 22, 2019'
 
 test_url http://web.archive.org/web/20190923170820/https://runsignup.com/Race/NY/Brooklyn/PPTCTurkeyTrot?remMeAttempt=  '2019 PPTC Turkey Trot' 'thu november 28 2019'
+
+echo # after progress no-newline echos
 
 if [ "$(basename "$0")" == "racetocal.sh" ]
 then
