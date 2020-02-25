@@ -2,7 +2,7 @@
 #
 # Add Race to calendar
 #
-# autoupdate_version = 38
+# autoupdate_version = 55
 #
 NYRR_TITLE_SELECTOR="h2.title"
 NYRR_DATE_SELECTOR="p.full-width span"
@@ -11,7 +11,9 @@ NYCRUNS_TITLE_SELECTOR=".race-display-name"
 NYCRUNS_TITLE_SELECTOR2="h1._title"
 NYCRUNS_DATE_SELECTOR=".race-display-date"
 NYCRUNS_DATE_SELECTOR2="._date , ._subtitle"
-NYCRUNS_ADDRESS_SELECTOR=".race-display-address"
+
+GENERIC_LOCATION_SELECTOR=".race-display-address"
+GENERIC_LOCATION_SELECTOR2='li:parent-of(h2:contains("Location")) div'
 
 RNR_DATE_SELECTOR="h2:contains(\"General Info\") + p + p"
 RNR_TITLE_SELECTOR="h2:contains(\"General Info\") + p"
@@ -55,9 +57,12 @@ GENERIC_DATE_SELECTOR8="section.fullheader div.container div.message p"
 
 CACHE_TIMEOUT_SECONDS=2592000 # 30 days
 
-set -o nounset
-set -o errexit
-set -o pipefail
+if [ "$(basename "$0")" == "racetocal.sh" ]
+then
+  set -o nounset
+  set -o errexit
+  set -o pipefail
+fi
 
 # Use cache_get if available, else curl
 #
@@ -91,7 +96,7 @@ fi
 #
 if [ ! "${1:-}" -a "$(basename "$0")" == "racetocal.sh" ]
 then
-  echo "Usage: $0 <URL> [ <DATE> [ <title> ] ]"
+  echo "Usage: $0 <URL> [ <DATE> [ <title> [ <location> ] ] ]"
   exit 1
 fi
 
@@ -107,6 +112,13 @@ then
   arg_title="$3"
 else
   arg_title=""
+fi
+
+if [ "${3:-}" ]
+then
+  arg_location="$3"
+else
+  arg_location=""
 fi
 
 
@@ -363,7 +375,14 @@ get_race_date() {
 
 get_race_location() {
   url="$1"
-  returned_location="$($CURL "$url" | $PUP "$NYCRUNS_ADDRESS_SELECTOR" text{})"
+  returned_location="$($CURL "$url" | $PUP "$GENERIC_LOCATION_SELECTOR" text{})"
+
+  if [ ! "$returned_location" ]
+  then
+    returned_location="$($CURL "$url" | $PUP "$GENERIC_LOCATION_SELECTOR2" text{} | grep . | head -1)"
+  fi
+
+
 
   # Trim trailing whitespace
   #
@@ -393,7 +412,7 @@ test_url() {
   expected_title="$2"
   expected_date="$3"
   expected_location="${5:-}"
-  expected_pattern="${4:-}"
+  pattern_comments="${4:-}"
 
   returned_title="$(get_race_title "$url_to_test")"
   returned_date="$(get_race_date "$url_to_test")"
@@ -408,9 +427,9 @@ test_url() {
     echo "expected:"
     echo ">$expected_title<"
     echo "Test URL: $url_to_test"
-    if [ "$expected_pattern" ]
+    if [ "$pattern_comments" ]
       then
-      echo "Expected match pattern: $expected_pattern"
+        echo "Pattern comments (by URL so may not cover title matches): $pattern_comments"
     fi
     exit 2
   fi
@@ -423,12 +442,28 @@ test_url() {
     echo "expected:"
     echo ">$expected_date<"
     echo "Test URL: $url_to_test"
-    if [ "$expected_pattern" ]
+    if [ "$pattern_comments" ]
       then
-      echo "Expected match pattern: $expected_pattern"
+        echo "Pattern comments (by URL so may not cover date matches): $pattern_comments"
     fi
     exit 2
   fi
+
+  if [ "$expected_location" -a "$returned_location" != "$expected_location" ]
+  then
+    echo # after progress no-newline echos
+    echo "Test command failed! Got:"
+    echo ">$returned_location<"
+    echo "expected:"
+    echo ">$expected_location<"
+    echo "Test URL: $url_to_test"
+    if [ "$pattern_comments" ]
+      then
+        echo "Pattern comments (by URL so may not cover location matches): $pattern_comments"
+    fi
+    exit 2
+  fi
+
 }
 
 # Validate selectors and scraping logic
@@ -468,7 +503,7 @@ url_to_test="http://web.archive.org/web/20160321034209/http://www.orlenmarathon.
 
 test_url "$url_to_test" "$expected_title" "$expected_date"
 
-test_url "https://web.archive.org/web/20180401061548/https://www.virginmoneylondonmarathon.com/en-gb/" "Virgin Money London Marathon" "22 april 2018" "meta[name=description] attr{content}"
+test_url "https://web.archive.org/web/20180401061548/https://www.virginmoneylondonmarathon.com/en-gb/" "Virgin Money London Marathon" "22 april 2018" "title:meta[name=description] attr{content}"
 
 
 #expected_title="Yosemite Half Marathon (Direct)"
@@ -512,6 +547,9 @@ test_url http://web.archive.org/web/20190816170055/https://nytri.org/events/rock
 
 test_url http://web.archive.org/web/20190923170820/https://runsignup.com/Race/NY/Brooklyn/PPTCTurkeyTrot?remMeAttempt=  '2019 PPTC Turkey Trot' 'thu november 28 2019'
 
+
+test_url http://web.archive.org/web/20200219182317/https://www.nyrr.org/races/nyrrnewportfiesta5k 'NYRR Newport Fiesta 5K' 'may 2, 2020 5:00 pm' "location: 'li:parent-of(h2:contains(\"Location\")) div'" 'Jersey City'
+
 echo # after progress no-newline echos
 
 if [ "$(basename "$0")" == "racetocal.sh" ]
@@ -531,7 +569,7 @@ then
   else
     date="$(get_race_date "$url")"
   fi
-  address="$(get_race_address "$url")"
+  location="$(get_race_location "$url")"
 
   if [ ! "$title" ]
   then
@@ -546,7 +584,7 @@ then
   echo "title=\"$title\""
   echo "date=\"$date\""
   echo "url=\"$url\""
-  echo "address=\"$address\""
+  echo "location=\"$location\""
   set -o xtrace
-  addrace.sh "$title" "$date" "$url" "" "$address"
+  addrace.sh "$title" "$date" "$url" "" "$location"
 fi
