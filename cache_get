@@ -10,6 +10,7 @@ set -o errexit
 cachedir=$HOME/.generic_cache
 
 TIMEOUT=2
+RETRIES=10
 
 if [ ! -d $cachedir ]
 then
@@ -57,4 +58,21 @@ then
 		exit
 	fi
 fi
-curl --max-time $TIMEOUT --location --silent --connect-timeout $TIMEOUT --header 'User-Agent: Mozilla/5.0' $url | tee $cachefile
+
+tempfile=`mktemp`
+tries=0
+while [ ! -s "$tempfile" -a "$tries" -lt "$RETRIES" ]
+do
+  # pass --cookie /dev/null to activate cookie engine without specifying any cookies
+  #
+  curl --cookie /dev/null --max-time $TIMEOUT --location --silent --connect-timeout $TIMEOUT --header 'User-Agent: Mozilla/5.0' $url | tee $tempfile
+  let tries=tries+1
+done
+if [ -s "$tempfile" ]
+then
+  mv "$tempfile" "$cachefile"
+elif [ -s "$cachefile" ]
+then
+  cat $cachefile
+fi
+
