@@ -2,7 +2,7 @@
 #
 # Add Race to calendar
 #
-# autoupdate_version = 55
+# autoupdate_version = 58
 #
 NYRR_TITLE_SELECTOR="h2.title"
 NYRR_DATE_SELECTOR="p.full-width span"
@@ -555,6 +555,13 @@ echo # after progress no-newline echos
 if [ "$(basename "$0")" == "racetocal.sh" ]
 then
   url="$1"
+
+  if [[ "$($CURL "$url" | grep  "403 Forbidden" )" != "" && "$CURL" == *cache_get* ]]
+  then
+    echo RETRYING DUE TO 403 2>&1
+    # try again
+    cache_get 0 "$url" > /dev/null
+  fi
 
   if [ "$arg_title" ]
   then
