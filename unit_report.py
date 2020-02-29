@@ -33,9 +33,13 @@ def log(function):
 
 @log
 def get_last_data_timestamp(collection):
-    most_recent_summary = collection.find().sort('_id', DESCENDING).limit(1).next()
-    id = most_recent_summary['_id']
-    return id.generation_time
+    try:
+        most_recent_summary = collection.find().sort('_id', DESCENDING).limit(1).next()
+        id = most_recent_summary['_id']
+        gentime = id.generation_time
+    except StopIteration:
+        gentime = datetime.datetime.fromtimestamp(0)
+    return gentime
 
 
 PARSER = argparse.ArgumentParser(description='Generate calorie report')
@@ -185,7 +189,12 @@ if __name__ == '__main__':
     current_day = for_date.day
     previous_day = current_day - 1
 
-    today_last_year = for_date.replace(year=previous_year)
+    try:
+        today_last_year = for_date.replace(year=previous_year)
+    except ValueError:
+        # try yesterday in case of leap day or other weirdness
+        today_last_year = yesterday.replace(year=previous_year)
+
     yesterday_last_year = today_last_year - timedelta(days=1)
 
     units_today = get_units_average(summary_collection, yesterday, for_date)
