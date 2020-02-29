@@ -13,6 +13,7 @@ import os.path
 import time
 import dateutil.parser
 from pymongo import MongoClient
+from pymongo import DESCENDING
 
 
 COLLECTION = "daily_summary"
@@ -30,7 +31,16 @@ def log(function):
     return decorator
 
 
+@log
+def get_last_data_timestamp(collection):
+    most_recent_summary = collection.find().sort('_id', DESCENDING).limit(1).next()
+    id = most_recent_summary['_id']
+    return id.generation_time
+
+
 PARSER = argparse.ArgumentParser(description='Generate calorie report')
+PARSER.add_argument('--run-timestamp', help='Explicit execution timestamp for template',
+                    required=False)
 PARSER.add_argument('--for-date', help='Date to generate report for', required=False)
 PARSER.add_argument(
     '--debug',
@@ -54,19 +64,30 @@ MONGODB_URI = os.environ["MONGODB_URI"]
 @log
 def get_units_average(
         collection,
-        forever_ago=datetime.datetime.now() - timedelta(days=50 * 365),
-        today=datetime.datetime.now()):
-    """ return the average number of calories bruned between two timestamps """
+        older_date=datetime.datetime.now() - timedelta(days=50 * 365),
+        today=datetime.datetime.now(), activity_type=None, entry_source=None):
+    """ return the average number of calories burned between two timestamps """
 
-    return int(get_average_between_two_dates(collection, forever_ago, today))
+    return int(get_average_between_two_dates(collection, older_date, today,
+               activity_type=activity_type, entry_source=entry_source))
 
 
 @log
-def get_average_between_two_dates(collection, min_date, max_date):
-    """ return the average nuber of calories burned between two dates """
+def get_average_between_two_dates(collection, min_date, max_date, activity_type,
+                                  entry_source):
+    """ return the average number of calories burned between two dates """
 
-    match = {"$match": {"$and": [{"Date": {"$lte": max_date}}, {"Date": {"$gt": min_date}}]}}
-    group = {"$group": {"_id": None, "average": {"$avg": "$Calories"}}}
+    if activity_type is not None:
+        calories_field = "calories_by_type.{activity_type}".format(activity_type=activity_type)
+    elif entry_source is not None:
+        calories_field = "calories_by_entry_source.{entry_source}".format(entry_source=entry_source)
+    else:
+        calories_field = "Calories"
+
+    match = {"$match": {"$and": [{"Date": {"$lte": max_date}},
+             {"Date": {"$gt": min_date}}]}}
+    group = {"$group": {"_id": None, "average":
+             {"$avg": "${calories_field}".format(calories_field=calories_field)}}}
 
     pipeline = [match, group]
 
@@ -79,32 +100,27 @@ def get_average_between_two_dates(collection, min_date, max_date):
         average = result['average']
     except StopIteration:
         average = 0
+    if average is None:
+        average = 0
     return average
 
 
 @log
 def get_7day_average(collection, today=datetime.datetime.now()):
     """ 7 day calorie average """
-    return int(get_average_between_two_dates(collection, today - timedelta(days=7), today))
+    return get_units_average(collection, today - timedelta(days=7), today)
 
 
 @log
 def get_2day_average(collection, today=datetime.datetime.now()):
     """ 2 day calorie average """
-    return int(get_average_between_two_dates(collection, today - timedelta(days=2), today))
+    return get_units_average(collection, today - timedelta(days=2), today)
 
 
 @log
 def get_30day_average(collection, today=datetime.datetime.now()):
     """ 30 day calorie average """
-    return int(get_average_between_two_dates(collection, today - timedelta(days=30), today))
-
-
-@log
-def get_units_today(collection, day_before_today=datetime.datetime.now() - timedelta(days=1),
-                    today=datetime.datetime.now()):
-    """ today calorie total """
-    return int(get_average_between_two_dates(collection, day_before_today, today))
+    return get_units_average(collection, today - timedelta(days=30), today)
 
 
 @log
@@ -112,9 +128,9 @@ def get_units_average_current_year(collection, today=datetime.datetime.now()):
     """ current year calorie average """
     last_day_of_previous_year = get_last_day_of_previous_year(today=today)
     last_day_of_current_year = get_last_day_of_current_year(today=today)
-    units_average_current_year = int(get_average_between_two_dates(collection,
-                                     last_day_of_previous_year,
-                                     last_day_of_current_year))
+    units_average_current_year = get_units_average(collection,
+                                                   last_day_of_previous_year,
+                                                   last_day_of_current_year)
     return units_average_current_year
 
 
@@ -135,8 +151,13 @@ def get_last_day_of_current_year(today=datetime.datetime.now()):
     return last_day_of_current_year
 
 
-if __name__ == '__main__':
+@log
+def get_units_today(collection, today=datetime.datetime.now(),
+                    yesterday=datetime.datetime.now() - timedelta(days=1)):
+    return get_units_average(collection, today=today, older_date=yesterday)
 
+
+if __name__ == '__main__':
     client = MongoClient(MONGODB_URI)
 
     db = client[DB]
@@ -167,15 +188,17 @@ if __name__ == '__main__':
     today_last_year = for_date.replace(year=previous_year)
     yesterday_last_year = today_last_year - timedelta(days=1)
 
-    units_today = get_units_today(summary_collection, yesterday, for_date)
+    units_today = get_units_average(summary_collection, yesterday, for_date)
 
     units_average = get_units_average(summary_collection)
 
-    units_yesterday = int(get_average_between_two_dates(summary_collection, day_before_yesterday,
-                          yesterday))
+    units_yesterday = get_units_average(summary_collection, day_before_yesterday,
+                                        yesterday)
 
-    units_today_last_year = int(get_average_between_two_dates(summary_collection,
-                                yesterday_last_year, today_last_year))
+    units_today_last_year = get_units_average(summary_collection,
+                                              yesterday_last_year, today_last_year)
+
+    last_data_timestamp = get_last_data_timestamp(summary_collection).ctime()
 
     # use last day of two years ago to account for db dates being 00:00, so anything > last day of
     # two years ago will only include last year, not two years ago
@@ -185,9 +208,9 @@ if __name__ == '__main__':
 
     last_day_of_previous_year = get_last_day_of_previous_year(today=for_date)
 
-    units_average_previous_year = int(get_average_between_two_dates(summary_collection,
-                                      last_day_of_year_before_previous_year,
-                                      last_day_of_previous_year))
+    units_average_previous_year = get_units_average(summary_collection,
+                                                    last_day_of_year_before_previous_year,
+                                                    last_day_of_previous_year)
 
     units_average_current_year = get_units_average_current_year(summary_collection, today=for_date)
 
@@ -222,7 +245,7 @@ if __name__ == '__main__':
     PLACEHOLDER['units_average_7days'] = units_average_7days
     PLACEHOLDER['units_average_2days'] = units_average_2days
     PLACEHOLDER['now'] = time.ctime()
-    PLACEHOLDER['moves_csv_modified'] = time.ctime(os.path.getmtime(ARC_GPX_DIR))
+    PLACEHOLDER['moves_csv_modified'] = last_data_timestamp
     PLACEHOLDER['units_average_current_year'] = units_average_current_year
 
     PLACEHOLDER['units_today_previous_year_diff'] = units_today_previous_year_diff
@@ -251,6 +274,153 @@ if __name__ == '__main__':
     PLACEHOLDER['2days_class'] = ""
     PLACEHOLDER['7days_class'] = ""
     PLACEHOLDER['alltime_class'] = ""
+
+    # fill in big table at the bottom
+    #
+    PLACEHOLDER['units_two_days_ago'] = \
+        get_units_average(summary_collection, for_date - timedelta(days=3),
+                          for_date - timedelta(days=2))
+    PLACEHOLDER['units_three_days_ago'] = \
+        get_units_average(summary_collection, for_date - timedelta(days=4),
+                          for_date - timedelta(days=3))
+    PLACEHOLDER['units_four_days_ago'] = \
+        get_units_average(summary_collection, for_date - timedelta(days=5),
+                          for_date - timedelta(days=4))
+    PLACEHOLDER['units_five_days_ago'] = \
+        get_units_average(summary_collection, for_date - timedelta(days=6),
+                          for_date - timedelta(days=5))
+    PLACEHOLDER['units_six_days_ago'] = \
+        get_units_average(summary_collection, for_date - timedelta(days=7),
+                          for_date - timedelta(days=6))
+    PLACEHOLDER['day_of_week_two_days_ago'] = (for_date - timedelta(days=2)).strftime("%A")
+    PLACEHOLDER['day_of_week_three_days_ago'] = (for_date - timedelta(days=3)).strftime("%A")
+    PLACEHOLDER['day_of_week_four_days_ago'] = (for_date - timedelta(days=4)).strftime("%A")
+    PLACEHOLDER['day_of_week_five_days_ago'] = (for_date - timedelta(days=5)).strftime("%A")
+    PLACEHOLDER['day_of_week_six_days_ago'] = (for_date - timedelta(days=6)).strftime("%A")
+
+    PLACEHOLDER['date_today'] = for_date.strftime("%Y-%m-%d")
+    PLACEHOLDER['date_yesterday'] = (for_date - timedelta(days=1)).strftime("%Y-%m-%d")
+    PLACEHOLDER['date_two_days_ago'] = (for_date - timedelta(days=2)).strftime("%Y-%m-%d")
+    PLACEHOLDER['date_three_days_ago'] = (for_date - timedelta(days=3)).strftime("%Y-%m-%d")
+    PLACEHOLDER['date_four_days_ago'] = (for_date - timedelta(days=4)).strftime("%Y-%m-%d")
+    PLACEHOLDER['date_five_days_ago'] = (for_date - timedelta(days=5)).strftime("%Y-%m-%d")
+    PLACEHOLDER['date_six_days_ago'] = (for_date - timedelta(days=6)).strftime("%Y-%m-%d")
+
+    PLACEHOLDER['units_today_cycling'] = \
+        get_units_average(summary_collection, for_date - timedelta(days=1), for_date,
+                          activity_type="Cycling")
+    PLACEHOLDER['units_yesterday_cycling'] = \
+        get_units_average(summary_collection, for_date - timedelta(days=2),
+                          for_date - timedelta(days=1), activity_type="Cycling")
+    PLACEHOLDER['units_two_days_ago_cycling'] = \
+        get_units_average(summary_collection, for_date - timedelta(days=3),
+                          for_date - timedelta(days=2), activity_type="Cycling")
+    PLACEHOLDER['units_three_days_ago_cycling'] = \
+        get_units_average(summary_collection, for_date - timedelta(days=4),
+                          for_date - timedelta(days=3), activity_type="Cycling")
+    PLACEHOLDER['units_four_days_ago_cycling'] = \
+        get_units_average(summary_collection, for_date - timedelta(days=5),
+                          for_date - timedelta(days=4), activity_type="Cycling")
+    PLACEHOLDER['units_five_days_ago_cycling'] = \
+        get_units_average(summary_collection, for_date - timedelta(days=6),
+                          for_date - timedelta(days=5), activity_type="Cycling")
+    PLACEHOLDER['units_six_days_ago_cycling'] = \
+        get_units_average(summary_collection, for_date - timedelta(days=7),
+                          for_date - timedelta(days=6), activity_type="Cycling")
+
+    PLACEHOLDER['units_today_running'] = \
+        get_units_average(summary_collection, for_date - timedelta(days=1), for_date,
+                          activity_type="Running")
+    PLACEHOLDER['units_yesterday_running'] = \
+        get_units_average(summary_collection,
+                          for_date - timedelta(days=2), for_date - timedelta(days=1),
+                          activity_type="Running")
+    PLACEHOLDER['units_two_days_ago_running'] = \
+        get_units_average(summary_collection,
+                          for_date - timedelta(days=3), for_date - timedelta(days=2),
+                          activity_type="Running")
+    PLACEHOLDER['units_three_days_ago_running'] = \
+        get_units_average(summary_collection,
+                          for_date - timedelta(days=4), for_date - timedelta(days=3),
+                          activity_type="Running")
+    PLACEHOLDER['units_four_days_ago_running'] = \
+        get_units_average(summary_collection,
+                          for_date - timedelta(days=5), for_date - timedelta(days=4),
+                          activity_type="Running")
+    PLACEHOLDER['units_five_days_ago_running'] = \
+        get_units_average(summary_collection,
+                          for_date - timedelta(days=6), for_date - timedelta(days=5),
+                          activity_type="Running")
+    PLACEHOLDER['units_six_days_ago_running'] = \
+        get_units_average(summary_collection,
+                          for_date - timedelta(days=7), for_date - timedelta(days=6),
+                          activity_type="Running")
+
+    PLACEHOLDER['units_today_walking'] = \
+        get_units_average(summary_collection,
+                          for_date - timedelta(days=1), for_date, activity_type="Walking")
+    PLACEHOLDER['units_yesterday_walking'] = \
+        get_units_average(summary_collection, for_date - timedelta(days=2),
+                          for_date - timedelta(days=1), activity_type="Walking")
+    PLACEHOLDER['units_two_days_ago_walking'] = \
+        get_units_average(summary_collection, for_date - timedelta(days=3),
+                          for_date - timedelta(days=2), activity_type="Walking")
+    PLACEHOLDER['units_three_days_ago_walking'] = \
+        get_units_average(summary_collection, for_date - timedelta(days=4),
+                          for_date - timedelta(days=3), activity_type="Walking")
+    PLACEHOLDER['units_four_days_ago_walking'] = \
+        get_units_average(summary_collection, for_date - timedelta(days=5),
+                          for_date - timedelta(days=4), activity_type="Walking")
+    PLACEHOLDER['units_five_days_ago_walking'] = \
+        get_units_average(summary_collection, for_date - timedelta(days=6),
+                          for_date - timedelta(days=5), activity_type="Walking")
+    PLACEHOLDER['units_six_days_ago_walking'] = \
+        get_units_average(summary_collection, for_date - timedelta(days=7),
+                          for_date - timedelta(days=6), activity_type="Walking")
+
+    PLACEHOLDER['units_today_strava'] = \
+        get_units_average(summary_collection, for_date - timedelta(days=1), for_date,
+                          entry_source="Strava")
+    PLACEHOLDER['units_yesterday_strava'] = \
+        get_units_average(summary_collection, for_date - timedelta(days=2),
+                          for_date - timedelta(days=1), entry_source="Strava")
+    PLACEHOLDER['units_two_days_ago_strava'] = \
+        get_units_average(summary_collection, for_date - timedelta(days=3),
+                          for_date - timedelta(days=2), entry_source="Strava")
+    PLACEHOLDER['units_three_days_ago_strava'] = \
+        get_units_average(summary_collection, for_date - timedelta(days=4),
+                          for_date - timedelta(days=3), entry_source="Strava")
+    PLACEHOLDER['units_four_days_ago_strava'] = \
+        get_units_average(summary_collection, for_date - timedelta(days=5),
+                          for_date - timedelta(days=4), entry_source="Strava")
+    PLACEHOLDER['units_five_days_ago_strava'] = \
+        get_units_average(summary_collection, for_date - timedelta(days=6),
+                          for_date - timedelta(days=5), entry_source="Strava")
+    PLACEHOLDER['units_six_days_ago_strava'] = \
+        get_units_average(summary_collection, for_date - timedelta(days=7),
+                          for_date - timedelta(days=6), entry_source="Strava")
+
+    PLACEHOLDER['units_today_arc'] = \
+        get_units_average(summary_collection, for_date - timedelta(days=1), for_date,
+                          entry_source="Arc GPX")
+    PLACEHOLDER['units_yesterday_arc'] = \
+        get_units_average(summary_collection, for_date - timedelta(days=2),
+                          for_date - timedelta(days=1), entry_source="Arc GPX")
+    PLACEHOLDER['units_two_days_ago_arc'] = \
+        get_units_average(summary_collection, for_date - timedelta(days=3),
+                          for_date - timedelta(days=2), entry_source="Arc GPX")
+    PLACEHOLDER['units_three_days_ago_arc'] = \
+        get_units_average(summary_collection, for_date - timedelta(days=4),
+                          for_date - timedelta(days=3), entry_source="Arc GPX")
+    PLACEHOLDER['units_four_days_ago_arc'] = \
+        get_units_average(summary_collection, for_date - timedelta(days=5),
+                          for_date - timedelta(days=4), entry_source="Arc GPX")
+    PLACEHOLDER['units_five_days_ago_arc'] = \
+        get_units_average(summary_collection, for_date - timedelta(days=6),
+                          for_date - timedelta(days=5), entry_source="Arc GPX")
+    PLACEHOLDER['units_six_days_ago_arc'] = \
+        get_units_average(summary_collection, for_date - timedelta(days=7),
+                          for_date - timedelta(days=6), entry_source="Arc GPX")
 
     with open(TEMPLATE_FILENAME, "r") as myfile:
         template = myfile.read()
