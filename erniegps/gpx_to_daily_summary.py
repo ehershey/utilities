@@ -54,7 +54,7 @@ ACTIVITY_COLLECTION = "activities"
 
 
 def get_summary_type_from_strava_type(type):
-    "" return type for DB based on type from Strava """
+    """ return type for DB based on type from Strava """
     if type == "Ride":
         summary_type = "cycling"
     elif type == "Run":
