@@ -53,25 +53,25 @@ STRAVA_DB = "strava"
 ACTIVITY_COLLECTION = "activities"
 
 
-def get_summary_type_from_strava_type(type):
+def get_summary_type_from_strava_type(strava_type):
     """ return type for DB based on type from Strava """
-    if type == "Ride":
+    if strava_type == "Ride":
         summary_type = "cycling"
-    elif type == "Run":
+    elif strava_type == "Run":
         summary_type = "running"
-    elif type == "Walk":
+    elif strava_type == "Walk":
         summary_type = "walking"
-    elif type == "Hike":
+    elif strava_type == "Hike":
         summary_type = "hiking"
-    elif type == "Workout":
+    elif strava_type == "Workout":
         summary_type = "gym"
-    elif type == "WeightTraining":
+    elif strava_type == "WeightTraining":
         summary_type = "gym"
-    elif type == "Rowing":
+    elif strava_type == "Rowing":
         summary_type = "rowing"
-    elif type == "Swim":
+    elif strava_type == "Swim":
         summary_type = "swimming"
-    elif type == "Elliptical":
+    elif strava_type == "Elliptical":
         summary_type = "elliptical"
     else:
         raise Exception("Unrecognized activity type: {type}".format(type=type))
@@ -102,17 +102,18 @@ def compute_activity_calories(activity_type, duration_secs, distance_meters):
 
 
 def new_summary(start_time, entry_source):
+    """ return empty summary object """
     return dict({
-            "entry_source": ARGS.entry_source,
-            "Date": start_time.replace(hour=0, minute=0, second=0),
-            "Verbose Date": start_time.strftime("%Y-%m-%d"),
-            "GPS Points": 0,
-            "Calories": 0,
-            "Time": 0,
-            "Distance": 0,
-            "calories_by_type": {},
-            "calories_by_entry_source": {ARGS.entry_source: 0}
-            })
+        "entry_source": entry_source,
+        "Date": start_time.replace(hour=0, minute=0, second=0),
+        "Verbose Date": start_time.strftime("%Y-%m-%d"),
+        "GPS Points": 0,
+        "Calories": 0,
+        "Time": 0,
+        "Distance": 0,
+        "calories_by_type": {},
+        "calories_by_entry_source": {entry_source: 0}
+        })
 
 
 def process_track(track):
@@ -143,7 +144,7 @@ def process_track(track):
         activity_start = strava_activity['start_date_local']
         try:
             activity_end = strava_activity['end_date_local']
-        except KeyError as e:
+        except KeyError:
             if 'elapsed_time' in strava_activity:
                 activity_end = activity_start + \
                         datetime.timedelta(seconds=strava_activity['elapsed_time'])
@@ -153,20 +154,19 @@ def process_track(track):
                 logging.error(strava_activity)
                 exit()
 
-        logging.debug("strava_activity: {strava_activity}".format(strava_activity=strava_activity))
+        logging.debug("strava_activity: %s", strava_activity)
 
-        logging.debug("track_start: {track_start}".format(track_start=track_start))
-        logging.debug("track_end: {track_end}".format(track_end=track_end))
-        logging.debug("activity_start: {activity_start}".format(activity_start=activity_start))
-        logging.debug("activity_end: {activity_end}".format(activity_end=activity_end))
+        logging.debug("track_start: %s", track_start)
+        logging.debug("track_end: %s", track_end)
+        logging.debug("activity_start: %s", activity_start)
+        logging.debug("activity_end: %s", activity_end)
 
         if activity_start.tzinfo is None and track_start.tzinfo is not None:
             logging.debug("copying tzinfo from track start")
-            activity_start = activity_start.replace(tzinfo = track_start.tzinfo)
-            activity_end = activity_end.replace(tzinfo = track_start.tzinfo)
-            logging.debug("activity_start: {activity_start}".format(activity_start=activity_start))
-            logging.debug("activity_end: {activity_end}".format(activity_end=activity_end))
-
+            activity_start = activity_start.replace(tzinfo=track_start.tzinfo)
+            activity_end = activity_end.replace(tzinfo=track_start.tzinfo)
+            logging.debug("activity_start: %s", activity_start)
+            logging.debug("activity_end: %s", activity_end)
 
         # * "track" from ARC
         # * "activity" from Strava
@@ -203,7 +203,7 @@ def process_track(track):
                         indexes_to_delete.append(index)
 
                 for index_to_delete in reversed(sorted(indexes_to_delete)):
-                    del(segment.points[index_to_delete])
+                    del segment.points[index_to_delete]
             for segment in end_track.segments:
                 indexes_to_delete = []
                 for index, point in enumerate(segment.points):
@@ -211,13 +211,12 @@ def process_track(track):
                         indexes_to_delete.append(index)
 
                 for index_to_delete in reversed(sorted(indexes_to_delete)):
-                    del(segment.points[index_to_delete])
+                    del segment.points[index_to_delete]
 
             process_track(track)
             process_track(end_track)
             return None
-        elif track_start >= activity_start and track_start <= activity_end and track_end \
-                >= activity_end:
+        elif activity_start < track_start <= activity_end < track_end:
             logging.debug("case 3: Shrinking track")
             for segment in track.segments:
                 indexes_to_delete = []
@@ -226,11 +225,10 @@ def process_track(track):
                         indexes_to_delete.append(index)
 
                 for index_to_delete in reversed(sorted(indexes_to_delete)):
-                    del(segment.points[index_to_delete])
+                    del segment.points[index_to_delete]
             process_track(track)
             return None
-        elif track_start <= activity_start and track_end >= activity_start and track_end \
-                <= activity_end:
+        elif track_start <= activity_start < track_end <= activity_end:
             logging.debug("case 4: Shrinking track")
             for segment in track.segments:
                 indexes_to_delete = []
@@ -239,7 +237,7 @@ def process_track(track):
                         indexes_to_delete.append(index)
 
                 for index_to_delete in reversed(sorted(indexes_to_delete)):
-                    del(segment.points[index_to_delete])
+                    del segment.points[index_to_delete]
             process_track(track)
             return None
         else:
@@ -249,8 +247,8 @@ def process_track(track):
         # Split into one track for start_date date and one for everything else
         #
         new_dates_track = track.clone()
-        logging.debug("track: {track}".format(track=track))
-        logging.debug("new_dates_track: {new_dates_track}".format(new_dates_track=new_dates_track))
+        logging.debug("track: %s", track)
+        logging.debug("new_dates_track: %s", new_dates_track)
         for segment in track.segments:
             indexes_to_delete = []
             for index, point in enumerate(segment.points):
@@ -258,7 +256,7 @@ def process_track(track):
                     indexes_to_delete.append(index)
 
             for index_to_delete in reversed(sorted(indexes_to_delete)):
-                del(segment.points[index_to_delete])
+                del segment.points[index_to_delete]
         for segment in new_dates_track.segments:
             indexes_to_delete = []
             for index, point in enumerate(segment.points):
@@ -266,7 +264,7 @@ def process_track(track):
                     indexes_to_delete.append(index)
 
             for index_to_delete in reversed(sorted(indexes_to_delete)):
-                del(segment.points[index_to_delete])
+                del segment.points[index_to_delete]
 
         process_track(track)
         process_track(new_dates_track)
@@ -274,7 +272,7 @@ def process_track(track):
     elif start_date in SUMMARIES_BY_DATE:
         summary = SUMMARIES_BY_DATE[start_date]
     else:
-        summary = new_summary(start_time,ARGS.entry_source)
+        summary = new_summary(start_time, ARGS.entry_source)
         SUMMARIES_BY_DATE[start_date] = summary
 
     tracktype = track.type
@@ -307,11 +305,6 @@ def process_track(track):
 
 
 if __name__ == '__main__':
-
-    main()
-
-def main():
-
     PARSER = argparse.ArgumentParser(description='gpx to daily summary')
     PARSER.add_argument('--entry-source', help='Entry Source for db entries', default="None")
     PARSER.add_argument('--debug', help='Display debugging info', action='store_true')
@@ -348,13 +341,19 @@ def main():
 
     UREG = pint.UnitRegistry()
 
+    main()
+
+
+def main():
+    """ run as a script """
+
     # get all strava activities that overlap track dates
     #
 
     seen_strava_activity_ids = {}
     if not ARGS.skip_strava:
-        DB_URL = get_db_url()
-        mongoclient = MongoClient(DB_URL)
+        db_url = get_db_url()
+        mongoclient = MongoClient(db_url)
 
         database = mongoclient[STRAVA_DB]
 
@@ -374,12 +373,12 @@ def main():
             if latest_end_date is None or end_date > latest_end_date:
                 latest_end_date = end_date
         for waypoint in GPX.waypoints:
-            waypoint_timestamp_date = datetime.datetime.combine(waypoint.time, datetime.datetime.min.time())
+            waypoint_timestamp_date = datetime.datetime.combine(waypoint.time,
+                                                                datetime.datetime.min.time())
             if earliest_start_date is None or waypoint_timestamp_date < earliest_start_date:
                 earliest_start_date = waypoint_timestamp_date
             if latest_end_date is None or waypoint_timestamp_date > latest_end_date:
                 latest_end_date = waypoint_timestamp_date
-
 
         if earliest_start_date is not None and latest_end_date is not None:
             start_date = earliest_start_date
@@ -402,7 +401,6 @@ def main():
             # TODO: fix gaps in strava tracks with activity in ARC
             # TODO: account for strava activity ending on different day only including calories in
             # start date but subtracting from tracks on both ARC days
-
 
             # for gaps - idea to split activity into multiple based on large gaps
             # with activity gpx -
@@ -435,14 +433,13 @@ def main():
             #    current_activity.append(point)
             #
 
-
             query = {"$or": [
                 {"$and": [{"start_date_local": {"$gte": start_date}},
                           {"start_date_local": {"$lt": end_date}}]},
                 {"$and": [{"end_date_local": {"$gte": start_date}},
                           {"end_date_local": {"$lt": end_date}}]}
                 ]}
-            logging.debug("query: {query}".format(query=query))
+            logging.debug("query: %s", query)
             cursor = collection.find(query)
 
             for strava_activity in cursor:
@@ -450,7 +447,7 @@ def main():
                     STRAVA_ACTIVITIES.append(strava_activity)
                     seen_strava_activity_ids[strava_activity['strava_id']] = True
 
-    logging.info("Overlapping strava activity count: {count}".format(count=len(STRAVA_ACTIVITIES)))
+    logging.info("Overlapping strava activity count: %d", len(STRAVA_ACTIVITIES))
 
     for track in GPX.tracks:
         process_track(track)
@@ -475,8 +472,8 @@ def main():
         if 'Strava' not in summary['calories_by_entry_source']:
             summary['calories_by_entry_source']['Strava'] = 0
 
-        type = get_summary_type_from_strava_type(strava_activity['type'])
-        key = type.capitalize()
+        summary_type = get_summary_type_from_strava_type(strava_activity['type'])
+        key = summary_type.capitalize()
         if key not in summary:
             summary[key] = strava_activity['distance']
         else:
@@ -484,7 +481,7 @@ def main():
         if 'calories' not in strava_activity or strava_activity['calories'] is None or \
                 strava_activity['calories'] == 0:
             calories = compute_activity_calories(
-                activity_type=type,
+                activity_type=summary_type,
                 distance_meters=distance,
                 duration_secs=elapsed_time)
         else:
@@ -494,7 +491,7 @@ def main():
             summary['calories_by_type'][key] = 0
         summary['calories_by_type'][key] += calories
 
-        time_key = type.capitalize() + " Seconds"
+        time_key = summary_type.capitalize() + " Seconds"
         if time_key not in summary:
             summary[time_key] = elapsed_time
         else:
