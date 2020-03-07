@@ -38,17 +38,15 @@ import gpxpy
 import gpxpy.gpx
 import pint
 from bson import json_util
+from pymongo import MongoClient
 import erniegps.calories
 
 
-from pymongo import MongoClient
-
 def get_db_url():
+    """ get DB URI - default to localhost """
     if "MONGODB_URI" in os.environ:
         return os.environ["MONGODB_URI"]
-    else:
-        return "localhost"
-
+    return "localhost"
 
 
 STRAVA_DB = "strava"
@@ -56,6 +54,7 @@ ACTIVITY_COLLECTION = "activities"
 
 
 def get_summary_type_from_strava_type(type):
+    "" return type for DB based on type from Strava """
     if type == "Ride":
         summary_type = "cycling"
     elif type == "Run":
@@ -70,6 +69,10 @@ def get_summary_type_from_strava_type(type):
         summary_type = "gym"
     elif type == "Rowing":
         summary_type = "rowing"
+    elif type == "Swim":
+        summary_type = "swimming"
+    elif type == "Elliptical":
+        summary_type = "elliptical"
     else:
         raise Exception("Unrecognized activity type: {type}".format(type=type))
     return summary_type
@@ -98,9 +101,22 @@ def compute_activity_calories(activity_type, duration_secs, distance_meters):
         activity_type=activity_type))
 
 
+def new_summary(start_time, entry_source):
+    return dict({
+            "entry_source": ARGS.entry_source,
+            "Date": start_time.replace(hour=0, minute=0, second=0),
+            "Verbose Date": start_time.strftime("%Y-%m-%d"),
+            "GPS Points": 0,
+            "Calories": 0,
+            "Time": 0,
+            "Distance": 0,
+            "calories_by_type": {},
+            "calories_by_entry_source": {ARGS.entry_source: 0}
+            })
+
+
 def process_track(track):
-    """ Take gpxpy track object and read summary data from it
-    """
+    """ Take gpxpy track object and read summary data from it """
     distance = track.get_moving_data().moving_distance
     logging.debug("")
     logging.debug("")
@@ -128,14 +144,29 @@ def process_track(track):
         try:
             activity_end = strava_activity['end_date_local']
         except KeyError as e:
-            logging.error("Can't find end_date_local in activity!")
-            logging.error(strava_activity)
-            exit()
+            if 'elapsed_time' in strava_activity:
+                activity_end = activity_start + \
+                        datetime.timedelta(seconds=strava_activity['elapsed_time'])
+                strava_activity['end_date_local'] = activity_end
+            else:
+                logging.error("Can't find end_date_local or elapsed_time in activity!")
+                logging.error(strava_activity)
+                exit()
+
+        logging.debug("strava_activity: {strava_activity}".format(strava_activity=strava_activity))
 
         logging.debug("track_start: {track_start}".format(track_start=track_start))
         logging.debug("track_end: {track_end}".format(track_end=track_end))
         logging.debug("activity_start: {activity_start}".format(activity_start=activity_start))
         logging.debug("activity_end: {activity_end}".format(activity_end=activity_end))
+
+        if activity_start.tzinfo is None and track_start.tzinfo is not None:
+            logging.debug("copying tzinfo from track start")
+            activity_start = activity_start.replace(tzinfo = track_start.tzinfo)
+            activity_end = activity_end.replace(tzinfo = track_start.tzinfo)
+            logging.debug("activity_start: {activity_start}".format(activity_start=activity_start))
+            logging.debug("activity_end: {activity_end}".format(activity_end=activity_end))
+
 
         # * "track" from ARC
         # * "activity" from Strava
@@ -243,17 +274,7 @@ def process_track(track):
     elif start_date in SUMMARIES_BY_DATE:
         summary = SUMMARIES_BY_DATE[start_date]
     else:
-        summary = dict({
-            "entry_source": ARGS.entry_source,
-            "Date": start_time.replace(hour=0, minute=0, second=0),
-            "Verbose Date": start_time.strftime("%Y-%m-%d"),
-            "GPS Points": 0,
-            "Calories": 0,
-            "Time": 0,
-            "Distance": 0,
-            "calories_by_type": {},
-            "calories_by_entry_source": {ARGS.entry_source: 0}
-            })
+        summary = new_summary(start_time,ARGS.entry_source)
         SUMMARIES_BY_DATE[start_date] = summary
 
     tracktype = track.type
@@ -286,6 +307,10 @@ def process_track(track):
 
 
 if __name__ == '__main__':
+
+    main()
+
+def main():
 
     PARSER = argparse.ArgumentParser(description='gpx to daily summary')
     PARSER.add_argument('--entry-source', help='Entry Source for db entries', default="None")
@@ -348,6 +373,13 @@ if __name__ == '__main__':
                 earliest_start_date = start_date
             if latest_end_date is None or end_date > latest_end_date:
                 latest_end_date = end_date
+        for waypoint in GPX.waypoints:
+            waypoint_timestamp_date = datetime.datetime.combine(waypoint.time, datetime.datetime.min.time())
+            if earliest_start_date is None or waypoint_timestamp_date < earliest_start_date:
+                earliest_start_date = waypoint_timestamp_date
+            if latest_end_date is None or waypoint_timestamp_date > latest_end_date:
+                latest_end_date = waypoint_timestamp_date
+
 
         if earliest_start_date is not None and latest_end_date is not None:
             start_date = earliest_start_date
@@ -369,8 +401,40 @@ if __name__ == '__main__':
             #
             # TODO: fix gaps in strava tracks with activity in ARC
             # TODO: account for strava activity ending on different day only including calories in
-            # start date but
-            # subtracting from tracks on both ARC days
+            # start date but subtracting from tracks on both ARC days
+
+
+            # for gaps - idea to split activity into multiple based on large gaps
+            # with activity gpx -
+            # split_activities = []
+            # current_activity = new_activity()
+            # last_point = None
+            # # limits
+            # MIN_POINT_SPEED_TO_SPLIT_MPH = 50 # too fast to go on bike
+            # MIN_POINT_DISTANCE_TO_SPLIT_METERS = 80 # short city block
+            # MIN_POINT_TIME_TO_SPLIT_SECONDS = 60 # there should be a point tracked per minute
+            # for point in activity.trackpoints:
+            #    split = False
+            #    if last_point is not None:
+            #       elapsed = point.timestamp - last_point.timestamp
+            #       if elapsed > MIN_POINT_TIME_TO_SPLIT_SECONDS:
+            #           split = True
+            #       else:
+            #           distance = distance(point, last_point)
+            #           if distance > MIN_POINT_DISTANCE_TO_SPLIT_METERS:
+            #             split = True
+            #           else:
+            #               speed = ( distance * MILES_PER_METER ) / elapsed * HOURS_PER_SECOND
+            #               if speed > MIN_POINT_SPEED_TO_SPLIT_MPH:
+            #                   split = True
+            #    last_point = point
+            #    if split == True:
+            #       split_activities.append(current_activity)
+            #       current_activity = new_activity()
+            #
+            #    current_activity.append(point)
+            #
+
 
             query = {"$or": [
                 {"$and": [{"start_date_local": {"$gte": start_date}},
@@ -392,19 +456,19 @@ if __name__ == '__main__':
         process_track(track)
 
     for strava_activity in STRAVA_ACTIVITIES:
-        start_date = strava_activity['start_date_local'].date()
+        start_time = strava_activity['start_date_local']
+        start_date = start_time.date()
         end_date = strava_activity['end_date_local'].date()
         distance = strava_activity['distance']
         elapsed_time = strava_activity['elapsed_time']
-        calories = strava_activity['calories']
 
         if start_date in SUMMARIES_BY_DATE:
             summary = SUMMARIES_BY_DATE[start_date]
         elif end_date in SUMMARIES_BY_DATE:
             summary = SUMMARIES_BY_DATE[end_date]
         else:
-            raise Exception("No summaries from ARC data matching start_date ({start_date}) or end_date \
-                             ({end_date})".format(start_date=start_date, end_date=end_date))
+            summary = new_summary(start_time, ARGS.entry_source)
+            SUMMARIES_BY_DATE[start_date] = summary
 
         if 'calories_by_entry_source' not in summary:
             summary['calories_by_entry_source'] = {}
@@ -423,6 +487,8 @@ if __name__ == '__main__':
                 activity_type=type,
                 distance_meters=distance,
                 duration_secs=elapsed_time)
+        else:
+            calories = strava_activity['calories']
 
         if key not in summary['calories_by_type']:
             summary['calories_by_type'][key] = 0
@@ -438,6 +504,9 @@ if __name__ == '__main__':
         summary['calories_by_entry_source']['Strava'] += calories
 
         summary['Calories'] += calories
+        # Account for weird cases of arc data with weird times including strava from weird times
+        # TODO use actual gps points form strava
+        summary["GPS Points"] += 1
 
     summaries = SUMMARIES_BY_DATE.values()
 
