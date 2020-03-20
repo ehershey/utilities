@@ -19,13 +19,21 @@ fi
 
 # grep out bastion host nc proxy connections (for example -
 # ssh -q ssh1.vpc1.10gen.cc nc brs-staging-1.vpc1.10gen.cc 22)
-ps -o command -www | grep ^ssh | grep -i "$pattern" | grep -v eahdroplet | grep -v ssh.*ssh.*nc.*22 | grep -v ssh.*ssh_tunnel.*\ | sort -u > $tempfile
+filter="grep -v eahdroplet | grep -v ernienet | grep -v ssh.*ssh.*nc.*22 | grep -v ssh.*ssh_tunnel.*\ "
+ps -o command -www -a | grep ^ssh | grep -i "$pattern" | bash -c "$filter" | sort -u > $tempfile
 count=$(wc -l < $tempfile | tr -d \\t\ )
 
 if [[ $count == 0 ]]
 then
-  echo "No current sessions!"
-  exit 1
+  # try without filter
+  #
+  ps -o command -www -a | grep ^ssh | grep -i "$pattern" | sort -u > $tempfile
+  count=$(wc -l < $tempfile | tr -d \\t\ )
+  if [[ $count == 0 ]]
+  then
+    echo "No current sessions!"
+    exit 1
+  fi
 fi
 
 if [[ $count == 1 ]]
