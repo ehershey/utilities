@@ -2,6 +2,7 @@ CALORIES_PER_MILE_BY_ACTIVITY_TYPE = {
     'bogus': 0,
     'running': 110,
     'walking': 100,
+    'hiking': 105,
     'cycling': 40,
     'bus': 0,
     'train': 0,
