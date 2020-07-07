@@ -1,12 +1,17 @@
 #!/bin/bash
 #
-# Return a 2fa token, without repeating.
+# Return a 2fa token, without re-use.
 #
 # Requires oath-toolkit homebrew package
 #
 # Optional configuration environment variables - $DIR_2FA (default is ~)
 #
-# Optional command line argument - name of file to load from $DIR_2FA/ (default is .secret_2fa)
+# Optional positional command line argument is name of file to load from $DIR_2FA/
+# (default is .secret_2fa)
+# (unless script is invoked with argv[0]!="get2fa" in which case filename is "${DIR_2fa}/.${basename"}
+#
+# if passed with "-r" argument will restore to the clipboard the value from the previous invocation
+#
 #
 # Default is TOTP but if "#HOTP:TRUE" exists on a line in the file, HOTP will be used instead
 
@@ -36,12 +41,24 @@ then
   fi
 fi
 
+basename=$(basename "$0")
 if [ "${1:-}" ]
 then
   KEYFILE="$DIR_2FA/${1:-}"
+elif [ "$basename" != "get2fa" ]
+then
+  #
+  #
+  # DO WEIRD substitutions so symlinked executable names can be a wide range of things that will still map to a sane name for the
+  # key file - "aws devops" or "beyondid 2fa" or "aws-swe" or "gsuite" or many others
+  #
+  basename=$(echo "$basename" | sed 's/ 2fa//' | sed 's/2fa //' | sed 's/ /-/g')
+  KEYFILE="$DIR_2FA/.$basename"
 else
   KEYFILE="$DIR_2FA/.secret_2fa"
 fi
+echo "basename: $basename">&2
+echo "KEYFILE: $KEYFILE">&2
 
 if [ ! -e "$KEYFILE" ]
 then
@@ -49,10 +66,18 @@ then
   exit 3
 fi
 
+if file --brief "$KEYFILE" | grep -q PGP
+then
+  SECRET_2FA="$(gpg --decrypt < "$KEYFILE" | grep -v ^\# | tr -d \ )"
+else
+  SECRET_2FA="$(grep -v ^\# "$KEYFILE" | tr -d \ )"
+fi
+echo "basename: $basename">&2
+echo "KEYFILE: $KEYFILE">&2
+
 LAST_ENTRY_FILE=~/".2fa-last-${1:-}.txt"
 LAST_COUNTER_FILE=$DIR_2FA/".2fa-counter-${1:-}.txt"
 
-SECRET_2FA="$(grep -v ^\# "$KEYFILE" | tr -d \ )"
 
 HOTP=""
 if grep -qx \#HOTP:TRUE "$KEYFILE"
@@ -64,8 +89,8 @@ fi
 if [ -e "$LAST_ENTRY_FILE" ]
 then
   last_entry=$(cat $LAST_ENTRY_FILE)
-  echo "Found last entry:"
-  echo "$last_entry"
+  echo "Found last entry:">&2
+  echo "$last_entry">&2
 else
   last_entry=""
 fi
@@ -73,8 +98,8 @@ fi
 if [ -e "$LAST_COUNTER_FILE" ]
 then
   last_counter=$(cat $LAST_COUNTER_FILE)
-  echo "Found last counter:"
-  echo "$last_counter"
+  echo "Found last counter:">&2
+  echo "$last_counter">&2
 else
   last_counter="-1"
 fi
@@ -83,11 +108,11 @@ new_counter=$last_counter
 
 new_entry=""
 
-echo -n "Generating new 2fa password"
+echo -n "Generating new 2fa password">&2
 while [[ "$new_entry" == "$last_entry" || ! "$new_entry" ]]
 do
   new_counter=$(expr $new_counter + 1)
-  echo -n "."
+  echo -n ".">&2
   if [ ! -z "$HOTP" ]
   then
     new_entry=$(oathtool --hotp -b $SECRET_2FA -c $new_counter)
@@ -95,12 +120,18 @@ do
     new_entry=$(oathtool --totp -b $SECRET_2FA)
   fi
 done
-echo
+echo>&2
 
-pbpaste > "$CLIPBOARD_BACKUP"
+if which pbpaste > /dev/null 2>&1
+then
+  pbpaste > "$CLIPBOARD_BACKUP"
+  echo $new_entry | pbcopy
+fi
+
+
 echo $new_entry
 touch "$LAST_ENTRY_FILE"
 touch "$LAST_COUNTER_FILE"
 echo "$new_entry" > "$LAST_ENTRY_FILE"
 echo "$new_counter" > "$LAST_COUNTER_FILE"
-echo $new_entry | pbcopy
+
