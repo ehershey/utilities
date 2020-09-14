@@ -7,11 +7,29 @@
 #
 
 PATH=/home/ernie/Dropbox/Misc/venv.eahdroplet2/bin:/usr/bin:/bin:/usr/local/bin:/sbin:/usr/sbin:/usr/local/sbin
+THRESHOLD_DISK_PERCENT=90
+MAILTO=cron-server-notify@ernie.org
 
-* * * * * ~/git/utilities/average_unit_checker.py >> /tmp/average_unit_checker.log 2>&1
-* * * * * (chown :nginx ~/git/goeverywhere/unit_report.html ; chmod g+rw ~/git/goeverywhere/unit_report.html ; ~/git/utilities/generate_unit_report.sh  ) >> /tmp/unit_report.log
-*/15 * * * * ~/git/utilities/save_myfitnesspal_data.js  >> /tmp/save_myfitnesspal_data.log 2>&1
+* * * * * ~/git/utilities/average_unit_checker.py >> $LOGDIR/average_unit_checker.log 2>&1
+* * * * * (chown :apache ~/git/goeverywhere/unit_report.html ; chmod g+rw ~/git/goeverywhere/unit_report.html ; ~/git/utilities/generate_unit_report.sh  ) >> $LOGDIR/unit_report.log
+*/15 * * * * ~/git/utilities/save_myfitnesspal_data.js  >> $LOGDIR/save_myfitnesspal_data.log 2>&1
 */5 * * * * pkill -0 -x dropbox || pkill -0 -x Dropbox || pkill -0 dropbox_py3 || echo "Dropbox not running on $(hostname)"
-*/15 * * * * /home/ernie/git/utilities/save_nest_data.sh >> /tmp/save_nest_data.log
-* * * * * /home/ernie/git/utilities/process_activity_stats.py >> /tmp/process_activity_stats.log
-* * * * * /home/ernie/git/utilities/import_arc_data.sh >> /tmp/import_arc_data.log ; /home/ernie/git/utilities/post_to_sheets.sh >> /tmp/post_to_sheets.log
+*/15 * * * * /home/ernie/git/utilities/save_nest_data.sh >> $LOGDIR/save_nest_data.log
+* * * * * /home/ernie/git/utilities/process_activity_stats.py >> $LOGDIR/process_activity_stats.log
+*/20 * * * * /home/ernie/git/utilities/dedupe-arc-gpx.sh >> $LOGDIR/dedupe-arc-gpx.log ; /home/ernie/git/utilities/import_arc_data.sh >> $LOGDIR/import_arc_data.log ; /home/ernie/git/utilities/post_to_sheets.sh >> $LOGDIR/post_to_sheets.log
+
+0 * * * * ps auwx >> ~/Dropbox/Misc/pslog.$(hostname -s).log 2>&1
+0 * * * * /sbin/ifconfig -a >> ~/Dropbox/Misc/ifconfig.$(hostname -s).log 2>&1
+#*/5 * * * * sh -c "~/google-cloud-sdk/bin/gsutil -q -m rsync -r  gs://ernie-audit-bucket/  ~/splunk-gcp-audit-test/"
+#*/5 * * * * sh -c "rclone sync azure:insights-operational-logs ~/splunk-azure-audit-test/"
+*/5 * * * * /home/ernie/git/utilities/strava_to_db.py >> $LOGDIR/strava_to_db.log 2>> $LOGDIR/strava_to_db-err.log
+* * * * * /home/ernie/git/utilities/strava_csv_from_db.py > /home/ernie/git/goeverywhere/strava.csv
+#0 1 * * * find ~/Dropbox/Misc/Arc\ Export/Export/GPX/ -mtime -7 -exec touch {} \;
+30 * * * * logrotate --state $LOGDIR/dropbox-logrotate.state ~/Dropbox/Misc/dropbox-logrotate.conf >> $LOGDIR/dropbox-logrotate.log
+
+0 2 * * * cp -prn ~ernie/.bash_history ~ernie/Dropbox/Misc/bash_history/bash_history-$(date +\%Y\%m\%d-$(hostname -s))
+*/5 * * * * curl -Ss "http://eahdroplet4.ernie.org/hostupdate?name=$(hostname -s)&ips=$(/sbin/ifconfig -a | grep inet | grep -v inet6 | grep -v 127.0.0 | awk '{print $2}'  | sed 's/.*://' | tr \\n \|)" >> $LOGDIR/hostupdate.log
+
+*/5 * * * * ~/Dropbox/Misc/erniepayloads/common/files/usr/local/bin/sync-logs-to-s3 >> $LOGDIR/sync-logs-to-s3.log 2>>$LOGDIR/sync-logs-to-s3-err.log
+
+*/10 * * * * for percentage in $(df | grep ^/dev/ | awk '{print $5}' | tr -d \%) ; do if [ "$percentage" -gt $THRESHOLD_DISK_PERCENT ] ; then df | mail -s "disk space problem on $(hostname -s)   ($percentage > $THRESHOLD_DISK_PERCENT)" $MAILTO ; fi ; done
