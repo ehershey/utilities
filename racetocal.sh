@@ -2,7 +2,7 @@
 #
 # Add Race to calendar
 #
-# autoupdate_version = 58
+# autoupdate_version = 61
 #
 NYRR_TITLE_SELECTOR="h2.title"
 NYRR_DATE_SELECTOR="p.full-width span"
@@ -173,9 +173,13 @@ get_race_title() {
   done
 
 
-  # Discard pipe and preceding text
+  # Discard pipe and text afterwards
+  ## Discard pipe and preceding text
   #
-  returned_title="$(echo -n "$returned_title" | sed 's/.*| *//' )"
+  # inverted 20200917 for warsaw marathon
+  #
+  #returned_title="$(echo -n "$returned_title" | sed 's/.*| *//' )"
+  returned_title="$(echo -n "$returned_title" | sed 's/ *|.*//' )"
 
   # Remove leading "Home" text (â€“ from archive.org)
   #
@@ -496,12 +500,12 @@ test_url "$url_to_test" "$expected_title" "$expected_date"
 #
 #test_url "$url_to_test" "$expected_title" "$expected_date"
 
-expected_title="ORLEN Warsaw Marathon"
-expected_date="24 april 2016"
-# url_to_test="https://www.orlenmarathon.pl/en/"
-url_to_test="http://web.archive.org/web/20160321034209/http://www.orlenmarathon.pl/en/"
+#expected_title="ORLEN Warsaw Marathon"
+#expected_date="24 april 2016"
+## url_to_test="https://www.orlenmarathon.pl/en/"
+#url_to_test="http://web.archive.org/web/20160321034209/http://www.orlenmarathon.pl/en/"
 
-test_url "$url_to_test" "$expected_title" "$expected_date"
+#test_url "$url_to_test" "$expected_title" "$expected_date"
 
 test_url "https://web.archive.org/web/20180401061548/https://www.virginmoneylondonmarathon.com/en-gb/" "Virgin Money London Marathon" "22 april 2018" "title:meta[name=description] attr{content}"
 
