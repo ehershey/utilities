@@ -49,7 +49,7 @@ def get_db_url():
     return "localhost"
 
 
-autoupdate_version = 3
+autoupdate_version = 25
 
 STRAVA_DB = "strava"
 LIVETRACK_DB = "livetrack"
@@ -363,7 +363,6 @@ def main():
             if latest_end_date is None or date_arg_obj > latest_end_date:
                 latest_end_date = date_arg_obj
 
-
         if earliest_start_date is not None and latest_end_date is not None:
             start_date = earliest_start_date
             end_date = latest_end_date + datetime.timedelta(days=1)
@@ -385,7 +384,7 @@ def main():
             # TODO: fix gaps in strava tracks with activity in ARC
             # TODO: account for strava activity ending on different day only including calories in
             # start date but subtracting from tracks on both ARC days
-            # TODO: Make sure starting an activity on one day and completing it the next day is 
+            # TODO: Make sure starting an activity on one day and completing it the next day is
             # fully supported (unit tests?)
 
             # for gaps - idea to split activity into multiple based on large gaps
@@ -433,7 +432,6 @@ def main():
                     STRAVA_ACTIVITIES.append(strava_activity)
                     seen_strava_activity_ids[strava_activity['strava_id']] = True
 
-
             query = {"$or": [
                 {"$and": [{"start": {"$gte": str(start_date)}},
                           {"start": {"$lt": str(end_date)}}]},
@@ -448,8 +446,6 @@ def main():
                     LIVETRACK_SESSIONS.append(livetrack_session)
                     seen_livetrack_session_ids[livetrack_session['sessionId']] = True
 
-
-
     logging.info("Overlapping strava activity count: %d", len(STRAVA_ACTIVITIES))
     logging.info("Overlapping livetrack session count: %d", len(LIVETRACK_SESSIONS))
 
@@ -457,7 +453,7 @@ def main():
         process_track(track)
 
     for livetrack_session in LIVETRACK_SESSIONS:
-        #logging.debug("livetrack_session: %s", livetrack_session)
+        # logging.debug("livetrack_session: %s", livetrack_session)
         trackpoints = livetrack_session['trackPoints']
         logging.info("livetrack trackpoint count: %d", len(trackpoints))
         first_trackpoint = trackpoints[0]
@@ -487,7 +483,7 @@ def main():
         logging.debug("start_date: %s", start_date)
         logging.debug("end_date: %s", end_date)
 
-        #end_date = strava_activity['end_date_local'].date()
+        # end_date = strava_activity['end_date_local'].date()
         elapsed_time = last_trackpoint_fitnesspointdata['totalDurationSecs']
 
         entry_source = 'Livetrack'
@@ -495,13 +491,12 @@ def main():
         # TODO: account for multiple activity types in one track instead of counting entire thing as
         # final one
         #
-        activity_type = last_trackpoint_fitnesspointdata['activityType'])
+        activity_type = last_trackpoint_fitnesspointdata['activityType']
 
         calories = None
 
-        process_non_gpx_data(start_date, end_date, start_time, entry_source, activity_type, distance, calories)
-
-
+        process_non_gpx_data(start_date, end_date, start_time, entry_source, activity_type,
+                             distance, calories)
 
     for strava_activity in STRAVA_ACTIVITIES:
         start_time = strava_activity['start_date_local']
@@ -516,8 +511,8 @@ def main():
         else:
             calories = None
 
-        process_non_gpx_data(start_date, end_date, start_time, entry_source, activity_type, distance, calories)
-
+        process_non_gpx_data(start_date, end_date, start_time, entry_source, activity_type,
+                             distance, calories)
 
     summaries = SUMMARIES_BY_DATE.values()
 
@@ -529,51 +524,54 @@ def main():
     for summary in summaries:
         print(json.dumps(summary, default=json_util.default))
 
-def process_non_gpx_data(start_date, end_date, start_time, entry_source, activity_type, distance, calories):
-        if start_date in SUMMARIES_BY_DATE:
-            summary = SUMMARIES_BY_DATE[start_date]
-        elif end_date in SUMMARIES_BY_DATE:
-            summary = SUMMARIES_BY_DATE[end_date]
-        else:
-            summary = new_summary(start_time, ARGS.entry_source)
-            SUMMARIES_BY_DATE[start_date] = summary
 
-        if 'calories_by_entry_source' not in summary:
-            summary['calories_by_entry_source'] = {}
-        if entry_source not in summary['calories_by_entry_source']:
-            summary['calories_by_entry_source'][entry_source] = 0
+def process_non_gpx_data(start_date, end_date, start_time, entry_source, activity_type, distance,
+                         calories):
 
-        summary_type = get_summary_type_from_other_type(activity_type)
-        key = summary_type.capitalize()
-        if key not in summary:
-            summary[key] = distance
-        else:
-            summary[key] += distance
+    if start_date in SUMMARIES_BY_DATE:
+        summary = SUMMARIES_BY_DATE[start_date]
+    elif end_date in SUMMARIES_BY_DATE:
+        summary = SUMMARIES_BY_DATE[end_date]
+    else:
+        summary = new_summary(start_time, ARGS.entry_source)
+        SUMMARIES_BY_DATE[start_date] = summary
 
-        if calories == 0 or calories is None:
-            calories = compute_activity_calories(
-                activity_type=summary_type,
-                distance_meters=distance,
-                duration_secs=elapsed_time)
+    if 'calories_by_entry_source' not in summary:
+        summary['calories_by_entry_source'] = {}
+    if entry_source not in summary['calories_by_entry_source']:
+        summary['calories_by_entry_source'][entry_source] = 0
 
-        if key not in summary['calories_by_type']:
-            summary['calories_by_type'][key] = 0
-        summary['calories_by_type'][key] += calories
+    summary_type = get_summary_type_from_other_type(activity_type)
+    key = summary_type.capitalize()
+    if key not in summary:
+        summary[key] = distance
+    else:
+        summary[key] += distance
 
-        time_key = Key + " Seconds"
-        if time_key not in summary:
-            summary[time_key] = elapsed_time
-        else:
-            summary[time_key] += elapsed_time
+    if calories == 0 or calories is None:
+        calories = compute_activity_calories(
+            activity_type=summary_type,
+            distance_meters=distance,
+            duration_secs=elapsed_time)
 
-        logging.debug("adding {calories} to total for source: {entry_source}".format(calories=calories, entry_source=entry_source))
-        summary['calories_by_entry_source'][entry_source] += calories
+    if key not in summary['calories_by_type']:
+        summary['calories_by_type'][key] = 0
+    summary['calories_by_type'][key] += calories
 
-        summary['Calories'] += calories
-        # Account for weird cases of arc data with weird times including strava from weird times
-        # TODO use actual gps points form strava
-        summary["GPS Points"] += 1
+    time_key = Key + " Seconds"
+    if time_key not in summary:
+        summary[time_key] = elapsed_time
+    else:
+        summary[time_key] += elapsed_time
 
+    logging.debug("adding {calories} to total for source: {entry_source}".format(calories=calories,
+                  entry_source=entry_source))
+    summary['calories_by_entry_source'][entry_source] += calories
+
+    summary['Calories'] += calories
+    # Account for weird cases of arc data with weird times including strava from weird times
+    # TODO use actual gps points form strava
+    summary["GPS Points"] += 1
 
 
 if __name__ == '__main__':
@@ -581,7 +579,8 @@ if __name__ == '__main__':
     PARSER.add_argument('--entry-source', help='Entry Source for db entries', default="None")
     PARSER.add_argument('--debug', help='Display debugging info', action='store_true')
     PARSER.add_argument('--filename', help='File to read', default=None)
-    PARSER.add_argument('--date', help='Override date in gpx data (required format: YYYY-MM-DD)', default=None)
+    PARSER.add_argument('--date', help='Override date in gpx data (required format: YYYY-MM-DD)',
+                        default=None)
     PARSER.add_argument('--skip-strava', help='Do not merge Strava activities', default=False,
                         action='store_true')
     PARSER.add_argument('--allow-multiple', help='Allow multiple date summaries in output',
@@ -617,5 +616,3 @@ if __name__ == '__main__':
     UREG = pint.UnitRegistry()
 
     main()
-
-
