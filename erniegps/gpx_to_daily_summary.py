@@ -49,7 +49,7 @@ def get_db_url():
     return "localhost"
 
 
-autoupdate_version = 25
+autoupdate_version = 34
 
 STRAVA_DB = "strava"
 LIVETRACK_DB = "livetrack"
@@ -145,10 +145,11 @@ def process_track(track):
     start_date = start_time.date()
     end_time = track.get_time_bounds().end_time
     end_date = end_time.date()
+    # Split into tracks that don't overlap with external activities from strava or livetrack
+    #
+    # gather array of [start,end] tuples from exernal sources
 
     for strava_activity in STRAVA_ACTIVITIES:
-        # Split into tracks that don't overlap with strava
-        #
         logging.debug("")
         logging.debug("processing strava activity")
 
@@ -495,8 +496,12 @@ def main():
 
         calories = None
 
+        # Invalidate any livetrack sessions that overlap with strava activities
+        # This avoids double counting when strava activities get saved but
+        # livetracks are still in the DB
+
         process_non_gpx_data(start_date, end_date, start_time, entry_source, activity_type,
-                             distance, calories)
+                             elapsed_time, distance, calories, len(trackpoints))
 
     for strava_activity in STRAVA_ACTIVITIES:
         start_time = strava_activity['start_date_local']
@@ -512,7 +517,7 @@ def main():
             calories = None
 
         process_non_gpx_data(start_date, end_date, start_time, entry_source, activity_type,
-                             distance, calories)
+                             elapsed_time, distance, calories, 1)
 
     summaries = SUMMARIES_BY_DATE.values()
 
@@ -525,8 +530,16 @@ def main():
         print(json.dumps(summary, default=json_util.default))
 
 
-def process_non_gpx_data(start_date, end_date, start_time, entry_source, activity_type, distance,
-                         calories):
+def process_non_gpx_data(start_date, end_date, start_time, entry_source, activity_type,
+                         elapsed_time, distance, calories, num_gps_points):
+    """
+        handle strava activities or livetrack sessions
+
+        All arguments are required except calories and num_gps_points.
+        `calories` can be None or 0 and they'll be auto computed.
+        `num_gps_points` can be 1. It will be used to choose when multiple days are
+                         considered for inclusion.
+    """
 
     if start_date in SUMMARIES_BY_DATE:
         summary = SUMMARIES_BY_DATE[start_date]
@@ -558,7 +571,7 @@ def process_non_gpx_data(start_date, end_date, start_time, entry_source, activit
         summary['calories_by_type'][key] = 0
     summary['calories_by_type'][key] += calories
 
-    time_key = Key + " Seconds"
+    time_key = key + " Seconds"
     if time_key not in summary:
         summary[time_key] = elapsed_time
     else:
@@ -568,10 +581,12 @@ def process_non_gpx_data(start_date, end_date, start_time, entry_source, activit
                   entry_source=entry_source))
     summary['calories_by_entry_source'][entry_source] += calories
 
+    summary['Time'] += elapsed_time
+    summary['Distance'] += distance
     summary['Calories'] += calories
     # Account for weird cases of arc data with weird times including strava from weird times
     # TODO use actual gps points form strava
-    summary["GPS Points"] += 1
+    summary["GPS Points"] += num_gps_points
 
 
 if __name__ == '__main__':
