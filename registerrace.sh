@@ -1,26 +1,36 @@
 #!/bin/bash
+#
+# Update status of race in calendar to registered or cancelled
+# Usage:
+#
+# registerrace.sh [ -c (mark as canceled) ] <search_string> [ <event year> [ <registration/cancellation date> ]]
+#
+#
+# autoupdate_version = 18
 set -o nounset
 set -o errexit
 
 URL_COLUMN=5
 TITLE_COLUMN=9
-DESCRIPTION_COLUMN=24
-
-#
-# Update status of race in calendar to registered
-# Usage:
-#
-# registerrace.sh <search_string> [ <event year> [ <registration date> ]]
+DESCRIPTION_COLUMN=11
 
 CALENDAR="Rides and Races"
 TODAY=$(date +%D)
+
+if [ "$1" == "-c" ]
+then
+  shift
+  cancel=1
+else
+  cancel=""
+fi
 
 SEARCH_STRING="${1:-}"
 YEAR="${2:-}"
 
 if [ ! "$SEARCH_STRING" ]
 then
-  echo "Usage: registerrace.sh <search_string> [ <event year> [ <registration date> ]]"
+  echo "Usage: registerrace.sh [ -c (mark as canceled)] <search_string> [ <event year> [ <registration/cancellation date> ]]"
   exit 2
 fi
 if [ ! "$YEAR" ]
@@ -55,28 +65,48 @@ fi
 tempfile="$(mktemp /tmp/registerrace.XXXXX)"
 echo $tempfile
 
-gcalcli --calendar "$CALENDAR" search --tsv --nostarted --military --nocolor "$SEARCH_STRING (registered) $YEAR" --details all > "$tempfile"
+if [ "$cancel" ]
+then
+  verb="cancelled"
+  capital_verb="Cancelled"
+  # assume cancelations are delayed getting entered because they are not fun
+  date_description="as of"
+else
+  verb="registered"
+  capital_verb="Registered"
+  date_description="on"
+fi
+
+gcalcli --calendar "$CALENDAR" search --tsv --nostarted --military --nocolor "$SEARCH_STRING ($verb) $YEAR" --details all > "$tempfile"
 
 #title=$(grep ^$YEAR $tempfile | awk '{print $3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21}')
 returned_title="$(cut -f$TITLE_COLUMN "$tempfile")"
 url="$(cut -f$URL_COLUMN "$tempfile")"
 
-
-if [[ ! "$returned_title" ]]
-then
-  echo "Couldn't find returned_title"
-  exit 5
-fi
-
 echo "returned_title: $returned_title"
 echo "url: $url"
 
-if [[ -s $tempfile && ! "$(grep 'No Events Found...' "$tempfile" )" && $returned_title == *registered* ]]
+if [[ -s $tempfile && ! "$(grep 'No Events Found...' "$tempfile" )" && $returned_title == *$verb* ]]
 then
-  echo "Already registered"
+  echo "Already $verb"
   echo "$url"
   exit 2
 fi
+
+if [[ ! "$returned_title" ]]
+then
+  gcalcli --calendar "$CALENDAR" search --tsv --nostarted --military --nocolor "$SEARCH_STRING $YEAR" --details all > "$tempfile"
+
+  returned_title="$(cut -f$TITLE_COLUMN "$tempfile")"
+  url="$(cut -f$URL_COLUMN "$tempfile")"
+  if [[ ! "$returned_title" ]]
+  then
+    echo "Couldn't find returned_title"
+    exit 5
+  fi
+fi
+
+
 
 gcalcli --calendar "$CALENDAR" search --nostarted --military --nocolor "$SEARCH_STRING $YEAR" --details all > "$tempfile"
 
@@ -100,17 +130,17 @@ fi
 description="$(gcalcli --calendar "$CALENDAR" search --tsv --nocolor "$SEARCH_STRING $YEAR" --details all | cut -f$DESCRIPTION_COLUMN -d\	 | sed 's/<br[^>]*>/ /g' | sed 's/<[^>]*>//g')"
 echo "description: >$description<"
 
-new_title=$(echo "$returned_title" | sed "s/$YEAR/(registered) $YEAR/")
+new_title=$(echo "$returned_title" | sed "s/$YEAR/($verb) $YEAR/")
 echo "new_title: $new_title"
 
 #new_description="$(echo "$description" | sed "s#Not registered as of ......[0-9]*#Registered on $DATE#" | grep . | tr \\n \  | sed 's/\\n/ /g')"
-new_description="$(echo "$description" | sed "s#Not registered as of ......[0-9]*#Registered on $DATE#" | sed 's/\\n/\\\\n/g')"
+new_description="$(echo "$description" | sed "s#Not registered as of ......[0-9]*#&\\\\n$capital_verb $date_description $DATE#" | sed 's/\\n/\\\\n/g')"
 
 # Account for no "Not registered" note in original event
 #
 if ! echo "$new_description" | grep -qi registered
 then
-  new_description="$new_description\\nRegistered on $DATE"
+  new_description="$new_description\\n$capital_verb $date_description $DATE"
 fi
 
 echo "new_description: $new_description"
