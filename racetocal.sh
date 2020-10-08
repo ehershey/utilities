@@ -2,7 +2,7 @@
 #
 # Add Race to calendar
 #
-# autoupdate_version = 61
+# autoupdate_version = 65
 #
 NYRR_TITLE_SELECTOR="h2.title"
 NYRR_DATE_SELECTOR="p.full-width span"
@@ -177,9 +177,14 @@ get_race_title() {
   ## Discard pipe and preceding text
   #
   # inverted 20200917 for warsaw marathon
+  # Undid 20200928 for nyc century
   #
-  #returned_title="$(echo -n "$returned_title" | sed 's/.*| *//' )"
-  returned_title="$(echo -n "$returned_title" | sed 's/ *|.*//' )"
+  returned_title="$(echo -n "$returned_title" | sed 's/.*| *//' )"
+  #returned_title="$(echo -n "$returned_title" | sed 's/ *|.*//' )"
+
+  # Discard "- ATRA" for trailrunner.com
+  #
+  returned_title="$(echo -n "$returned_title" | sed 's/ — ATRA$//' )"
 
   # Remove leading "Home" text (â€“ from archive.org)
   #
