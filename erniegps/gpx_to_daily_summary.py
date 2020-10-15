@@ -50,7 +50,7 @@ def get_db_url():
     return "localhost"
 
 
-autoupdate_version = 83
+autoupdate_version = 84
 
 STRAVA_DB = "strava"
 LIVETRACK_DB = "livetrack"
@@ -192,7 +192,10 @@ def process_track(track):
         logging.debug("")
         logging.debug("processing livetrack session")
         logging.debug("livetrack_session: %s", livetrack_session)
-        trackpoints = livetrack_session['trackPoints']
+        if 'trackPoints' in livetrack_session:
+            trackpoints = livetrack_session['trackPoints']
+        else:
+            trackpoints = []
         logging.info("livetrack trackpoint count: %d", len(trackpoints))
         if len(trackpoints) == 0:
             session_start = dateutil.parser.parse(livetrack_session['start'])
