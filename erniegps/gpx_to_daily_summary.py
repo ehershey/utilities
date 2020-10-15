@@ -40,6 +40,7 @@ import pint
 from bson import json_util
 from pymongo import MongoClient
 import erniegps.calories
+from pytz import reference
 
 
 def get_db_url():
@@ -49,7 +50,7 @@ def get_db_url():
     return "localhost"
 
 
-autoupdate_version = 34
+autoupdate_version = 83
 
 STRAVA_DB = "strava"
 LIVETRACK_DB = "livetrack"
@@ -131,30 +132,34 @@ def new_summary(start_time, entry_source):
 
 def process_track(track):
     """ Take gpxpy track object and read summary data from it """
-    distance = track.get_moving_data().moving_distance
     logging.debug("")
     logging.debug("")
     logging.debug("processing new track")
-    logging.debug("distance: %f", distance)
-    logging.debug("get_points_no(): %f", track.get_points_no())
+    if track is not None:
+        distance = track.get_moving_data().moving_distance
+        logging.debug("distance: %f", distance)
+        logging.debug("get_points_no(): %f", track.get_points_no())
 
-    time = track.get_moving_data().moving_time
-    start_time = track.get_time_bounds().start_time
-    if start_time is None:
-        return
-    start_date = start_time.date()
-    end_time = track.get_time_bounds().end_time
-    end_date = end_time.date()
-    # Split into tracks that don't overlap with external activities from strava or livetrack
-    #
-    # gather array of [start,end] tuples from exernal sources
+        time = track.get_moving_data().moving_time
+        start_time = track.get_time_bounds().start_time
+        if start_time is not None:
+            start_date = start_time.date()
+        end_time = track.get_time_bounds().end_time
+        if end_time is not None:
+            end_date = end_time.date()
+        # Split into tracks that don't overlap with external activities from strava or livetrack
+        #
+        # gather array of [start,end] tuples from exernal sources
+        track_start = start_time
+        track_end = end_time
+
+    external_activities = []
 
     for strava_activity in STRAVA_ACTIVITIES:
         logging.debug("")
         logging.debug("processing strava activity")
+        logging.debug("strava_activity: %s", strava_activity)
 
-        track_start = start_time
-        track_end = end_time
         activity_start = strava_activity['start_date_local']
         try:
             activity_end = strava_activity['end_date_local']
@@ -168,19 +173,96 @@ def process_track(track):
                 logging.error(strava_activity)
                 exit()
 
-        logging.debug("strava_activity: %s", strava_activity)
+        if activity_start.tzinfo is None:
+            if track is not None and track_start is not None and track_start.tzinfo is not None:
+                logging.debug("copying tzinfo from track start")
+                activity_start = activity_start.replace(tzinfo=track_start.tzinfo)
+                activity_end = activity_end.replace(tzinfo=track_start.tzinfo)
+            else:
+                logging.debug("copying tzinfo from pytz.reference")
+                activity_start = activity_start.replace(tzinfo=reference.LocalTimezone())
+                activity_end = activity_end.replace(tzinfo=reference.LocalTimezone())
+
+        logging.debug("activity_start: %s", activity_start)
+        logging.debug("activity_end: %s", activity_end)
+        external_activities.append({"start": activity_start, "end": activity_end,
+                                    "type": "strava_activity"})
+
+    for livetrack_session in LIVETRACK_SESSIONS:
+        logging.debug("")
+        logging.debug("processing livetrack session")
+        logging.debug("livetrack_session: %s", livetrack_session)
+        trackpoints = livetrack_session['trackPoints']
+        logging.info("livetrack trackpoint count: %d", len(trackpoints))
+        if len(trackpoints) == 0:
+            session_start = dateutil.parser.parse(livetrack_session['start'])
+            session_end = dateutil.parser.parse(livetrack_session['end'])
+        else:
+            first_trackpoint = trackpoints[0]
+            last_trackpoint = trackpoints[-1]
+            logging.debug("first_trackpoint: %s", first_trackpoint)
+            logging.debug("last_trackpoint: %s", last_trackpoint)
+
+            session_start = dateutil.parser.parse(first_trackpoint['dateTime'])
+            session_end = dateutil.parser.parse(last_trackpoint['dateTime'])
+
+        if session_start.tzinfo is None:
+            if track is not None and track_start is not None and track_start.tzinfo is not None:
+                logging.debug("copying tzinfo from track start")
+                session_start = session_start.replace(tzinfo=track_start.tzinfo)
+                session_end = session_end.replace(tzinfo=track_start.tzinfo)
+            else:
+                logging.debug("copying tzinfo from pytz.reference")
+                session_start = session_start.replace(tzinfo=reference.LocalTimezone())
+                session_end = session_end.replace(tzinfo=reference.LocalTimezone())
+
+        logging.debug("session_start: %s", session_start)
+        logging.debug("session_end: %s", session_end)
+        # set data for later summarization
+        livetrack_session['ernie:infered_start'] = session_start
+        livetrack_session['ernie:infered_end'] = session_end
+
+        found_overlap = False
+        for external_activity in external_activities:
+            external_activity_start = external_activity['start']
+            external_activity_end = external_activity['end']
+            # session start within external range
+            if session_start >= external_activity_start and session_start <= external_activity_end:
+                found_overlap = True
+                logging.info("Found overlap with another activity: %s", external_activity)
+                break
+            # session end within external range
+            elif session_end >= external_activity_start and session_end <= external_activity_end:
+                found_overlap = True
+                logging.info("Found overlap with another activity: %s", external_activity)
+                break
+            # session fully covering external range
+            elif session_start <= external_activity_start and session_end >= external_activity_end:
+                found_overlap = True
+                logging.info("Found overlap with another activity: %s", external_activity)
+                break
+
+        if found_overlap:
+            livetrack_session["ernie:invalid"] = True
+        else:
+            external_activities.append({"start": session_start, "end": session_end,
+                                        "type": "livetrack_session"})
+
+    if track is None or start_time is None or end_time is None:
+        return
+    # only one pass needed because none of these should overlap
+    #
+    for external_activity in external_activities:
+
+        logging.debug("external_activity: %s", external_activity)
+
+        activity_start = external_activity['start']
+        activity_end = external_activity['end']
 
         logging.debug("track_start: %s", track_start)
         logging.debug("track_end: %s", track_end)
         logging.debug("activity_start: %s", activity_start)
         logging.debug("activity_end: %s", activity_end)
-
-        if activity_start.tzinfo is None and track_start.tzinfo is not None:
-            logging.debug("copying tzinfo from track start")
-            activity_start = activity_start.replace(tzinfo=track_start.tzinfo)
-            activity_end = activity_end.replace(tzinfo=track_start.tzinfo)
-            logging.debug("activity_start: %s", activity_start)
-            logging.debug("activity_end: %s", activity_end)
 
         # * "track" from ARC
         # * "activity" from Strava
@@ -276,10 +358,8 @@ def process_track(track):
             for index, point in enumerate(segment.points):
                 if point.time.date() == start_date:
                     indexes_to_delete.append(index)
-
             for index_to_delete in reversed(sorted(indexes_to_delete)):
                 del segment.points[index_to_delete]
-
         process_track(track)
         process_track(new_dates_track)
         return None
@@ -453,38 +533,44 @@ def main():
     for track in GPX.tracks:
         process_track(track)
 
+    # this shouldn't necessary but we do depend on stuff in process_track
+    if len(GPX.tracks) == 0:
+        process_track(None)
+
     for livetrack_session in LIVETRACK_SESSIONS:
         # logging.debug("livetrack_session: %s", livetrack_session)
         trackpoints = livetrack_session['trackPoints']
         logging.info("livetrack trackpoint count: %d", len(trackpoints))
-        first_trackpoint = trackpoints[0]
+        if len(trackpoints) == 0:
+            continue
+        if "ernie:invalid" in livetrack_session:
+            if livetrack_session['ernie:invalid']:
+                logging.debug("ernie:invalid=true")
+                continue
+
         last_trackpoint = trackpoints[-1]
-        logging.debug("first_trackpoint: %s", first_trackpoint)
         logging.debug("last_trackpoint: %s", last_trackpoint)
 
-        first_trackpoint_fitnesspointdata = first_trackpoint['fitnessPointData']
         last_trackpoint_fitnesspointdata = last_trackpoint['fitnessPointData']
 
-        # try to get the start date
-        #         "activityCreatedTime": "2020-10-06T13:27:13.000Z",
-        activity_created_time = first_trackpoint_fitnesspointdata['activityCreatedTime']
-        start_time = dateutil.parser.parse(activity_created_time)
+        start_time = livetrack_session["ernie:infered_start"]
+        end_time = livetrack_session["ernie:infered_end"]
+
+        logging.debug("start_time: %s", start_time)
+        logging.debug("end_time: %s", end_time)
+
+        if not start_time or not end_time:
+            logging.fatal("Missing infered start or end time!")
+            exit(2)
 
         start_date = start_time.date()
+        end_date = end_time.date()
 
         distance = last_trackpoint_fitnesspointdata['totalDistanceMeters']
-
-        # call latest trackpoint date the end date for now
-
-        latest_trackpoint_time = last_trackpoint['dateTime']
-        end_time = dateutil.parser.parse(latest_trackpoint_time)
-
-        end_date = end_time.date()
 
         logging.debug("start_date: %s", start_date)
         logging.debug("end_date: %s", end_date)
 
-        # end_date = strava_activity['end_date_local'].date()
         elapsed_time = last_trackpoint_fitnesspointdata['totalDurationSecs']
 
         entry_source = 'Livetrack'
@@ -520,6 +606,12 @@ def main():
                              elapsed_time, distance, calories, 1)
 
     summaries = SUMMARIES_BY_DATE.values()
+
+    logging.debug("summaries: {summaries}".format(summaries=summaries))
+    logging.debug("filtering summaries")
+
+    if ARGS.date:
+        summaries = (summary for summary in summaries if summary['Verbose Date'] == ARGS.date)
 
     # Unless multiples are explicitly allowed, only print the summary with the most points
     #
@@ -601,6 +693,9 @@ if __name__ == '__main__':
     PARSER.add_argument('--allow-multiple', help='Allow multiple date summaries in output',
                         action='store_true')
     ARGS = PARSER.parse_args()
+
+    FORMAT = '%(levelname)s:%(funcName)s:%(lineno)s %(message)s'
+    logging.basicConfig(format=FORMAT)
 
     if ARGS.debug:
         logging.getLogger().setLevel(getattr(logging, "DEBUG"))
