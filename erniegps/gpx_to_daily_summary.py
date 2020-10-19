@@ -44,7 +44,7 @@ import erniegps.db
 from pytz import reference
 
 
-autoupdate_version = 90
+autoupdate_version = 91
 
 
 def get_summary_type_from_other_type(other_type):
@@ -521,6 +521,8 @@ def main():
     logging.info("Overlapping strava activity count: %d", len(STRAVA_ACTIVITIES))
     logging.info("Overlapping livetrack session count: %d", len(LIVETRACK_SESSIONS))
 
+    # uses LIVETRACK_SESSIONS and STRAVA_ACTIVITIES
+    #
     for track in GPX.tracks:
         process_track(track)
 
