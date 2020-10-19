@@ -40,23 +40,11 @@ import pint
 from bson import json_util
 from pymongo import MongoClient
 import erniegps.calories
+import erniegps.db
 from pytz import reference
 
 
-def get_db_url():
-    """ get DB URI - default to localhost """
-    if "MONGODB_URI" in os.environ:
-        return os.environ["MONGODB_URI"]
-    return "localhost"
-
-
-autoupdate_version = 84
-
-STRAVA_DB = "strava"
-LIVETRACK_DB = "livetrack"
-
-ACTIVITY_COLLECTION = "activities"
-SESSION_COLLECTION = "session"
+autoupdate_version = 90
 
 
 def get_summary_type_from_other_type(other_type):
@@ -410,14 +398,14 @@ def main():
     seen_strava_activity_ids = {}
     seen_livetrack_session_ids = {}
     if not ARGS.skip_strava:
-        db_url = get_db_url()
+        db_url = erniegps.db.get_db_url()
         mongoclient = MongoClient(db_url)
 
-        strava_db = mongoclient[STRAVA_DB]
-        livetrack_db = mongoclient[LIVETRACK_DB]
+        strava_db = mongoclient[erniegps.db.STRAVA_DB]
+        livetrack_db = mongoclient[erniegps.db.LIVETRACK_DB]
 
-        activity_collection = strava_db[ACTIVITY_COLLECTION]
-        session_collection = livetrack_db[SESSION_COLLECTION]
+        activity_collection = strava_db[erniegps.db.ACTIVITY_COLLECTION]
+        session_collection = livetrack_db[erniegps.db.SESSION_COLLECTION]
 
         earliest_start_date = None
         latest_end_date = None
