@@ -44,7 +44,7 @@ import erniegps.db
 from pytz import reference
 
 
-autoupdate_version = 91
+autoupdate_version = 93
 
 
 def get_summary_type_from_other_type(other_type):
@@ -275,12 +275,12 @@ def process_track(track):
         # 5) No overlap (all cases should reduce to this)
         #    * process track raw, or keep looking for overlaps
 
-        # 1) Track enclosed within activity
+        # 1) Track enclosed within activity (or exactly the same)
         if track_start >= activity_start and track_end <= activity_end:
             logging.debug("case 1: returning")
             return None
         # 2) Activity enclosed within track
-        elif track_start < activity_start and track_end > activity_end:
+        elif track_start <= activity_start and track_end >= activity_end:
             logging.debug("case 2: Splitting into two")
             end_track = track.clone()
             for segment in track.segments:
