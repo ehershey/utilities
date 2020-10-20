@@ -15,6 +15,8 @@ import pickle
 import time
 import datetime
 
+autoupdate_version = 22
+
 DB_URL = 'mongodb://localhost:27017/'
 
 DB_NAME = 'strava'
@@ -182,16 +184,18 @@ def process_activities(weeks_back=1, collection=None, redo=False, num_weeks_to_p
         # [{'resource': 'Application', 'field': '', 'code': 'invalid'}]
         except stravalib.exc.AccessUnauthorized as e:
             wait = 30
-            logging.warn(
-                    "access unauthorized error on get_activity(), waiting {wait} seconds and retrying".format(wait=wait))
+            logging.warn("Access unauthorized error on get_activity()")
+            logging.warn("Waiting {wait} seconds and retrying".format(wait=wait))
             time.sleep(wait)
             detail_activity = stravaclient.get_activity(activity.id)
 
         # TODO: use streams to detect gaps to allow other activity data to pass through
-        # between gaps in strava activities (e.g. if walking around during stopped ride/run on garmin watch)
+        # between gaps in strava activities (e.g. if walking around during stopped
+        # ride/run on garmin watch)
         #
-        #streams = stravaclient.get_activity_streams(activity.id, types=['moving'], resolution='high')
-        #logging.debug("streams: %s", streams)
+        # streams = stravaclient.get_activity_streams(activity.id,
+        # types=['moving'], resolution='high')
+        # logging.debug("streams: %s", streams)
 
         logging.debug("db_activity: %s", db_activity)
         logging.debug("detail_activity: %s", detail_activity)
@@ -238,7 +242,24 @@ def main():
 
     args = get_args()
 
-    if args.debug:
+    update_db(debug=args.debug,
+              oauth_code=args.oauth_code,
+              redo=args.redo,
+              force_access_token_refresh=args.force_access_token_refresh,
+              num_weeks_to_process=args.weeks_back, weeks_back=args.weeks_back)
+
+
+def update_db(debug=False,
+              oauth_code=None,
+              redo=False,
+              force_access_token_refresh=False,
+              num_weeks_to_process=1,
+              weeks_back=1):
+    """
+    does it all
+    """
+
+    if debug:
         logging.getLogger().setLevel(getattr(logging, "DEBUG"))
 
     mongoclient = MongoClient(DB_URL)
@@ -249,10 +270,15 @@ def main():
 
     config_data = setup_pickle()
 
-    get_oauth_data(oauth_code=args.oauth_code, config_data = config_data, force_access_token_refresh = args.force_access_token_refresh)
+    get_oauth_data(oauth_code=oauth_code,
+                   config_data=config_data,
+                   force_access_token_refresh=force_access_token_refresh)
 
     try:
-        process_activities(weeks_back=args.weeks_back, collection=collection, redo = args.redo, num_weeks_to_process=args.num_weeks_to_process)
+        process_activities(weeks_back=weeks_back,
+                           collection=collection,
+                           redo=redo,
+                           num_weeks_to_process=num_weeks_to_process)
     except stravalib.exc.RateLimitExceeded as e:
         timeout = e.timeout
         print("Rate limit error. Sleeping {timeout} seconds".format(timeout=timeout))
