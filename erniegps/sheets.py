@@ -8,6 +8,7 @@ import dateutil.parser
 import httplib2
 import os
 from apiclient import discovery
+import googleapiclient.errors
 from pymongo import MongoClient
 
 from oauth2client import client
@@ -60,7 +61,13 @@ def insert_record_into_sheet(google_credentials, record, spreadsheet_id, sheet_n
                               discoveryServiceUrl=discoveryUrl)
 
     request = service.spreadsheets().get(spreadsheetId=spreadsheet_id)
-    response = request.execute()
+    try:
+        response = request.execute()
+    except googleapiclient.errors.HttpError as e:
+        if "Quota exceeded" in str(e):
+            raise(e)
+        else:
+            response = request.execute()
 
     LOGGER.debug("Found spreadsheet")
 
@@ -77,7 +84,13 @@ def insert_record_into_sheet(google_credentials, record, spreadsheet_id, sheet_n
 
     dateRange = '{name}!A:A'.format(name=sheet_name)
     request = service.spreadsheets().values().get(spreadsheetId=spreadsheet_id, range=dateRange)
-    response = request.execute()
+    try:
+        response = request.execute()
+    except googleapiclient.errors.HttpError as e:
+        if "Quota exceeded" in str(e):
+            raise(e)
+        else:
+            response = request.execute()
 
     if 'values' in response:
         dates_in_sheet = response['values']
@@ -136,9 +149,12 @@ def insert_record_into_sheet(google_credentials, record, spreadsheet_id, sheet_n
                                                         range=headerRange)
     try:
         headerResponse = headerRequest.execute()
-    except googleapiclient.errors.HttpError:
+    except googleapiclient.errors.HttpError as e:
         # try again
-        headerResponse = headerRequest.execute()
+        if "Quota exceeded" in str(e):
+            raise(e)
+        else:
+            headerResponse = headerRequest.execute()
     if 'values' in headerResponse:
         headers = headerResponse['values'][0]
     else:
@@ -211,6 +227,11 @@ def insert_record_into_sheet(google_credentials, record, spreadsheet_id, sheet_n
 
     update_request = service.spreadsheets().batchUpdate(
         spreadsheetId=spreadsheet_id, body=batch_update_spreadsheet_request_body)
-    update_response = update_request.execute()
-
+    try:
+        update_response = update_request.execute()
+    except googleapiclient.errors.HttpError as e:
+        if "Quota exceeded" in str(e):
+            raise(e)
+        else:
+            update_response = update_request.execute()
     LOGGER.debug("response: {response}".format(response=response))
