@@ -15,7 +15,7 @@ import pickle
 import time
 import datetime
 
-autoupdate_version = 75
+autoupdate_version = 78
 
 DB_URL = 'mongodb://localhost:27017/'
 
@@ -36,10 +36,20 @@ def upload_activity(gpx_xml=None,
                     name=None,
                     activity_type=None):
     init_strava()
-    return stravaclient.upload_activity(activity_file=gpx_xml,
-                                        name=name,
-                                        data_type='gpx',
-                                        activity_type=activity_type)
+    try:
+        return stravaclient.upload_activity(activity_file=gpx_xml,
+                                            name=name,
+                                            data_type='gpx',
+                                            activity_type=activity_type)
+    except stravalib.exc.RateLimitExceeded as e:
+        timeout = e.timeout
+        print("Rate limit error. Sleeping {timeout} seconds".format(timeout=timeout))
+        print()
+        time.sleep(timeout)
+        return stravaclient.upload_activity(activity_file=gpx_xml,
+                                            name=name,
+                                            data_type='gpx',
+                                            activity_type=activity_type)
 
 
 def get_args():
