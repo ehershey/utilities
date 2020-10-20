@@ -1,32 +1,11 @@
 #!/usr/bin/env python3
 """
 
-Take gpx data and generate a daily summary of calories, durations, and distances per ativity type
+Take gpx data and generate walking tracks that don't overlap with strava activities or active
+livetracks.
 
-{
-    "Walking": "6.76mi",
-    "Cycling": "95.14mi",
-    "Running Seconds": 4676.0,
-    "Calories": 5402.0,
-    "Running": "5.61mi",
-    "Date": {"$date": "2017-12-15T00:00:00.000Z"},
-    "Walking Seconds": 8909.0,
-    "Cycling Seconds": 23204.0,
-    "entry_source": "Arc Export"
-    "calories_by_type": {
-        "Cycling": 500,
-        "Running": 123,
-        "Walking": 321
-    }
-    "calories_by_entry_source": {
-        "Strava": 313,
-        "Arc Export": 100
-    }
-}
-#
-convert a gpx file to geojson
 """
-
+import cProfile
 import argparse
 import datetime
 import dateutil
@@ -40,98 +19,18 @@ import pint
 from bson import json_util
 from pymongo import MongoClient
 import erniegps.calories
+import erniegps.db
 from pytz import reference
 
 
-def get_db_url():
-    """ get DB URI - default to localhost """
-    if "MONGODB_URI" in os.environ:
-        return os.environ["MONGODB_URI"]
-    return "localhost"
+autoupdate_version = 83
 
-
-autoupdate_version = 84
-
-STRAVA_DB = "strava"
-LIVETRACK_DB = "livetrack"
-
-ACTIVITY_COLLECTION = "activities"
-SESSION_COLLECTION = "session"
-
-
-def get_summary_type_from_other_type(other_type):
-    """ return type for DB based on type from Strava """
-    if other_type == "Ride":
-        summary_type = "cycling"
-    elif other_type == "CYCLING":
-        summary_type = "cycling"
-    elif other_type == "Run":
-        summary_type = "running"
-    elif other_type == "RUNNING":
-        summary_type = "running"
-    elif other_type == "Walk":
-        summary_type = "walking"
-    elif other_type == "hiking":
-        summary_type = "hiking"
-    elif other_type == "HIKING":
-        summary_type = "hiking"
-    elif other_type == "Hike":
-        summary_type = "hiking"
-    elif other_type == "Workout":
-        summary_type = "gym"
-    elif other_type == "WeightTraining":
-        summary_type = "gym"
-    elif other_type == "Rowing":
-        summary_type = "rowing"
-    elif other_type == "Swim":
-        summary_type = "swimming"
-    elif other_type == "Elliptical":
-        summary_type = "elliptical"
-    else:
-        raise Exception("Unrecognized activity type: {type}".format(type=type))
-    return summary_type
-
-
-def compute_activity_calories(activity_type, duration_secs, distance_meters):
-    """
-    Return how many calories were burned during the given activity
-    """
-
-    if isinstance(distance_meters, UREG.Quantity) and distance_meters.unit == UREG.meter:
-        distance_meters = distance_meters / UREG.meter
-
-    # Ultimately, duration should be used to adjust the multiplier for when
-    # the activity took so long or was so fast that it's not reasonable to use
-    # these numbers as simple deltas from basal caloric burn.
-
-    distance_miles = (distance_meters * UREG.meter).to('miles').magnitude
-    logging.debug("duration: %s", datetime.timedelta(seconds=duration_secs))
-    logging.debug("distance_miles: %s", distance_miles)
-    if activity_type in CALORIES_PER_MILE_BY_ACTIVITY_TYPE:
-        calories = distance_miles * CALORIES_PER_MILE_BY_ACTIVITY_TYPE[activity_type]
-        logging.debug("calories: %s", calories)
-        return calories
-    raise Exception("Unrecognized activity type: {activity_type}".format(
-        activity_type=activity_type))
-
-
-def new_summary(start_time, entry_source):
-    """ return empty summary object """
-    return dict({
-        "entry_source": entry_source,
-        "Date": start_time.replace(hour=0, minute=0, second=0),
-        "Verbose Date": start_time.strftime("%Y-%m-%d"),
-        "GPS Points": 0,
-        "Calories": 0,
-        "Time": 0,
-        "Distance": 0,
-        "calories_by_type": {},
-        "calories_by_entry_source": {entry_source: 0}
-        })
+MAX_DISTANCE_METERS_TO_ABSORB_TRACK = 10
+MAX_EMPTY_MINUTES_TO_ALLOW_BETWEEN_TRACKS = 30
 
 
 def process_track(track):
-    """ Take gpxpy track object and read summary data from it """
+    """ Take gpxpy track object and read new_track data from it """
     logging.debug("")
     logging.debug("")
     logging.debug("processing new track")
@@ -191,7 +90,7 @@ def process_track(track):
     for livetrack_session in LIVETRACK_SESSIONS:
         logging.debug("")
         logging.debug("processing livetrack session")
-        logging.debug("livetrack_session: %s", livetrack_session)
+        logging.debug("livetrack_session: %.80s", livetrack_session)
         if 'trackPoints' in livetrack_session:
             trackpoints = livetrack_session['trackPoints']
         else:
@@ -253,6 +152,7 @@ def process_track(track):
 
     if track is None or start_time is None or end_time is None:
         return
+
     # only one pass needed because none of these should overlap
     #
     for external_activity in external_activities:
@@ -287,12 +187,15 @@ def process_track(track):
         # 5) No overlap (all cases should reduce to this)
         #    * process track raw, or keep looking for overlaps
 
-        # 1) Track enclosed within activity
+        # track: 17:42:30 - 18:03:27
+        # activity: 17:42:30 - 18:03:24
+
+        # 1) Track enclosed within activity (or exactly the same)
         if track_start >= activity_start and track_end <= activity_end:
             logging.debug("case 1: returning")
             return None
         # 2) Activity enclosed within track
-        elif track_start < activity_start and track_end > activity_end:
+        elif track_start <= activity_start and track_end >= activity_end:
             logging.debug("case 2: Splitting into two")
             end_track = track.clone()
             for segment in track.segments:
@@ -341,64 +244,12 @@ def process_track(track):
             return None
         else:
             logging.debug("case 5: continuing")
-
-    if start_date != end_date:
-        # Split into one track for start_date date and one for everything else
-        #
-        new_dates_track = track.clone()
-        logging.debug("track: %s", track)
-        logging.debug("new_dates_track: %s", new_dates_track)
-        for segment in track.segments:
-            indexes_to_delete = []
-            for index, point in enumerate(segment.points):
-                if point.time.date() != start_date:
-                    indexes_to_delete.append(index)
-
-            for index_to_delete in reversed(sorted(indexes_to_delete)):
-                del segment.points[index_to_delete]
-        for segment in new_dates_track.segments:
-            indexes_to_delete = []
-            for index, point in enumerate(segment.points):
-                if point.time.date() == start_date:
-                    indexes_to_delete.append(index)
-            for index_to_delete in reversed(sorted(indexes_to_delete)):
-                del segment.points[index_to_delete]
-        process_track(track)
-        process_track(new_dates_track)
-        return None
-    elif start_date in SUMMARIES_BY_DATE:
-        summary = SUMMARIES_BY_DATE[start_date]
-    else:
-        summary = new_summary(start_time, ARGS.entry_source)
-        SUMMARIES_BY_DATE[start_date] = summary
-
-    tracktype = track.type
-    if not tracktype:
-        tracktype = "none"
-    key = tracktype.capitalize()
-    if key not in summary:
-        summary[key] = distance
-    else:
-        summary[key] += distance
-    calories = compute_activity_calories(
-        activity_type=tracktype,
-        distance_meters=distance,
-        duration_secs=time)
-    if key not in summary["calories_by_type"]:
-        summary["calories_by_type"][key] = 0
-    summary["calories_by_type"][key] += calories
-    logging.debug("calories: %d", calories)
-    summary["calories_by_entry_source"][ARGS.entry_source] += calories
-    time_key = tracktype.capitalize() + " Seconds"
-    if time_key not in summary:
-        summary[time_key] = time
-    else:
-        summary[time_key] += time
-
-    summary["Time"] += time
-    summary["Distance"] += distance
-    summary["Calories"] += calories
-    summary["GPS Points"] += track.get_points_no()
+    logging.debug("Got non-overlapping track:")
+    logging.debug("start_time: %s", start_time)
+    logging.debug("end_time: %s", end_time)
+    logging.debug("distance: %s", distance)
+    logging.debug("track.type: %s", track.type)
+    NEW_TRACKS.append(track)
 
 
 def main():
@@ -410,14 +261,14 @@ def main():
     seen_strava_activity_ids = {}
     seen_livetrack_session_ids = {}
     if not ARGS.skip_strava:
-        db_url = get_db_url()
+        db_url = erniegps.db.get_db_url()
         mongoclient = MongoClient(db_url)
 
-        strava_db = mongoclient[STRAVA_DB]
-        livetrack_db = mongoclient[LIVETRACK_DB]
+        strava_db = mongoclient[erniegps.db.STRAVA_DB]
+        livetrack_db = mongoclient[erniegps.db.LIVETRACK_DB]
 
-        activity_collection = strava_db[ACTIVITY_COLLECTION]
-        session_collection = livetrack_db[SESSION_COLLECTION]
+        activity_collection = strava_db[erniegps.db.ACTIVITY_COLLECTION]
+        session_collection = livetrack_db[erniegps.db.SESSION_COLLECTION]
 
         earliest_start_date = None
         latest_end_date = None
@@ -533,168 +384,92 @@ def main():
     logging.info("Overlapping strava activity count: %d", len(STRAVA_ACTIVITIES))
     logging.info("Overlapping livetrack session count: %d", len(LIVETRACK_SESSIONS))
 
+    # uses LIVETRACK_SESSIONS and STRAVA_ACTIVITIES
+    #
     for track in GPX.tracks:
         process_track(track)
 
-    # this shouldn't necessary but we do depend on stuff in process_track
-    if len(GPX.tracks) == 0:
-        process_track(None)
+    new_tracks = NEW_TRACKS
 
-    for livetrack_session in LIVETRACK_SESSIONS:
-        # logging.debug("livetrack_session: %s", livetrack_session)
-        trackpoints = livetrack_session['trackPoints']
-        logging.info("livetrack trackpoint count: %d", len(trackpoints))
-        if len(trackpoints) == 0:
-            continue
-        if "ernie:invalid" in livetrack_session:
-            if livetrack_session['ernie:invalid']:
-                logging.debug("ernie:invalid=true")
-                continue
-
-        last_trackpoint = trackpoints[-1]
-        logging.debug("last_trackpoint: %s", last_trackpoint)
-
-        last_trackpoint_fitnesspointdata = last_trackpoint['fitnessPointData']
-
-        start_time = livetrack_session["ernie:infered_start"]
-        end_time = livetrack_session["ernie:infered_end"]
-
-        logging.debug("start_time: %s", start_time)
-        logging.debug("end_time: %s", end_time)
-
-        if not start_time or not end_time:
-            logging.fatal("Missing infered start or end time!")
-            exit(2)
-
-        start_date = start_time.date()
-        end_date = end_time.date()
-
-        distance = last_trackpoint_fitnesspointdata['totalDistanceMeters']
-
-        logging.debug("start_date: %s", start_date)
-        logging.debug("end_date: %s", end_date)
-
-        elapsed_time = last_trackpoint_fitnesspointdata['totalDurationSecs']
-
-        entry_source = 'Livetrack'
-
-        # TODO: account for multiple activity types in one track instead of counting entire thing as
-        # final one
-        #
-        activity_type = last_trackpoint_fitnesspointdata['activityType']
-
-        calories = None
-
-        # Invalidate any livetrack sessions that overlap with strava activities
-        # This avoids double counting when strava activities get saved but
-        # livetracks are still in the DB
-
-        process_non_gpx_data(start_date, end_date, start_time, entry_source, activity_type,
-                             elapsed_time, distance, calories, len(trackpoints))
-
-    for strava_activity in STRAVA_ACTIVITIES:
-        start_time = strava_activity['start_date_local']
-        start_date = start_time.date()
-        end_date = strava_activity['end_date_local'].date()
-        distance = strava_activity['distance']
-        elapsed_time = strava_activity['elapsed_time']
-        entry_source = 'Strava'
-        activity_type = strava_activity['type']
-        if 'calories' in strava_activity:
-            calories = strava_activity['calories']
-        else:
-            calories = None
-
-        process_non_gpx_data(start_date, end_date, start_time, entry_source, activity_type,
-                             elapsed_time, distance, calories, 1)
-
-    summaries = SUMMARIES_BY_DATE.values()
-
-    logging.debug("summaries: {summaries}".format(summaries=summaries))
-    logging.debug("filtering summaries")
+    logging.debug("total non-overlapping tracks to consider: %d", len(new_tracks))
+    logging.debug("combining tracks")
 
     if ARGS.date:
-        summaries = (summary for summary in summaries if summary['Verbose Date'] == ARGS.date)
+        date_arg_obj = datetime.datetime.strptime(ARGS.date, '%Y-%m-%d')
+        new_tracks = (new_track for new_track in new_tracks if
+                      new_track.get_time_bounds().start_time.date == date_arg_obj or
+                      new_track.get_time_bounds().end_time.date == date_arg_obj)
 
-    # Unless multiples are explicitly allowed, only print the summary with the most points
-    #
-    if not ARGS.allow_multiple:
-        summaries = sorted(summaries, key=lambda summary: summary["GPS Points"], reverse=True)[0:1]
+    max_empty_delta = datetime.timedelta(
+            minutes=MAX_EMPTY_MINUTES_TO_ALLOW_BETWEEN_TRACKS)
+    # Try really hard to reduce to single long walking tracks
+    # MAX_DISTANCE_METERS_TO_ABSORB_TRACK = 10
+    # MAX_EMPTY_MINUTES_TO_ALLOW_BETWEEN_TRACKS = 30
+    new_new_tracks = []
+    for index in range(len(new_tracks)):
+        this_track = new_tracks[index]
+        this_track_type = this_track.type
+        this_track_start_time = this_track.get_time_bounds().start_time
+        this_track_end_time = this_track.get_time_bounds().end_time
+        this_track_distance = this_track.get_moving_data().moving_distance
+        logging.debug("this_track_type: %s", this_track_type)
+        logging.debug("this_track_start_time: %s", this_track_start_time)
+        logging.debug("this_track_end_time: %s", this_track_end_time)
+        logging.debug("this_track_distance: %s", this_track_distance)
+        if len(new_new_tracks) == 0:
+            if this_track_type == 'walking':
+                logging.debug("starting new track")
+                new_new_tracks.append(this_track)
+            continue
+            # Don't start a track until there's a walking track
+        most_recent_track = new_new_tracks[-1]
+        most_recent_track_type = most_recent_track.type
+        most_recent_track_start_time = most_recent_track.get_time_bounds().start_time
+        most_recent_track_end_time = most_recent_track.get_time_bounds().end_time
+        most_recent_track_distance = most_recent_track.get_moving_data().moving_distance
+        logging.debug("most_recent_track_type: %s", most_recent_track_type)
+        logging.debug("most_recent_track_start_time: %s", most_recent_track_start_time)
+        logging.debug("most_recent_track_end_time: %s", most_recent_track_end_time)
+        logging.debug("most_recent_track_distance: %s", most_recent_track_distance)
 
-    for summary in summaries:
-        print(json.dumps(summary, default=json_util.default))
+        if this_track_distance < MAX_DISTANCE_METERS_TO_ABSORB_TRACK:
+            logging.debug("absorbing new track")
+            logging.debug("(distance %f < %f)", this_track_distance,
+                          MAX_DISTANCE_METERS_TO_ABSORB_TRACK)
+            for segment in this_track.segments:
+                most_recent_track.segments.append(segment)
+        elif this_track_start_time - most_recent_track_end_time < max_empty_delta:
+            logging.debug("absorbing new track")
+            logging.debug("(empty minutes %s < %s)", this_track_start_time -
+                          most_recent_track_end_time,
+                          datetime.timedelta(
+                              minutes=MAX_EMPTY_MINUTES_TO_ALLOW_BETWEEN_TRACKS))
+            for segment in this_track.segments:
+                most_recent_track.segments.append(segment)
+        elif this_track_type == 'walking':
+            logging.debug("starting new track")
+            new_new_tracks.append(this_track)
+        else:
+            logging.debug("ignoring track")
 
+    new_track_length = len(new_new_tracks)
+    logging.warning("new_track_length: %s", new_track_length)
 
-def process_non_gpx_data(start_date, end_date, start_time, entry_source, activity_type,
-                         elapsed_time, distance, calories, num_gps_points):
-    """
-        handle strava activities or livetrack sessions
+    gpx = gpxpy.gpx.GPX()
 
-        All arguments are required except calories and num_gps_points.
-        `calories` can be None or 0 and they'll be auto computed.
-        `num_gps_points` can be 1. It will be used to choose when multiple days are
-                         considered for inclusion.
-    """
-
-    if start_date in SUMMARIES_BY_DATE:
-        summary = SUMMARIES_BY_DATE[start_date]
-    elif end_date in SUMMARIES_BY_DATE:
-        summary = SUMMARIES_BY_DATE[end_date]
-    else:
-        summary = new_summary(start_time, ARGS.entry_source)
-        SUMMARIES_BY_DATE[start_date] = summary
-
-    if 'calories_by_entry_source' not in summary:
-        summary['calories_by_entry_source'] = {}
-    if entry_source not in summary['calories_by_entry_source']:
-        summary['calories_by_entry_source'][entry_source] = 0
-
-    summary_type = get_summary_type_from_other_type(activity_type)
-    key = summary_type.capitalize()
-    if key not in summary:
-        summary[key] = distance
-    else:
-        summary[key] += distance
-
-    if calories == 0 or calories is None:
-        calories = compute_activity_calories(
-            activity_type=summary_type,
-            distance_meters=distance,
-            duration_secs=elapsed_time)
-
-    if key not in summary['calories_by_type']:
-        summary['calories_by_type'][key] = 0
-    summary['calories_by_type'][key] += calories
-
-    time_key = key + " Seconds"
-    if time_key not in summary:
-        summary[time_key] = elapsed_time
-    else:
-        summary[time_key] += elapsed_time
-
-    logging.debug("adding {calories} to total for source: {entry_source}".format(calories=calories,
-                  entry_source=entry_source))
-    summary['calories_by_entry_source'][entry_source] += calories
-
-    summary['Time'] += elapsed_time
-    summary['Distance'] += distance
-    summary['Calories'] += calories
-    # Account for weird cases of arc data with weird times including strava from weird times
-    # TODO use actual gps points form strava
-    summary["GPS Points"] += num_gps_points
+    for new_new_track in new_new_tracks:
+        gpx.tracks.append(new_new_track)
+    print(gpx.to_xml())
 
 
 if __name__ == '__main__':
-    PARSER = argparse.ArgumentParser(description='gpx to daily summary')
-    PARSER.add_argument('--entry-source', help='Entry Source for db entries', default="None")
+    PARSER = argparse.ArgumentParser(description='gpx to walk tracks')
     PARSER.add_argument('--debug', help='Display debugging info', action='store_true')
     PARSER.add_argument('--filename', help='File to read', default=None)
     PARSER.add_argument('--date', help='Override date in gpx data (required format: YYYY-MM-DD)',
                         default=None)
-    PARSER.add_argument('--skip-strava', help='Do not merge Strava activities', default=False,
-                        action='store_true')
-    PARSER.add_argument('--allow-multiple', help='Allow multiple date summaries in output',
-                        action='store_true')
+    PARSER.add_argument('--skip-strava', help='Do not ignore overlapping Strava activities',
+                        default=False, action='store_true')
     ARGS = PARSER.parse_args()
 
     FORMAT = '%(levelname)s:%(funcName)s:%(lineno)s %(message)s'
@@ -702,9 +477,7 @@ if __name__ == '__main__':
 
     if ARGS.debug:
         logging.getLogger().setLevel(getattr(logging, "DEBUG"))
-
-    if not ARGS.entry_source:
-        logging.warning('No entry source defined. Using "None"')
+        logging.debug("Debug logging enabled")
 
     CALORIES_PER_MILE_BY_ACTIVITY_TYPE = erniegps.calories.CALORIES_PER_MILE_BY_ACTIVITY_TYPE
 
@@ -713,19 +486,15 @@ if __name__ == '__main__':
     else:
         GPX_FILE = sys.stdin
 
-    if ARGS.debug:
-        logging.getLogger().setLevel(getattr(logging, "DEBUG"))
-        logging.debug("Debug logging enabled")
-
     GPX = gpxpy.parse(GPX_FILE)
 
     logging.debug("read input")
 
-    SUMMARIES_BY_DATE = dict()
+    NEW_TRACKS = []
     STRAVA_ACTIVITIES = []
     LIVETRACK_SESSIONS = []
     DATE = ARGS.date
 
     UREG = pint.UnitRegistry()
-
+    # cProfile.run('main()')
     main()
