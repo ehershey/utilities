@@ -310,3 +310,15 @@ def process_activity(activity):
     del activity['trackpoints']
 
     return activity
+
+
+def get_first_point(track):
+    for segment in track.segments:
+        if len(segment.points) > 0:
+            return segment.points[0]
+
+
+def get_last_point(track):
+    for segment in reversed(track.segments):
+        if len(segment.points) > 0:
+            return segment.points[-1]
