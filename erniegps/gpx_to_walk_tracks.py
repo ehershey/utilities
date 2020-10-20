@@ -23,7 +23,7 @@ import erniegps.db
 from pytz import reference
 
 
-autoupdate_version = 83
+autoupdate_version = 85
 
 MAX_DISTANCE_METERS_TO_ABSORB_TRACK = 10
 MAX_EMPTY_MINUTES_TO_ALLOW_BETWEEN_TRACKS = 30
@@ -455,11 +455,12 @@ def main():
     new_track_length = len(new_new_tracks)
     logging.warning("new_track_length: %s", new_track_length)
 
-    gpx = gpxpy.gpx.GPX()
-
     for new_new_track in new_new_tracks:
+        gpx = gpxpy.gpx.GPX()
         gpx.tracks.append(new_new_track)
-    print(gpx.to_xml())
+        logging.debug("gpx: %s", gpx.to_xml())
+        if not ARGS.skip_strava_upload:
+            print("uploading to strava")
 
 
 if __name__ == '__main__':
@@ -469,6 +470,8 @@ if __name__ == '__main__':
     PARSER.add_argument('--date', help='Override date in gpx data (required format: YYYY-MM-DD)',
                         default=None)
     PARSER.add_argument('--skip-strava', help='Do not ignore overlapping Strava activities',
+                        default=False, action='store_true')
+    PARSER.add_argument('--skip-strava-upload', help='Do not upload to Strava',
                         default=False, action='store_true')
     ARGS = PARSER.parse_args()
 
