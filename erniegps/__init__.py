@@ -240,14 +240,16 @@ def get_is_negative_split(trackpoints, advantage_allowed=True):
         # it changes from a positive split to a negative split
         #
         for end_percentage in range(1, PERCENTAGE_MARGIN_SPLIT_ADVANTAGE + 1):
-            end_points_to_trim = len(trackpoints) * end_percentage / 100
+            end_points_to_trim = len(trackpoints) * end_percentage // 100
             logging.info("end_percentage: %d", end_percentage)
             logging.info("end_points_to_trim: %d", end_points_to_trim)
 
+            new_last_index = len(trackpoints) - end_points_to_trim
+            logging.info("new_last_index: %d", new_last_index)
+
             if get_is_negative_split(
                     trackpoints[
-                        0:
-                        len(trackpoints) - end_points_to_trim], False):
+                        0:new_last_index], False):
                 return True
 
         # despite all efforts, not negative

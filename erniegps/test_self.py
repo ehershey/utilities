@@ -5,6 +5,7 @@ Test erniegps module
 
 To run:
     $ pytest
+    $ pytest-3
 """
 
 import datetime
