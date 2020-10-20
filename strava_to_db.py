@@ -15,7 +15,7 @@ import pickle
 import time
 import datetime
 
-autoupdate_version = 74
+autoupdate_version = 75
 
 DB_URL = 'mongodb://localhost:27017/'
 
@@ -354,7 +354,12 @@ def update_db(debug=False,
         print("Rate limit error. Sleeping {timeout} seconds".format(timeout=timeout))
         print()
         time.sleep(timeout)
-        main()
+        process_activities(weeks_back=weeks_back,
+                           collection=get_collection(),
+                           redo=redo,
+                           num_weeks_to_process=num_weeks_to_process,
+                           date=date,
+                           lone_detailed_activity=lone_detailed_activity)
 
 
 if __name__ == '__main__':
