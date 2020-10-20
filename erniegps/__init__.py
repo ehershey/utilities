@@ -36,6 +36,23 @@ class Speed(m26.Speed):
             return m26.Speed.mph(self)
 
 
+class GpxHandler(ggps.GpxHandler):
+    def __init__(self):
+        ggps.GpxHandler.__init__(self)
+        self.activity_type = None
+        self.notes = None
+
+    def endElement(self, tag_name):
+        if tag_name == 'Notes':
+            self.notes = self.curr_text
+        ggps.GpxHandler.endElement(self, tag_name)
+
+    def endElement(self, tag_name):
+        if tag_name == 'type':
+            self.activity_type = self.curr_text
+        ggps.GpxHandler.endElement(self, tag_name)
+
+
 class TcxHandler(ggps.TcxHandler):
     def __init__(self):
         ggps.TcxHandler.__init__(self)
@@ -149,7 +166,7 @@ def read_activity(filename):
     if 'tcx' in filename:
         handler = TcxHandler()
     elif 'gpx' in filename:
-        handler = ggps.GpxHandler()
+        handler = GpxHandler()
 
     try:
         handler.parse(filename)

@@ -2,6 +2,9 @@
 # -*- coding: utf-8 -*-
 """
 Test erniegps module
+
+To run:
+    $ pytest
 """
 
 import datetime
@@ -63,7 +66,7 @@ def test_read_gpx():
     Make sure reading gpx files works
     """
     activity = erniegps.read_activity(
-        '{0}/Dropbox/Misc/Arc Export/2018-07-20.gpx'.format(
+        '{0}/Dropbox/Misc/Arc Export/Export/GPX/Daily/2018-07-20.gpx'.format(
             os.environ['HOME']))
     trackpoints = activity['trackpoints']
     assert len(trackpoints) == 2162
