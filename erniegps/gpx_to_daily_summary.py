@@ -44,7 +44,7 @@ import erniegps.db
 from pytz import reference
 
 
-autoupdate_version = 93
+autoupdate_version = 95
 
 
 def get_summary_type_from_other_type(other_type):
@@ -692,6 +692,7 @@ if __name__ == '__main__':
 
     if ARGS.debug:
         logging.getLogger().setLevel(getattr(logging, "DEBUG"))
+        logging.debug("Debug logging enabled")
 
     if not ARGS.entry_source:
         logging.warning('No entry source defined. Using "None"')
@@ -702,10 +703,6 @@ if __name__ == '__main__':
         GPX_FILE = open(ARGS.filename)
     else:
         GPX_FILE = sys.stdin
-
-    if ARGS.debug:
-        logging.getLogger().setLevel(getattr(logging, "DEBUG"))
-        logging.debug("Debug logging enabled")
 
     GPX = gpxpy.parse(GPX_FILE)
 
