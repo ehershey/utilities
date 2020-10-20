@@ -15,7 +15,7 @@ import pickle
 import time
 import datetime
 
-autoupdate_version = 79
+autoupdate_version = 74
 
 DB_URL = 'mongodb://localhost:27017/'
 
@@ -180,18 +180,18 @@ def process_activities(weeks_back=1,
                        redo=False,
                        num_weeks_to_process=None,
                        date=None,
-                       activity_id=None):
+                       lone_detailed_activity=None):
 
     """
     process activities - precendece is:
-    1) The single passed in activity id (presumably from a recent upload)
+    1) The single passed in detailed activity (presumably from a recent upload)
     2) Hit strava and download anything on the passed in day (GMT)
     3) Hit strava and grab weeks at a time
     """
 
-    if activity_id is not None:
-        logging.debug("activity_id: %s", activity_id)
-        activities = [{"id": activity_id}]
+    if lone_detailed_activity is not None:
+        logging.debug("lone_detailed_activity: %s", lone_detailed_activity)
+        activities = [lone_detailed_activity]
     else:
         # search by after/before timestamps
         if date is None:
@@ -224,16 +224,19 @@ def process_activities(weeks_back=1,
         db_activity = collection.find_one(activity_query)
         create_activity = False
         create_activity_reason = None
-        try:
-            detail_activity = stravaclient.get_activity(activity.id)
-        # stravalib.exc.AccessUnauthorized: Unauthorized: Authorization Error:
-        # [{'resource': 'Application', 'field': '', 'code': 'invalid'}]
-        except stravalib.exc.AccessUnauthorized as e:
-            wait = 30
-            logging.warn("Access unauthorized error on get_activity()")
-            logging.warn("Waiting {wait} seconds and retrying".format(wait=wait))
-            time.sleep(wait)
-            detail_activity = stravaclient.get_activity(activity.id)
+        if lone_detailed_activity:
+            detail_activity = lone_detailed_activity
+        else:
+            try:
+                detail_activity = stravaclient.get_activity(activity.id)
+            # stravalib.exc.AccessUnauthorized: Unauthorized: Authorization Error:
+            # [{'resource': 'Application', 'field': '', 'code': 'invalid'}]
+            except stravalib.exc.AccessUnauthorized as e:
+                wait = 30
+                logging.warn("Access unauthorized error on get_activity()")
+                logging.warn("Waiting {wait} seconds and retrying".format(wait=wait))
+                time.sleep(wait)
+                detail_activity = stravaclient.get_activity(activity.id)
 
         # TODO: use streams to detect gaps to allow other activity data to pass through
         # between gaps in strava activities (e.g. if walking around during stopped
