@@ -19,14 +19,17 @@ import pint
 from bson import json_util
 from pymongo import MongoClient
 import erniegps.calories
+import erniegps
 import erniegps.db
 from pytz import reference
+import strava_to_db
 
 
-autoupdate_version = 85
+autoupdate_version = 107
 
 MAX_DISTANCE_METERS_TO_ABSORB_TRACK = 10
 MAX_EMPTY_MINUTES_TO_ALLOW_BETWEEN_TRACKS = 30
+MAX_DISTANCE_METERS_TO_ALLOW_BETWEEN_TRACKS = 20
 
 
 def process_track(track):
@@ -252,7 +255,7 @@ def process_track(track):
     NEW_TRACKS.append(track)
 
 
-def main():
+def main(skip_strava=False, date=None, skip_strava_upload=False):
     """ run as a script """
 
     # get all strava and livetrack activities that overlap track dates
@@ -260,7 +263,7 @@ def main():
 
     seen_strava_activity_ids = {}
     seen_livetrack_session_ids = {}
-    if not ARGS.skip_strava:
+    if not skip_strava:
         db_url = erniegps.db.get_db_url()
         mongoclient = MongoClient(db_url)
 
@@ -290,8 +293,8 @@ def main():
                 earliest_start_date = waypoint_timestamp_date
             if latest_end_date is None or waypoint_timestamp_date > latest_end_date:
                 latest_end_date = waypoint_timestamp_date
-        if DATE:
-            date_arg_obj = datetime.datetime.strptime(DATE, '%Y-%m-%d')
+        if date:
+            date_arg_obj = datetime.datetime.strptime(date, '%Y-%m-%d')
 
             if earliest_start_date is None or date_arg_obj < earliest_start_date:
                 earliest_start_date = date_arg_obj
@@ -394,8 +397,8 @@ def main():
     logging.debug("total non-overlapping tracks to consider: %d", len(new_tracks))
     logging.debug("combining tracks")
 
-    if ARGS.date:
-        date_arg_obj = datetime.datetime.strptime(ARGS.date, '%Y-%m-%d')
+    if date:
+        date_arg_obj = datetime.datetime.strptime(date, '%Y-%m-%d')
         new_tracks = (new_track for new_track in new_tracks if
                       new_track.get_time_bounds().start_time.date == date_arg_obj or
                       new_track.get_time_bounds().end_time.date == date_arg_obj)
@@ -432,13 +435,26 @@ def main():
         logging.debug("most_recent_track_end_time: %s", most_recent_track_end_time)
         logging.debug("most_recent_track_distance: %s", most_recent_track_distance)
 
+        this_track_start_point = erniegps.get_first_point(this_track)
+        most_recent_track_end_point = erniegps.get_last_point(most_recent_track)
+
+        logging.debug("this_track_start_point: %s", this_track_start_point)
+        logging.debug("most_recent_track_end_point: %s", most_recent_track_end_point)
+
+        distance_from_last_track = this_track_start_point.distance_3d(most_recent_track_end_point)
+        logging.debug("distance_from_last_track: %s", distance_from_last_track)
+
+        time_diff = this_track_start_time - most_recent_track_end_time
+
+        logging.debug("time_diff: %s", time_diff)
+
         if this_track_distance < MAX_DISTANCE_METERS_TO_ABSORB_TRACK:
             logging.debug("absorbing new track")
             logging.debug("(distance %f < %f)", this_track_distance,
                           MAX_DISTANCE_METERS_TO_ABSORB_TRACK)
             for segment in this_track.segments:
                 most_recent_track.segments.append(segment)
-        elif this_track_start_time - most_recent_track_end_time < max_empty_delta:
+        elif time_diff < max_empty_delta:
             logging.debug("absorbing new track")
             logging.debug("(empty minutes %s < %s)", this_track_start_time -
                           most_recent_track_end_time,
@@ -457,10 +473,18 @@ def main():
 
     for new_new_track in new_new_tracks:
         gpx = gpxpy.gpx.GPX()
+        gpx.simplify()
         gpx.tracks.append(new_new_track)
         logging.debug("gpx: %s", gpx.to_xml())
-        if not ARGS.skip_strava_upload:
+        if not skip_strava_upload:
             print("uploading to strava")
+            uploader = strava_to_db.upload_activity(gpx_xml=gpx.to_xml(),
+                                                    name="Auto walk upload",
+                                                    activity_type="walk")
+            print("waiting for upload")
+            activity = uploader.wait(timeout=30)
+            # strava_to_db.update_db(activity_id = response.)
+            strava_to_db.update_db(lone_detailed_activity=activity)
 
 
 if __name__ == '__main__':
@@ -473,19 +497,19 @@ if __name__ == '__main__':
                         default=False, action='store_true')
     PARSER.add_argument('--skip-strava-upload', help='Do not upload to Strava',
                         default=False, action='store_true')
-    ARGS = PARSER.parse_args()
+    args = PARSER.parse_args()
 
     FORMAT = '%(levelname)s:%(funcName)s:%(lineno)s %(message)s'
     logging.basicConfig(format=FORMAT)
 
-    if ARGS.debug:
+    if args.debug:
         logging.getLogger().setLevel(getattr(logging, "DEBUG"))
         logging.debug("Debug logging enabled")
 
     CALORIES_PER_MILE_BY_ACTIVITY_TYPE = erniegps.calories.CALORIES_PER_MILE_BY_ACTIVITY_TYPE
 
-    if ARGS.filename:
-        GPX_FILE = open(ARGS.filename)
+    if args.filename:
+        GPX_FILE = open(args.filename)
     else:
         GPX_FILE = sys.stdin
 
@@ -496,8 +520,7 @@ if __name__ == '__main__':
     NEW_TRACKS = []
     STRAVA_ACTIVITIES = []
     LIVETRACK_SESSIONS = []
-    DATE = ARGS.date
 
     UREG = pint.UnitRegistry()
     # cProfile.run('main()')
-    main()
+    main(skip_strava=args.skip_strava, date=args.date, skip_strava_upload=args.skip_strava_upload)
