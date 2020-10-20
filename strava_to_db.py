@@ -15,7 +15,7 @@ import pickle
 import time
 import datetime
 
-autoupdate_version = 22
+autoupdate_version = 41
 
 DB_URL = 'mongodb://localhost:27017/'
 
@@ -48,7 +48,12 @@ def get_args():
         default=None,
         help='Number of weeks to process, starting with weeks_back',
         type=int)
-
+    parser.add_argument(
+        '--date',
+        required=False,
+        default=None,
+        help='Do a single day (mutually exclusive with weeks_back and num_weeks_to_process)',
+        type=datetime.date.fromisoformat)
     parser.add_argument(
         '--oauth_code',
         required=False,
@@ -152,21 +157,43 @@ def get_oauth_data(oauth_code=None, config_data={}, force_access_token_refresh=F
     stravaclient.token_expires_at = config_data['expires_at']
 
 
-def process_activities(weeks_back=1, collection=None, redo=False, num_weeks_to_process=None):
-    after = datetime.datetime.now() - datetime.timedelta(weeks=weeks_back)
+def process_activities(weeks_back=1,
+                       collection=None,
+                       redo=False,
+                       num_weeks_to_process=None,
+                       date=None,
+                       lone_detailed_activity=None):
 
-    if num_weeks_to_process is not None:
-        before = after + datetime.timedelta(weeks=num_weeks_to_process)
+    """
+    process activities - precendece is:
+    1) The single passed in detailed activity (presumably from a recent upload)
+    2) Hit strava and download anything on the passed in day (GMT)
+    3) Hit strava and grab weeks at a time
+    """
+
+    if lone_detailed_activity is not None:
+        activities = [lone_detailed_activity]
     else:
-        before = None
+        # search by after/before timestamps
+        if date is None:
 
-    # after = datetime.datetime.now() - datetime.timedelta(weeks=weeks_back)
+            after = datetime.datetime.now() - datetime.timedelta(weeks=weeks_back)
 
-    logging.debug("Download activities after: {after}".format(after=after))
-    logging.debug("Download activities before: {before}".format(before=before))
+            if num_weeks_to_process is not None:
+                before = after + datetime.timedelta(weeks=num_weeks_to_process)
+            else:
+                before = None
+        else:
+            after = datetime.datetime.combine(date, datetime.datetime.min.time())
+            before = before + datetime.timedelta(days=1)
+
+        activities = stravaclient.get_activities(after=after, before=before)
+
+        logging.debug("Download activities after: {after}".format(after=after))
+        logging.debug("Download activities before: {before}".format(before=before))
 
     created_count = 0
-    for activity in stravaclient.get_activities(after=after, before=before):
+    for activity in activities:
 
         # for field in EXTRACT_FIELDS:
 
@@ -178,16 +205,19 @@ def process_activities(weeks_back=1, collection=None, redo=False, num_weeks_to_p
         db_activity = collection.find_one(activity_query)
         create_activity = False
         create_activity_reason = None
-        try:
-            detail_activity = stravaclient.get_activity(activity.id)
-        # stravalib.exc.AccessUnauthorized: Unauthorized: Authorization Error:
-        # [{'resource': 'Application', 'field': '', 'code': 'invalid'}]
-        except stravalib.exc.AccessUnauthorized as e:
-            wait = 30
-            logging.warn("Access unauthorized error on get_activity()")
-            logging.warn("Waiting {wait} seconds and retrying".format(wait=wait))
-            time.sleep(wait)
-            detail_activity = stravaclient.get_activity(activity.id)
+        if lone_detailed_activity:
+            detail_activity = lone_detailed_activity
+        else:
+            try:
+                detail_activity = stravaclient.get_activity(activity.id)
+            # stravalib.exc.AccessUnauthorized: Unauthorized: Authorization Error:
+            # [{'resource': 'Application', 'field': '', 'code': 'invalid'}]
+            except stravalib.exc.AccessUnauthorized as e:
+                wait = 30
+                logging.warn("Access unauthorized error on get_activity()")
+                logging.warn("Waiting {wait} seconds and retrying".format(wait=wait))
+                time.sleep(wait)
+                detail_activity = stravaclient.get_activity(activity.id)
 
         # TODO: use streams to detect gaps to allow other activity data to pass through
         # between gaps in strava activities (e.g. if walking around during stopped
@@ -242,11 +272,15 @@ def main():
 
     args = get_args()
 
+    if args.date and (args.num_weeks_to_process is not None or args.weeks_back != 1):
+        logging.warning("Letting --date override --num_weeks_to_process and --weeks_back")
+
     update_db(debug=args.debug,
               oauth_code=args.oauth_code,
               redo=args.redo,
               force_access_token_refresh=args.force_access_token_refresh,
-              num_weeks_to_process=args.weeks_back, weeks_back=args.weeks_back)
+              num_weeks_to_process=args.weeks_back, weeks_back=args.weeks_back,
+              date=args.date)
 
 
 def update_db(debug=False,
@@ -254,7 +288,8 @@ def update_db(debug=False,
               redo=False,
               force_access_token_refresh=False,
               num_weeks_to_process=1,
-              weeks_back=1):
+              weeks_back=1,
+              date=None):
     """
     does it all
     """
@@ -278,7 +313,8 @@ def update_db(debug=False,
         process_activities(weeks_back=weeks_back,
                            collection=collection,
                            redo=redo,
-                           num_weeks_to_process=num_weeks_to_process)
+                           num_weeks_to_process=num_weeks_to_process,
+                           date=date)
     except stravalib.exc.RateLimitExceeded as e:
         timeout = e.timeout
         print("Rate limit error. Sleeping {timeout} seconds".format(timeout=timeout))
