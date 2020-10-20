@@ -15,7 +15,7 @@ import pickle
 import time
 import datetime
 
-autoupdate_version = 41
+autoupdate_version = 68
 
 DB_URL = 'mongodb://localhost:27017/'
 
@@ -30,6 +30,16 @@ PICKLE_FILE = os.environ['HOME'] + "/.strava_pickle"
 ACTIVITY_VERSION = 0.1
 
 stravaclient = Client()
+
+
+def upload_activity(gpx_xml=None,
+                    name=None,
+                    activity_type=None):
+    init_strava()
+    return stravaclient.upload_activity(activity_file=gpx_xml,
+                                        name=name,
+                                        data_type='gpx',
+                                        activity_type=activity_type)
 
 
 def get_args():
@@ -63,6 +73,11 @@ def get_args():
         '--force_access_token_refresh',
         default=False,
         help='Refresh access token regardless of expiration time',
+        action='store_true')
+    parser.add_argument(
+        '--force_reauth',
+        default=False,
+        help='Re-auth to strava',
         action='store_true')
     parser.add_argument(
         '--redo',
@@ -99,19 +114,21 @@ def setup_pickle():
         return {}
 
 
-def get_oauth_data(oauth_code=None, config_data={}, force_access_token_refresh=False):
+def get_oauth_data(oauth_code=None, config_data={}, force_access_token_refresh=False,
+                   force_reauth=False):
 
-    if 'access_token' in config_data:
+    if 'access_token' in config_data and not force_reauth:
         logging.debug("Found auth config data in pickle")
     else:
-        logging.debug("No auth config in pickle, doing auth dance")
+        logging.debug("No auth config in pickle or force_reauth=true, doing auth dance")
 
-        if oauth_code:
+        if oauth_code and not force_reauth:
             code = oauth_code
         else:
 
             authorize_url = stravaclient.authorization_url(client_id=CLIENT_ID,
-                                                           redirect_uri='http://strava.ernie.org')
+                                                           redirect_uri='http://strava.ernie.org',
+                                                           scope='write')
 
             print("authorize_url: {authorize_url}".format(authorize_url=authorize_url))
 
@@ -185,7 +202,7 @@ def process_activities(weeks_back=1,
                 before = None
         else:
             after = datetime.datetime.combine(date, datetime.datetime.min.time())
-            before = before + datetime.timedelta(days=1)
+            before = after + datetime.timedelta(days=1)
 
         activities = stravaclient.get_activities(after=after, before=before)
 
@@ -279,17 +296,40 @@ def main():
               oauth_code=args.oauth_code,
               redo=args.redo,
               force_access_token_refresh=args.force_access_token_refresh,
+              force_reauth=args.force_reauth,
               num_weeks_to_process=args.weeks_back, weeks_back=args.weeks_back,
               date=args.date)
+
+
+def get_collection():
+
+    mongoclient = MongoClient(DB_URL)
+
+    database = mongoclient[DB_NAME]
+
+    return database[COLLECTION_NAME]
+
+
+def init_strava(oauth_code=None, force_access_token_refresh=False,
+                force_reauth=False):
+
+    config_data = setup_pickle()
+
+    get_oauth_data(oauth_code=oauth_code,
+                   config_data=config_data,
+                   force_access_token_refresh=force_access_token_refresh,
+                   force_reauth=force_reauth)
 
 
 def update_db(debug=False,
               oauth_code=None,
               redo=False,
               force_access_token_refresh=False,
+              force_reauth=False,
               num_weeks_to_process=1,
               weeks_back=1,
-              date=None):
+              date=None,
+              lone_detailed_activity=None):
     """
     does it all
     """
@@ -297,24 +337,16 @@ def update_db(debug=False,
     if debug:
         logging.getLogger().setLevel(getattr(logging, "DEBUG"))
 
-    mongoclient = MongoClient(DB_URL)
-
-    database = mongoclient[DB_NAME]
-
-    collection = database[COLLECTION_NAME]
-
-    config_data = setup_pickle()
-
-    get_oauth_data(oauth_code=oauth_code,
-                   config_data=config_data,
-                   force_access_token_refresh=force_access_token_refresh)
-
+    init_strava(oauth_code=oauth_code,
+                force_reauth=force_reauth,
+                force_access_token_refresh=force_access_token_refresh)
     try:
         process_activities(weeks_back=weeks_back,
-                           collection=collection,
+                           collection=get_collection(),
                            redo=redo,
                            num_weeks_to_process=num_weeks_to_process,
-                           date=date)
+                           date=date,
+                           lone_detailed_activity=lone_detailed_activity)
     except stravalib.exc.RateLimitExceeded as e:
         timeout = e.timeout
         print("Rate limit error. Sleeping {timeout} seconds".format(timeout=timeout))
