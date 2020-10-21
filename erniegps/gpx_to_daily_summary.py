@@ -44,7 +44,7 @@ import erniegps.db
 from pytz import reference
 
 
-autoupdate_version = 95
+autoupdate_version = 96
 
 
 def get_summary_type_from_other_type(other_type):
@@ -180,10 +180,7 @@ def process_track(track):
         logging.debug("")
         logging.debug("processing livetrack session")
         logging.debug("livetrack_session: %s", livetrack_session)
-        if 'trackPoints' in livetrack_session:
-            trackpoints = livetrack_session['trackPoints']
-        else:
-            trackpoints = []
+        trackpoints = livetrack_session['trackPoints']
         logging.info("livetrack trackpoint count: %d", len(trackpoints))
         if len(trackpoints) == 0:
             session_start = dateutil.parser.parse(livetrack_session['start'])
@@ -515,6 +512,8 @@ def main():
 
             for livetrack_session in cursor:
                 if livetrack_session['sessionId'] not in seen_livetrack_session_ids:
+                    if 'trackPoints' not in livetrack_session:
+                        livetrack_session['trackPoints'] = []
                     LIVETRACK_SESSIONS.append(livetrack_session)
                     seen_livetrack_session_ids[livetrack_session['sessionId']] = True
 
