@@ -25,11 +25,18 @@ from pytz import reference
 import strava_to_db
 
 
-autoupdate_version = 115
+autoupdate_version = 140
 
-MAX_DISTANCE_METERS_TO_ABSORB_TRACK = 10
-MAX_EMPTY_MINUTES_TO_ALLOW_BETWEEN_TRACKS = 30
-MAX_DISTANCE_METERS_TO_ALLOW_BETWEEN_TRACKS = 20
+# limits for combining tracks
+#
+MAX_EMPTY_MINUTES_BETWEEN_COMBINED_TRACKS = 30
+MAX_DISTANCE_METERS_BETWEEN_COMBINED_TRACKS = 50
+
+
+# limits to include tracks in the end at all
+MIN_TRACK_DISTANCE_METERS = 30
+MIN_TRACK_DURATION_MINUTES = 1
+MIN_TRACK_GPS_POINTS = 10
 
 
 def process_track(track):
@@ -255,9 +262,7 @@ def process_track(track):
     NEW_TRACKS.append(track)
 
 
-def main(skip_strava=False, date=None, skip_strava_upload=False):
-    """ run as a script """
-
+def get_combined_tracks(skip_strava=False, date=None):
     # get all strava and livetrack activities that overlap track dates
     #
 
@@ -405,12 +410,13 @@ def main(skip_strava=False, date=None, skip_strava_upload=False):
                           new_track.get_time_bounds().end_time.date() == date_arg_obj)
 
     max_empty_delta = datetime.timedelta(
-            minutes=MAX_EMPTY_MINUTES_TO_ALLOW_BETWEEN_TRACKS)
+            minutes=MAX_EMPTY_MINUTES_BETWEEN_COMBINED_TRACKS)
     # Try really hard to reduce to single long walking tracks
-    # MAX_DISTANCE_METERS_TO_ABSORB_TRACK = 10
-    # MAX_EMPTY_MINUTES_TO_ALLOW_BETWEEN_TRACKS = 30
+    # MAX_EMPTY_MINUTES_BETWEEN_COMBINED_TRACKS = 30
     new_new_tracks = []
     for index in range(len(new_tracks)):
+        logging.debug("examining next pre-combined track")
+        logging.debug("index: %d", index)
         this_track = new_tracks[index]
         this_track_type = this_track.type
         this_track_start_time = this_track.get_time_bounds().start_time
@@ -421,11 +427,11 @@ def main(skip_strava=False, date=None, skip_strava_upload=False):
         logging.debug("this_track_end_time: %s", this_track_end_time)
         logging.debug("this_track_distance: %s", this_track_distance)
         if len(new_new_tracks) == 0:
-            if this_track_type == 'walking':
+            # Don't start a track until there's a running or walking track
+            if this_track_type in ('walking', 'running'):
                 logging.debug("starting new track")
                 new_new_tracks.append(this_track)
             continue
-            # Don't start a track until there's a walking track
         most_recent_track = new_new_tracks[-1]
         most_recent_track_type = most_recent_track.type
         most_recent_track_start_time = most_recent_track.get_time_bounds().start_time
@@ -449,21 +455,18 @@ def main(skip_strava=False, date=None, skip_strava_upload=False):
 
         logging.debug("time_diff: %s", time_diff)
 
-        if this_track_distance < MAX_DISTANCE_METERS_TO_ABSORB_TRACK:
+        logging.debug("Checking whether track can be absorbed.")
+        logging.debug("time_diff < max_empty_delta and")
+        logging.debug("distance_from_last_track < MAX_DISTANCE_METERS_BETWEEN_COMBINED_TRACKS")
+        logging.debug("%s < %s and", time_diff, max_empty_delta)
+        logging.debug("%f < %f", distance_from_last_track,
+                      MAX_DISTANCE_METERS_BETWEEN_COMBINED_TRACKS)
+        if time_diff < max_empty_delta and \
+           distance_from_last_track < MAX_DISTANCE_METERS_BETWEEN_COMBINED_TRACKS:
             logging.debug("absorbing new track")
-            logging.debug("(distance %f < %f)", this_track_distance,
-                          MAX_DISTANCE_METERS_TO_ABSORB_TRACK)
             for segment in this_track.segments:
                 most_recent_track.segments.append(segment)
-        elif time_diff < max_empty_delta:
-            logging.debug("absorbing new track")
-            logging.debug("(empty minutes %s < %s)", this_track_start_time -
-                          most_recent_track_end_time,
-                          datetime.timedelta(
-                              minutes=MAX_EMPTY_MINUTES_TO_ALLOW_BETWEEN_TRACKS))
-            for segment in this_track.segments:
-                most_recent_track.segments.append(segment)
-        elif this_track_type == 'walking':
+        elif this_track_type in ('walking', 'running'):
             logging.debug("starting new track")
             new_new_tracks.append(this_track)
         else:
@@ -472,10 +475,55 @@ def main(skip_strava=False, date=None, skip_strava_upload=False):
     new_track_length = len(new_new_tracks)
     logging.warning("new_track_length: %s", new_track_length)
 
-    for new_new_track in new_new_tracks:
+    # MIN_TRACK_DISTANCE_METERS = 30
+    # MIN_TRACK_DURATION_MINUTES = 1
+    # MIN_TRACK_GPS_POINTS = 10
+    logging.debug("MIN_TRACK_DISTANCE_METERS: %d", MIN_TRACK_DISTANCE_METERS)
+    logging.debug("MIN_TRACK_DURATION_MINUTES: %d", MIN_TRACK_DURATION_MINUTES)
+    logging.debug("MIN_TRACK_GPS_POINTS: %d", MIN_TRACK_GPS_POINTS)
+
+    min_duration = datetime.timedelta(minutes=MIN_TRACK_DURATION_MINUTES)
+
+    logging.debug("eliminating small tracks")
+
+    new_new_new_tracks = []
+    for track in new_new_tracks:
+        # skip if not big enough
+        #
+        distance = track.get_moving_data().moving_distance
+        start_time = track.get_time_bounds().start_time
+        end_time = track.get_time_bounds().end_time
+        duration = end_time - start_time
+        point_count = track.get_points_no()
+
+        logging.debug("distance: %d", distance)
+        if distance < MIN_TRACK_DISTANCE_METERS:
+            logging.debug("skipping due to distance")
+            continue
+
+        logging.debug("duration: %s", duration)
+        if duration < min_duration:
+            logging.debug("skipping due to duration")
+            continue
+
+        logging.debug("point_count: %d", point_count)
+        if point_count < MIN_TRACK_GPS_POINTS:
+            logging.debug("skipping due to point_count")
+            continue
+        new_new_new_tracks.append(track)
+
+    new_new_track_length = len(new_new_new_tracks)
+    logging.warning("new_new_track_length: %s", new_new_track_length)
+
+    return new_new_new_tracks
+
+
+def main(skip_strava=False, date=None, skip_strava_upload=False):
+    """ run as a script """
+    for track in get_combined_tracks(skip_strava=skip_strava, date=date):
         gpx = gpxpy.gpx.GPX()
         gpx.simplify()
-        gpx.tracks.append(new_new_track)
+        gpx.tracks.append(track)
         logging.debug("gpx: %s", gpx.to_xml())
         if not skip_strava_upload:
             print("uploading to strava")
