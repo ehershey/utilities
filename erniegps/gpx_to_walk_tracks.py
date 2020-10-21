@@ -25,7 +25,7 @@ from pytz import reference
 import strava_to_db
 
 
-autoupdate_version = 107
+autoupdate_version = 115
 
 MAX_DISTANCE_METERS_TO_ABSORB_TRACK = 10
 MAX_EMPTY_MINUTES_TO_ALLOW_BETWEEN_TRACKS = 30
@@ -398,10 +398,11 @@ def main(skip_strava=False, date=None, skip_strava_upload=False):
     logging.debug("combining tracks")
 
     if date:
-        date_arg_obj = datetime.datetime.strptime(date, '%Y-%m-%d')
-        new_tracks = (new_track for new_track in new_tracks if
-                      new_track.get_time_bounds().start_time.date == date_arg_obj or
-                      new_track.get_time_bounds().end_time.date == date_arg_obj)
+        date_arg_obj = datetime.datetime.strptime(date, '%Y-%m-%d').date()
+        logging.debug("date_arg_obj: %s", date_arg_obj)
+        new_tracks = list(new_track for new_track in new_tracks if
+                          new_track.get_time_bounds().start_time.date() == date_arg_obj or
+                          new_track.get_time_bounds().end_time.date() == date_arg_obj)
 
     max_empty_delta = datetime.timedelta(
             minutes=MAX_EMPTY_MINUTES_TO_ALLOW_BETWEEN_TRACKS)
