@@ -25,7 +25,7 @@ from pytz import reference
 import strava_to_db
 
 
-autoupdate_version = 140
+autoupdate_version = 141
 
 # limits for combining tracks
 #
@@ -570,6 +570,4 @@ if __name__ == '__main__':
     STRAVA_ACTIVITIES = []
     LIVETRACK_SESSIONS = []
 
-    UREG = pint.UnitRegistry()
-    # cProfile.run('main()')
     main(skip_strava=args.skip_strava, date=args.date, skip_strava_upload=args.skip_strava_upload)
