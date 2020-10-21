@@ -25,7 +25,7 @@ from pytz import reference
 import strava_to_db
 
 
-autoupdate_version = 141
+autoupdate_version = 168
 
 # limits for combining tracks
 #
@@ -37,6 +37,13 @@ MAX_DISTANCE_METERS_BETWEEN_COMBINED_TRACKS = 50
 MIN_TRACK_DISTANCE_METERS = 30
 MIN_TRACK_DURATION_MINUTES = 1
 MIN_TRACK_GPS_POINTS = 10
+
+AUTO_ACTIVITY_NAME = "Auto walk upload"
+
+
+NEW_TRACKS = []
+STRAVA_ACTIVITIES = []
+LIVETRACK_SESSIONS = []
 
 
 def process_track(track):
@@ -262,9 +269,13 @@ def process_track(track):
     NEW_TRACKS.append(track)
 
 
-def get_combined_tracks(skip_strava=False, date=None):
+def get_combined_tracks(gpx=None, gpx_file=None, skip_strava=False, skip_strava_auto_walking=False,
+                        date=None):
     # get all strava and livetrack activities that overlap track dates
     #
+
+    if gpx is None and type(gpx_file) == str:
+        gpx = gpxpy.parse(open(gpx_file))
 
     seen_strava_activity_ids = {}
     seen_livetrack_session_ids = {}
@@ -280,7 +291,7 @@ def get_combined_tracks(skip_strava=False, date=None):
 
         earliest_start_date = None
         latest_end_date = None
-        for track in GPX.tracks:
+        for track in gpx.tracks:
             start_time = track.get_time_bounds().start_time
             end_time = track.get_time_bounds().end_time
             if start_time is None:
@@ -291,7 +302,7 @@ def get_combined_tracks(skip_strava=False, date=None):
                 earliest_start_date = start_date
             if latest_end_date is None or end_date > latest_end_date:
                 latest_end_date = end_date
-        for waypoint in GPX.waypoints:
+        for waypoint in gpx.waypoints:
             waypoint_timestamp_date = datetime.datetime.combine(waypoint.time,
                                                                 datetime.datetime.min.time())
             if earliest_start_date is None or waypoint_timestamp_date < earliest_start_date:
@@ -371,7 +382,8 @@ def get_combined_tracks(skip_strava=False, date=None):
             cursor = activity_collection.find(query)
 
             for strava_activity in cursor:
-                if strava_activity['strava_id'] not in seen_strava_activity_ids:
+                if strava_activity['strava_id'] not in seen_strava_activity_ids and \
+                        strava_activity['name'] != AUTO_ACTIVITY_NAME:
                     STRAVA_ACTIVITIES.append(strava_activity)
                     seen_strava_activity_ids[strava_activity['strava_id']] = True
 
@@ -394,7 +406,7 @@ def get_combined_tracks(skip_strava=False, date=None):
 
     # uses LIVETRACK_SESSIONS and STRAVA_ACTIVITIES
     #
-    for track in GPX.tracks:
+    for track in gpx.tracks:
         process_track(track)
 
     new_tracks = NEW_TRACKS
@@ -518,9 +530,23 @@ def get_combined_tracks(skip_strava=False, date=None):
     return new_new_new_tracks
 
 
-def main(skip_strava=False, date=None, skip_strava_upload=False):
+def init():
+    NEW_TRACKS = []
+    STRAVA_ACTIVITIES = []
+    LIVETRACK_SESSIONS = []
+
+
+def main(gpx_input=None, skip_strava=False, date=None, skip_strava_upload=False):
+
+    init()
+    gpx = gpxpy.parse(gpx_input)
+
+    logging.debug("read input")
+
     """ run as a script """
-    for track in get_combined_tracks(skip_strava=skip_strava, date=date):
+    for track in get_combined_tracks(gpx=gpx,
+                                     skip_strava=skip_strava,
+                                     date=date):
         gpx = gpxpy.gpx.GPX()
         gpx.simplify()
         gpx.tracks.append(track)
@@ -528,7 +554,7 @@ def main(skip_strava=False, date=None, skip_strava_upload=False):
         if not skip_strava_upload:
             print("uploading to strava")
             uploader = strava_to_db.upload_activity(gpx_xml=gpx.to_xml(),
-                                                    name="Auto walk upload",
+                                                    name=AUTO_ACTIVITY_NAME,
                                                     activity_type="walk")
             print("waiting for upload")
             activity = uploader.wait(timeout=30)
@@ -562,12 +588,5 @@ if __name__ == '__main__':
     else:
         GPX_FILE = sys.stdin
 
-    GPX = gpxpy.parse(GPX_FILE)
-
-    logging.debug("read input")
-
-    NEW_TRACKS = []
-    STRAVA_ACTIVITIES = []
-    LIVETRACK_SESSIONS = []
-
-    main(skip_strava=args.skip_strava, date=args.date, skip_strava_upload=args.skip_strava_upload)
+    main(gpx_input=GPX_FILE, skip_strava=args.skip_strava, date=args.date,
+         skip_strava_upload=args.skip_strava_upload)
