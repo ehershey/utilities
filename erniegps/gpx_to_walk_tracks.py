@@ -25,7 +25,7 @@ from pytz import reference
 import strava_to_db
 
 
-autoupdate_version = 168
+autoupdate_version = 188
 
 # limits for combining tracks
 #
@@ -44,6 +44,10 @@ AUTO_ACTIVITY_NAME = "Auto walk upload"
 NEW_TRACKS = []
 STRAVA_ACTIVITIES = []
 LIVETRACK_SESSIONS = []
+
+
+def queryjsonhandler(obj):
+    obj.isoformat() if isinstance(obj, datetime.datetime) else json.JSONEncoder().default(obj)
 
 
 def process_track(track):
@@ -378,7 +382,7 @@ def get_combined_tracks(gpx=None, gpx_file=None, skip_strava=False, skip_strava_
                 {"$and": [{"end_date_local": {"$gte": start_date}},
                           {"end_date_local": {"$lt": end_date}}]}
                 ]}
-            logging.debug("query: %s", query)
+            logging.debug("query: %s", json.dumps(query, default=queryjsonhandler))
             cursor = activity_collection.find(query)
 
             for strava_activity in cursor:
@@ -536,7 +540,8 @@ def init():
     LIVETRACK_SESSIONS = []
 
 
-def main(gpx_input=None, skip_strava=False, date=None, skip_strava_upload=False):
+def main(gpx_input=None, skip_strava=False, skip_strava_auto_walking=False,
+         date=None, skip_strava_upload=False):
 
     init()
     gpx = gpxpy.parse(gpx_input)
@@ -546,6 +551,7 @@ def main(gpx_input=None, skip_strava=False, date=None, skip_strava_upload=False)
     """ run as a script """
     for track in get_combined_tracks(gpx=gpx,
                                      skip_strava=skip_strava,
+                                     skip_strava_auto_walking=skip_strava_auto_walking,
                                      date=date):
         gpx = gpxpy.gpx.GPX()
         gpx.simplify()
@@ -570,6 +576,11 @@ if __name__ == '__main__':
                         default=None)
     PARSER.add_argument('--skip-strava', help='Do not ignore overlapping Strava activities',
                         default=False, action='store_true')
+    PARSER.add_argument('--skip-strava-auto-walking',
+                        help="""
+                        Do not ignore overlapping Strava activities (only auto walking tracks)
+                        """,
+                        default=False, action='store_true')
     PARSER.add_argument('--skip-strava-upload', help='Do not upload to Strava',
                         default=False, action='store_true')
     args = PARSER.parse_args()
@@ -588,5 +599,8 @@ if __name__ == '__main__':
     else:
         GPX_FILE = sys.stdin
 
-    main(gpx_input=GPX_FILE, skip_strava=args.skip_strava, date=args.date,
+    main(gpx_input=GPX_FILE,
+         skip_strava=args.skip_strava,
+         skip_strava_auto_walking=args.skip_strava_auto_walking,
+         date=args.date,
          skip_strava_upload=args.skip_strava_upload)
