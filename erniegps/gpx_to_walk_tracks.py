@@ -25,7 +25,7 @@ from pytz import reference
 import strava_to_db
 
 
-autoupdate_version = 188
+autoupdate_version = 199
 
 # limits for combining tracks
 #
@@ -36,7 +36,7 @@ MAX_DISTANCE_METERS_BETWEEN_COMBINED_TRACKS = 50
 # limits to include tracks in the end at all
 MIN_TRACK_DISTANCE_METERS = 30
 MIN_TRACK_DURATION_MINUTES = 1
-MIN_TRACK_GPS_POINTS = 10
+MIN_TRACK_GPS_POINTS = 21  # 2020-10-17 1:30am and others on same day
 
 AUTO_ACTIVITY_NAME = "Auto walk upload"
 
@@ -44,10 +44,6 @@ AUTO_ACTIVITY_NAME = "Auto walk upload"
 NEW_TRACKS = []
 STRAVA_ACTIVITIES = []
 LIVETRACK_SESSIONS = []
-
-
-def queryjsonhandler(obj):
-    obj.isoformat() if isinstance(obj, datetime.datetime) else json.JSONEncoder().default(obj)
 
 
 def process_track(track):
@@ -382,12 +378,13 @@ def get_combined_tracks(gpx=None, gpx_file=None, skip_strava=False, skip_strava_
                 {"$and": [{"end_date_local": {"$gte": start_date}},
                           {"end_date_local": {"$lt": end_date}}]}
                 ]}
-            logging.debug("query: %s", json.dumps(query, default=queryjsonhandler))
+            logging.debug("query: %s", json.dumps(query, default=erniegps.queryjsonhandler))
             cursor = activity_collection.find(query)
 
             for strava_activity in cursor:
                 if strava_activity['strava_id'] not in seen_strava_activity_ids and \
-                        strava_activity['name'] != AUTO_ACTIVITY_NAME:
+                        ((not skip_strava_auto_walking) or
+                         strava_activity['name'] != AUTO_ACTIVITY_NAME):
                     STRAVA_ACTIVITIES.append(strava_activity)
                     seen_strava_activity_ids[strava_activity['strava_id']] = True
 
@@ -397,7 +394,7 @@ def get_combined_tracks(gpx=None, gpx_file=None, skip_strava=False, skip_strava_
                 {"$and": [{"end": {"$gte": str(start_date)}},
                           {"end": {"$lt": str(end_date)}}]}
                 ]}
-            logging.debug("query: %s", query)
+            logging.debug("query: %s", json.dumps(query, default=erniegps.queryjsonhandler))
             cursor = session_collection.find(query)
 
             for livetrack_session in cursor:

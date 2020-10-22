@@ -8,6 +8,8 @@ import dateutil.parser
 import ggps
 import m26
 import pytz
+import datetime
+import json
 
 MAX_SPLIT_DEPTH = 30
 
@@ -322,3 +324,13 @@ def get_last_point(track):
     for segment in reversed(track.segments):
         if len(segment.points) > 0:
             return segment.points[-1]
+
+
+def queryjsonhandler(obj):
+    """
+    https://stackoverflow.com/questions/455580/json-datetime-between-python-and-javascript
+    """
+    if isinstance(obj, datetime.datetime):
+        return obj.isoformat()
+    else:
+        return json.JSONEncoder().default(obj)

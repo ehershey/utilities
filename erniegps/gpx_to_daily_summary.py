@@ -41,10 +41,11 @@ from bson import json_util
 from pymongo import MongoClient
 import erniegps.calories
 import erniegps.db
+import erniegps
 from pytz import reference
 
 
-autoupdate_version = 96
+autoupdate_version = 97
 
 
 def get_summary_type_from_other_type(other_type):
@@ -493,7 +494,7 @@ def main():
                 {"$and": [{"end_date_local": {"$gte": start_date}},
                           {"end_date_local": {"$lt": end_date}}]}
                 ]}
-            logging.debug("query: %s", query)
+            logging.debug("query: %s", json.dumps(query, default=erniegps.queryjsonhandler))
             cursor = activity_collection.find(query)
 
             for strava_activity in cursor:
@@ -507,7 +508,7 @@ def main():
                 {"$and": [{"end": {"$gte": str(start_date)}},
                           {"end": {"$lt": str(end_date)}}]}
                 ]}
-            logging.debug("query: %s", query)
+            logging.debug("query: %s", json.dumps(query, default=erniegps.queryjsonhandler))
             cursor = session_collection.find(query)
 
             for livetrack_session in cursor:
