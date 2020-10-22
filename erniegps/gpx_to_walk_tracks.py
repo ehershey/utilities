@@ -22,10 +22,11 @@ import erniegps.calories
 import erniegps
 import erniegps.db
 from pytz import reference
+import pytz
 import strava_to_db
 
 
-autoupdate_version = 201
+autoupdate_version = 202
 
 # limits for combining tracks
 #
@@ -91,9 +92,9 @@ def process_track(track):
 
         if activity_start.tzinfo is None:
             if track is not None and track_start is not None and track_start.tzinfo is not None:
-                logging.debug("copying tzinfo from track start")
-                activity_start = strava_activity['start_date'].replace(tzinfo=track_start.tzinfo)
-                activity_end = strava_activity['end_date'].replace(tzinfo=track_end.tzinfo)
+                logging.debug("copying tzinfo from UTC")
+                activity_start = strava_activity['start_date'].replace(tzinfo=pytz.utc)
+                activity_end = strava_activity['end_date'].replace(tzinfo=pytz.utc)
             else:
                 logging.debug("copying tzinfo from pytz.reference")
                 activity_start = activity_start.replace(tzinfo=reference.LocalTimezone())
