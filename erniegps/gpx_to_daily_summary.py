@@ -43,9 +43,10 @@ import erniegps.calories
 import erniegps.db
 import erniegps
 from pytz import reference
+import pytz
 
 
-autoupdate_version = 99
+autoupdate_version = 100
 
 
 def get_summary_type_from_other_type(other_type):
