@@ -45,7 +45,7 @@ import erniegps
 from pytz import reference
 
 
-autoupdate_version = 97
+autoupdate_version = 98
 
 
 def get_summary_type_from_other_type(other_type):
@@ -165,8 +165,8 @@ def process_track(track):
         if activity_start.tzinfo is None:
             if track is not None and track_start is not None and track_start.tzinfo is not None:
                 logging.debug("copying tzinfo from track start")
-                activity_start = activity_start.replace(tzinfo=track_start.tzinfo)
-                activity_end = activity_end.replace(tzinfo=track_start.tzinfo)
+                activity_start = strava_activity['start_date'].replace(tzinfo=track_start.tzinfo)
+                activity_end = strava_activity['end_date'].replace(tzinfo=track_end.tzinfo)
             else:
                 logging.debug("copying tzinfo from pytz.reference")
                 activity_start = activity_start.replace(tzinfo=reference.LocalTimezone())
