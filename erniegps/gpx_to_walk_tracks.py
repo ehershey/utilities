@@ -26,12 +26,13 @@ import pytz
 import strava_to_db
 
 
-autoupdate_version = 202
+autoupdate_version = 233
 
 # limits for combining tracks
 #
 MAX_EMPTY_MINUTES_BETWEEN_COMBINED_TRACKS = 30
 MAX_DISTANCE_METERS_BETWEEN_COMBINED_TRACKS = 50
+MAX_MPH_TO_ASSUME_WALKING = 4  # 2017-10-31 (subway ride ~10mph?)
 
 
 # limits to include tracks in the end at all
@@ -45,6 +46,8 @@ AUTO_ACTIVITY_NAME = "Auto walk upload"
 NEW_TRACKS = []
 STRAVA_ACTIVITIES = []
 LIVETRACK_SESSIONS = []
+
+UREG = pint.UnitRegistry()
 
 
 def process_track(track):
@@ -379,7 +382,7 @@ def get_combined_tracks(gpx=None, gpx_file=None, skip_strava=False, skip_strava_
                 {"$and": [{"end_date_local": {"$gte": start_date}},
                           {"end_date_local": {"$lt": end_date}}]}
                 ]}
-            logging.debug("query: %s", json.dumps(query, default=erniegps.queryjsonhandler))
+            logging.debug("query: %s", erniegps.shellify(query))
             cursor = activity_collection.find(query)
 
             for strava_activity in cursor:
@@ -436,16 +439,31 @@ def get_combined_tracks(gpx=None, gpx_file=None, skip_strava=False, skip_strava_
         this_track_start_time = this_track.get_time_bounds().start_time
         this_track_end_time = this_track.get_time_bounds().end_time
         this_track_distance = this_track.get_moving_data().moving_distance
+        this_track_moving_time = this_track.get_moving_data().moving_time
         logging.debug("this_track_type: %s", this_track_type)
         logging.debug("this_track_start_time: %s", this_track_start_time)
         logging.debug("this_track_end_time: %s", this_track_end_time)
         logging.debug("this_track_distance: %s", this_track_distance)
+        if this_track_distance == 0:
+            this_track_speed = 0
+        else:
+            this_track_speed = ((this_track_distance *
+                                UREG.meters) / (this_track_moving_time *
+                                                UREG.seconds)).to('mph').magnitude
+        logging.debug("this_track_speed: %s", this_track_speed)
         if len(new_new_tracks) == 0:
             # Don't start a track until there's a running or walking track
             if this_track_type in ('walking', 'running'):
                 logging.debug("starting new track")
                 new_new_tracks.append(this_track)
+            else:
+                logging.debug("ignoring track due to no basis track found yet")
             continue
+        if this_track_speed > MAX_MPH_TO_ASSUME_WALKING:
+            if this_track_type != 'walking':
+                logging.debug("ignoring track due to high speed and not type!=walking")
+                continue
+
         most_recent_track = new_new_tracks[-1]
         most_recent_track_type = most_recent_track.type
         most_recent_track_start_time = most_recent_track.get_time_bounds().start_time
@@ -484,7 +502,7 @@ def get_combined_tracks(gpx=None, gpx_file=None, skip_strava=False, skip_strava_
             logging.debug("starting new track")
             new_new_tracks.append(this_track)
         else:
-            logging.debug("ignoring track")
+            logging.debug("ignoring track due to no matching case")
 
     new_track_length = len(new_new_tracks)
     logging.warning("new_track_length: %s", new_track_length)
