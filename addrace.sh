@@ -21,6 +21,8 @@ then
   exit 2
 fi
 
+DATE="$(echo "$DATE" | sed 's/ at / /')"
+
 YEAR=$(perl -MPOSIX=strftime -MDate::Parse -e 'print(strftime("%Y",localtime(str2time(shift))));' "$DATE")
 
 NOW_YEAR=$(date +%Y)
