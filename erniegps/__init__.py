@@ -45,12 +45,12 @@ class GpxHandler(ggps.GpxHandler):
         self.notes = None
 
     def endElement(self, tag_name):
-        if tag_name == 'Notes':
+        if tag_name == "Notes":
             self.notes = self.curr_text
         ggps.GpxHandler.endElement(self, tag_name)
 
     def endElement(self, tag_name):
-        if tag_name == 'type':
+        if tag_name == "type":
             self.activity_type = self.curr_text
         ggps.GpxHandler.endElement(self, tag_name)
 
@@ -62,13 +62,13 @@ class TcxHandler(ggps.TcxHandler):
         self.notes = None
 
     def endElement(self, tag_name):
-        if tag_name == 'Notes':
+        if tag_name == "Notes":
             self.notes = self.curr_text
         ggps.TcxHandler.endElement(self, tag_name)
 
     def startElement(self, tag_name, attrs):
-        if tag_name == 'Activity' and 'Sport' in attrs.keys():
-            self.activity_type = attrs.get('Sport')
+        if tag_name == "Activity" and "Sport" in attrs.keys():
+            self.activity_type = attrs.get("Sport")
         ggps.TcxHandler.startElement(self, tag_name, attrs)
 
 
@@ -81,8 +81,8 @@ def get_distance_from_trackpoints(trackpoints):
     first_trackpoint = trackpoints[0]
     last_trackpoint = trackpoints[-1]
 
-    first_distancemiles = first_trackpoint.get('distancemiles', 0.0)
-    last_distancemiles = last_trackpoint.get('distancemiles', 0.0)
+    first_distancemiles = first_trackpoint.get("distancemiles", 0.0)
+    last_distancemiles = last_trackpoint.get("distancemiles", 0.0)
     return m26.Distance(float(last_distancemiles) - float(first_distancemiles))
 
 
@@ -309,7 +309,7 @@ def process_activity(activity):
 
     # Trackpoints no longer needed
     #
-    del activity['trackpoints']
+    del activity["trackpoints"]
 
     return activity
 
@@ -326,11 +326,75 @@ def get_last_point(track):
             return segment.points[-1]
 
 
+def shellify(obj):
+    """
+    convert something like a mongo query python object into something that can be pasted into the
+    mongo shell
+    """
+    logging.debug("type(obj): %s", type(obj))
+    logging.debug("str(obj): %s", str(obj))
+    logging.debug("repr(obj): %s", repr(obj))
+    if isinstance(obj, datetime.time):
+        logging.debug("obj is a datetime.time")
+        return ISODate(obj)
+    elif isinstance(obj, datetime.datetime):
+        logging.debug("obj is a datetime.datetime")
+        return ISODate(obj)
+    else:
+        return repr(obj)
+
+    if isinstance(obj, list):
+        logging.debug("obj is a list")
+        string = " [ "
+        for entry in obj:
+            if string != " [ ":
+                string = string + ", "
+            string = string + shellify(entry)
+        string = string + " ] "
+        return string
+    elif isinstance(obj, object):
+        logging.debug("obj is a object")
+        string = " { "
+        for key in obj:
+            if isinstance(key, dict):
+                raise Exception("key is a dict??: {key}".format(key=key))
+            string = string + "\"" + str(key) + "\":"
+            string = string + repr(shellify(obj[key]))
+        string = string + " } "
+        return string
+    else:
+        logging.debug("obj is a DAMN DEFAULT {type}".format(type=type(obj)))
+        return repr(obj)
+
+
 def queryjsonhandler(obj):
     """
-    https://stackoverflow.com/questions/455580/json-datetime-between-python-and-javascript
+    ~https://stackoverflow.com/questions/455580/json-datetime-between-python-and-javascript~
+    https://stackoverflow.com/questions/4404742/how-do-i-turn-mongodb-query-into-a-json
     """
     if isinstance(obj, datetime.datetime):
-        return obj.isoformat()
+        return ISODate(obj)
     else:
-        return json.JSONEncoder().default(obj)
+        return json.JSONEncoder().encode(obj)
+
+
+class ISODate():
+
+    def __init__(self, dt):
+        self.orig_str = str(dt.isoformat())
+        return None
+
+    def __repr__(self):
+        return "ISODate(\"{orig_str}\")".format(orig_str=self.orig_str)
+
+    def toJSON(self):
+        return self.__repr__()
+
+    def __str__(self):
+        raise Exception("bogus string conversion :( ")
+
+
+class jsonclass(json.JSONEncoder):
+    def __init__(self):
+        ggps.GpxHandler.__init__(self)
+        logging.debug("holy shit!")

@@ -46,7 +46,7 @@ from pytz import reference
 import pytz
 
 
-autoupdate_version = 100
+autoupdate_version = 104
 
 
 def get_summary_type_from_other_type(other_type):
@@ -495,7 +495,7 @@ def main():
                 {"$and": [{"end_date_local": {"$gte": start_date}},
                           {"end_date_local": {"$lt": end_date}}]}
                 ]}
-            logging.debug("query: %s", json.dumps(query, default=erniegps.queryjsonhandler))
+            logging.debug("query: %s", erniegps.shellify(query))
             cursor = activity_collection.find(query)
 
             for strava_activity in cursor:
