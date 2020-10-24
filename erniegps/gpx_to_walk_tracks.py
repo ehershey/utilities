@@ -26,7 +26,7 @@ import pytz
 import strava_to_db
 
 
-autoupdate_version = 233
+autoupdate_version = 241
 
 # limits for combining tracks
 #
@@ -505,7 +505,7 @@ def get_combined_tracks(gpx=None, gpx_file=None, skip_strava=False, skip_strava_
             logging.debug("ignoring track due to no matching case")
 
     new_track_length = len(new_new_tracks)
-    logging.warning("new_track_length: %s", new_track_length)
+    logging.debug("new_track_length: %s", new_track_length)
 
     # MIN_TRACK_DISTANCE_METERS = 30
     # MIN_TRACK_DURATION_MINUTES = 1
@@ -545,7 +545,7 @@ def get_combined_tracks(gpx=None, gpx_file=None, skip_strava=False, skip_strava_
         new_new_new_tracks.append(track)
 
     new_new_track_length = len(new_new_new_tracks)
-    logging.warning("new_new_track_length: %s", new_new_track_length)
+    logging.debug("new_new_track_length: %s", new_new_track_length)
 
     return new_new_new_tracks
 
@@ -565,14 +565,18 @@ def main(gpx_input=None, skip_strava=False, skip_strava_auto_walking=False,
     logging.debug("read input")
 
     """ run as a script """
-    for track in get_combined_tracks(gpx=gpx,
-                                     skip_strava=skip_strava,
-                                     skip_strava_auto_walking=skip_strava_auto_walking,
-                                     date=date):
+    combined_tracks = get_combined_tracks(gpx=gpx,
+                                          skip_strava=skip_strava,
+                                          skip_strava_auto_walking=skip_strava_auto_walking,
+                                          date=date)
+
+    print(f"Tracks to upload: {len(combined_tracks)}")
+    for track in combined_tracks:
         gpx = gpxpy.gpx.GPX()
         gpx.simplify()
         gpx.tracks.append(track)
-        logging.debug("gpx: %s", gpx.to_xml())
+        logging.debug("gpx: %.100s", gpx.to_xml())
+
         if not skip_strava_upload:
             print("uploading to strava")
             uploader = strava_to_db.upload_activity(gpx_xml=gpx.to_xml(),
@@ -580,6 +584,7 @@ def main(gpx_input=None, skip_strava=False, skip_strava_auto_walking=False,
                                                     activity_type="walk")
             print("waiting for upload")
             activity = uploader.wait(timeout=30)
+            print(f"URL:\nhttps://www.strava.com/activities/{activity.id}")
             # strava_to_db.update_db(activity_id = response.)
             strava_to_db.update_db(lone_detailed_activity=activity)
 
