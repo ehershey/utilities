@@ -26,12 +26,13 @@ import pytz
 import strava_to_db
 
 
-autoupdate_version = 251
+autoupdate_version = 255
 
 # limits for combining tracks
 #
 MAX_EMPTY_MINUTES_BETWEEN_COMBINED_TRACKS = 30
-MAX_DISTANCE_METERS_BETWEEN_COMBINED_TRACKS = 50
+# MAX_DISTANCE_METERS_BETWEEN_COMBINED_TRACKS = 50
+MAX_DISTANCE_METERS_BETWEEN_COMBINED_TRACKS = 110  # 2020-10-24 split walking unnecessarily in two
 # MAX_MPH_TO_ASSUME_WALKING = 4  # 2017-10-31 (subway ride ~10mph?)
 MAX_MPH_TO_ASSUME_WALKING = 5.5  # 2020-10-22 a lot of running in between walking
 
@@ -387,11 +388,13 @@ def get_combined_tracks(gpx=None, gpx_file=None, skip_strava=False, skip_strava_
             cursor = activity_collection.find(query)
 
             for strava_activity in cursor:
-                if strava_activity['strava_id'] not in seen_strava_activity_ids and \
-                        ((not skip_strava_auto_walking) or
-                         strava_activity['name'] != AUTO_ACTIVITY_NAME):
-                    STRAVA_ACTIVITIES.append(strava_activity)
+                if strava_activity['strava_id'] not in seen_strava_activity_ids:
                     seen_strava_activity_ids[strava_activity['strava_id']] = True
+                    if skip_strava_auto_walking and strava_activity['name'] == AUTO_ACTIVITY_NAME:
+                        logging.debug("skipping auto walking track")
+                        logging.debug("strava_activity: %s", strava_activity)
+                        continue
+                    STRAVA_ACTIVITIES.append(strava_activity)
 
             query = {"$or": [
                 {"$and": [{"start": {"$gte": str(start_date)}},
