@@ -26,13 +26,14 @@ import pytz
 import strava_to_db
 
 
-autoupdate_version = 241
+autoupdate_version = 251
 
 # limits for combining tracks
 #
 MAX_EMPTY_MINUTES_BETWEEN_COMBINED_TRACKS = 30
 MAX_DISTANCE_METERS_BETWEEN_COMBINED_TRACKS = 50
-MAX_MPH_TO_ASSUME_WALKING = 4  # 2017-10-31 (subway ride ~10mph?)
+# MAX_MPH_TO_ASSUME_WALKING = 4  # 2017-10-31 (subway ride ~10mph?)
+MAX_MPH_TO_ASSUME_WALKING = 5.5  # 2020-10-22 a lot of running in between walking
 
 
 # limits to include tracks in the end at all
@@ -572,6 +573,9 @@ def main(gpx_input=None, skip_strava=False, skip_strava_auto_walking=False,
 
     print(f"Tracks to upload: {len(combined_tracks)}")
     for track in combined_tracks:
+        print("Track:")
+        print(f"{ erniegps.get_first_point(track) } -> ")
+        print(f"{ erniegps.get_last_point(track) }")
         gpx = gpxpy.gpx.GPX()
         gpx.simplify()
         gpx.tracks.append(track)
