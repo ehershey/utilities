@@ -2,7 +2,7 @@
 #
 # Add Race to calendar
 #
-# autoupdate_version = 65
+# autoupdate_version = 76
 #
 NYRR_TITLE_SELECTOR="h2.title"
 NYRR_DATE_SELECTOR="p.full-width span"
@@ -33,6 +33,7 @@ GENERIC_TITLE_SELECTORS="
 p.Style22
 "
 GENERIC_DATE_SELECTORS="
+.event-date
 .race-date
 div.race_detail-meta_list__value
 div.event-date
@@ -114,9 +115,9 @@ else
   arg_title=""
 fi
 
-if [ "${3:-}" ]
+if [ "${4:-}" ]
 then
-  arg_location="$3"
+  arg_location="$4"
 else
   arg_location=""
 fi
@@ -230,6 +231,16 @@ get_race_date() {
     returned_date="$($CURL "$url" | $PUP "$NYCRUNS_DATE_SELECTOR" text{})"
   fi
 
+  # [ernie@eahimac4 ~]$ cache_Get 86400 'https://ultrasignup.com/register.aspx?did=79440' | grep start.: | grep -v \< | cut -f4 -d\"
+
+  if [ ! "$returned_date" ]
+  then
+    returned_date="$($CURL "$url" | grep \"start\": | grep -v \< | grep -v has_external_ticketing_properties | cut -f4 -d\")" # ultrasignup.com
+    # has_external_ticketing_properties is from https://www.eventbrite.com/e/run-the-river-5k-registration-45356619871?bbemailid=9327519&bblinkid=110100196&bbejrid=712167945
+  fi
+
+
+
   for date_selector in $GENERIC_DATE_SELECTORS
   do
     if [ ! "$returned_date" ]
@@ -249,7 +260,6 @@ get_race_date() {
   # Grab only first two lines
   #
   returned_date="$(echo -n "$returned_date" | grep . | head -3 )"
-
 
   if [ ! "$returned_date" ]
   then
@@ -391,6 +401,18 @@ get_race_location() {
     returned_location="$($CURL "$url" | $PUP "$GENERIC_LOCATION_SELECTOR2" text{} | grep . | head -1)"
   fi
 
+  # [ernie@eahimac4 ~]$ cache_Get 86400 'https://ultrasignup.com/register.aspx?did=79440' | grep start.: | grep -v \< | cut -f4 -d\"
+  # February 6, 2021 07:30:00
+  # [ernie@eahimac4 ~]$ cache_Get 86400 'https://ultrasignup.com/register.aspx?did=79440' | grep location.: | grep -v \< | cut -f4 -d\"
+  # Bryceville, FL
+  # [ernie@eahimac4 ~]$
+
+  if [ ! "$returned_location" ]
+  then
+    returned_location="$($CURL "$url" | grep location.: | grep -v \< | cut -f4 -d\")"
+  fi
+
+
 
 
   # Trim trailing whitespace
@@ -408,7 +430,7 @@ get_race_location() {
 
 # Test get_race_title and get_race_date
 #
-# Arguments: <url> <expected title> <expected date> [<expected location>] [<expected pattern>]
+# Arguments: <url> <expected title> <expected date> [<expected pattern>] [<expected location>]
 #
 test_url() {
   if [ "${SKIP_TESTS:-}" ]
@@ -559,18 +581,20 @@ test_url http://web.archive.org/web/20190923170820/https://runsignup.com/Race/NY
 
 test_url http://web.archive.org/web/20200219182317/https://www.nyrr.org/races/nyrrnewportfiesta5k 'NYRR Newport Fiesta 5K' 'may 2, 2020 5:00 pm' "location: 'li:parent-of(h2:contains(\"Location\")) div'" 'Jersey City'
 
+test_url 'http://web.archive.org/web/20201023174217/https://ultrasignup.com/register.aspx?did=79440' 'Angry Tortoise 25K/50K' 'february 6, 2021 07:30:00' '' 'Bryceville, FL'
+
 echo # after progress no-newline echos
 
 if [ "$(basename "$0")" == "racetocal.sh" ]
 then
   url="$1"
 
-  if [[ "$($CURL "$url" | grep  "403 Forbidden" )" != "" && "$CURL" == *cache_get* ]]
-  then
-    echo RETRYING DUE TO 403 2>&1
-    # try again
-    cache_get 0 "$url" > /dev/null
-  fi
+  #if [[ "$($CURL "$url" | grep  "403 Forbidden" )" != "" && "$CURL" == *cache_get* ]]
+  #then
+    #echo RETRYING DUE TO 403 2>&1
+    ## try again
+    #cache_get 0 "$url" > /dev/null
+  #fi
 
   if [ "$arg_title" ]
   then
@@ -585,7 +609,14 @@ then
   else
     date="$(get_race_date "$url")"
   fi
-  location="$(get_race_location "$url")"
+
+  if [ "$arg_location" ]
+  then
+    location="$arg_location"
+  else
+    location="$(get_race_location "$url")"
+  fi
+
 
   if [ ! "$title" ]
   then
