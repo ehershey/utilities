@@ -4,6 +4,8 @@
 # Usage:
 #
 # addrace.sh <title> <date> <url> [ <duration - minutes, default 120> [ <location - default NYC> [ <reminder - minutes, default 10080 (one week)> ] ] ]
+#
+# autoupdate_version = 15
 
 set -o pipefail
 set -o errexit
@@ -27,10 +29,13 @@ YEAR=$(perl -MPOSIX=strftime -MDate::Parse -e 'print(strftime("%Y",localtime(str
 
 NOW_YEAR=$(date +%Y)
 
-if [ "$YEAR" -lt "$NOW_YEAR" ]
-then
-  YEAR=$NOW_YEAR
-fi
+# forget why I added this but if it's a past year just let it be a past year
+#20201029
+#
+# if [ "$YEAR" -lt "$NOW_YEAR" ]
+# then
+  # YEAR=$NOW_YEAR
+# fi
 
 #if ! echo "$DATE" | grep -q "$YEAR"
 #then
@@ -40,6 +45,7 @@ fi
 
 DEFAULT_DURATION=120
 DEFAULT_LOCATION="NYC"
+DEFAULT_START_TIME="8am"
 DEFAULT_REMINDER=10080 # week
 
 if [ "$4" ]
@@ -89,8 +95,14 @@ then
   exit 2
 fi
 
+if echo "$DATE" | grep -q " " && ( echo "$DATE" | grep -q : || echo "$DATE" | grep -q [0-9][ap]\.\?m\.\?)
+then
+  DATEWITHSTARTTIME="$DATE"
+else
+  DATEWITHSTARTTIME="$DATE $DEFAULT_START_TIME"
+fi
 
-output="$(gcalcli --calendar "$CALENDAR" add --title "$TITLE" --when "$DATE" --duration "$DURATION" --description "$URL
+output="$(gcalcli --calendar "$CALENDAR" add --title "$TITLE" --when "$DATEWITHSTARTTIME" --duration "$DURATION" --description "$URL
 
 Not registered as of $TODAY" --where "$LOCATION" --reminder "$REMINDER" --details url)"
 
