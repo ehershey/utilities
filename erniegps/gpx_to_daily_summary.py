@@ -38,7 +38,6 @@ import gpxpy
 import gpxpy.gpx
 import pint
 from bson import json_util
-from pymongo import MongoClient
 import erniegps.calories
 import erniegps.db
 import erniegps
@@ -46,7 +45,7 @@ from pytz import reference
 import pytz
 
 
-autoupdate_version = 115
+autoupdate_version = 121
 
 
 def get_summary_type_from_other_type(other_type):
@@ -351,147 +350,26 @@ def process_track(track):
     summary["GPS Points"] += track.get_points_no()
 
 
-def main():
+def main(skip_strava=False, gpx=None, date=None):
     """ run as a script """
 
     # get all strava and livetrack activities that overlap track dates
     #
-
-    seen_strava_activity_ids = {}
-    seen_livetrack_session_ids = {}
-    if not ARGS.skip_strava:
-        db_url = erniegps.db.get_db_url()
-        mongoclient = MongoClient(db_url)
-
-        strava_db = mongoclient[erniegps.db.STRAVA_DB]
-        livetrack_db = mongoclient[erniegps.db.LIVETRACK_DB]
-
-        activity_collection = strava_db[erniegps.db.ACTIVITY_COLLECTION]
-        session_collection = livetrack_db[erniegps.db.SESSION_COLLECTION]
-
-        earliest_start_date = None
-        latest_end_date = None
-        for track in GPX.tracks:
-            start_time = track.get_time_bounds().start_time
-            end_time = track.get_time_bounds().end_time
-            if start_time is None:
-                continue
-            start_date = datetime.datetime.combine(start_time.date(), datetime.datetime.min.time())
-            end_date = datetime.datetime.combine(end_time.date(), datetime.datetime.min.time())
-            if earliest_start_date is None or start_date < earliest_start_date:
-                earliest_start_date = start_date
-            if latest_end_date is None or end_date > latest_end_date:
-                latest_end_date = end_date
-        for waypoint in GPX.waypoints:
-            waypoint_timestamp_date = datetime.datetime.combine(waypoint.time,
-                                                                datetime.datetime.min.time())
-            if earliest_start_date is None or waypoint_timestamp_date < earliest_start_date:
-                earliest_start_date = waypoint_timestamp_date
-            if latest_end_date is None or waypoint_timestamp_date > latest_end_date:
-                latest_end_date = waypoint_timestamp_date
-        if DATE:
-            date_arg_obj = datetime.datetime.strptime(DATE, '%Y-%m-%d')
-
-            if earliest_start_date is None or date_arg_obj < earliest_start_date:
-                earliest_start_date = date_arg_obj
-            if latest_end_date is None or date_arg_obj > latest_end_date:
-                latest_end_date = date_arg_obj
-
-        if earliest_start_date is not None and latest_end_date is not None:
-            start_date = earliest_start_date
-            end_date = latest_end_date + datetime.timedelta(days=1)
-
-            # Build up query for:
-            # (start in range) OR (end in range)
-            # with "in range" meaning "(is after date) AND (is before date + 1 day)"
-            # thus:
-            # (start is after date AND start is before date + 1) OR (end is after date AND end is
-            # before date + 1)
-            #
-            # Using the "*_local" fields seems appropriate here since the time portions of the
-            # comparison date is gone.
-            # This will pick up any activities started or ending in this date according to local
-            # time.
-            # Maybe it should even be between 4am or some other boundary that would include late
-            # night jaunts.
-            #
-            # TODO: fix gaps in strava tracks with activity in ARC
-            # TODO: account for strava activity ending on different day only including calories in
-            # start date but subtracting from tracks on both ARC days
-            # TODO: Make sure starting an activity on one day and completing it the next day is
-            # fully supported (unit tests?)
-
-            # for gaps - idea to split activity into multiple based on large gaps
-            # with activity gpx -
-            # split_activities = []
-            # current_activity = new_activity()
-            # last_point = None
-            # # limits
-            # MIN_POINT_SPEED_TO_SPLIT_MPH = 50 # too fast to go on bike
-            # MIN_POINT_DISTANCE_TO_SPLIT_METERS = 80 # short city block
-            # MIN_POINT_TIME_TO_SPLIT_SECONDS = 60 # there should be a point tracked per minute
-            # for point in activity.trackpoints:
-            #    split = False
-            #    if last_point is not None:
-            #       elapsed = point.timestamp - last_point.timestamp
-            #       if elapsed > MIN_POINT_TIME_TO_SPLIT_SECONDS:
-            #           split = True
-            #       else:
-            #           distance = distance(point, last_point)
-            #           if distance > MIN_POINT_DISTANCE_TO_SPLIT_METERS:
-            #             split = True
-            #           else:
-            #               speed = ( distance * MILES_PER_METER ) / elapsed * HOURS_PER_SECOND
-            #               if speed > MIN_POINT_SPEED_TO_SPLIT_MPH:
-            #                   split = True
-            #    last_point = point
-            #    if split == True:
-            #       split_activities.append(current_activity)
-            #       current_activity = new_activity()
-            #
-            #    current_activity.append(point)
-            #
-
-            query = {"$or": [
-                {"$and": [{"start_date_local": {"$gte": start_date}},
-                          {"start_date_local": {"$lt": end_date}}]},
-                {"$and": [{"end_date_local": {"$gte": start_date}},
-                          {"end_date_local": {"$lt": end_date}}]}
-                ]}
-            logging.debug("strava query: %s", erniegps.shellify(query))
-            cursor = activity_collection.find(query)
-
-            for strava_activity in cursor:
-                if strava_activity['strava_id'] not in seen_strava_activity_ids:
-                    STRAVA_ACTIVITIES.append(strava_activity)
-                    seen_strava_activity_ids[strava_activity['strava_id']] = True
-
-            query = {"$or": [
-                {"$and": [{"start": {"$gte": str(start_date)}},
-                          {"start": {"$lt": str(end_date)}}]},
-                {"$and": [{"end": {"$gte": str(start_date)}},
-                          {"end": {"$lt": str(end_date)}}]}
-                ]}
-            logging.debug("livetrack query: %s", query)
-            cursor = session_collection.find(query)
-
-            for livetrack_session in cursor:
-                if livetrack_session['sessionId'] not in seen_livetrack_session_ids:
-                    if 'trackPoints' not in livetrack_session:
-                        livetrack_session['trackPoints'] = []
-                    LIVETRACK_SESSIONS.append(livetrack_session)
-                    seen_livetrack_session_ids[livetrack_session['sessionId']] = True
+    STRAVA_ACTIVITIES, LIVETRACK_SESSIONS = erniegps.get_external_activities(
+            skip_strava=skip_strava,
+            gpx=gpx,
+            date=date)
 
     logging.info("Overlapping strava activity count: %d", len(STRAVA_ACTIVITIES))
     logging.info("Overlapping livetrack session count: %d", len(LIVETRACK_SESSIONS))
 
     # uses LIVETRACK_SESSIONS and STRAVA_ACTIVITIES
     #
-    for track in GPX.tracks:
+    for track in gpx.tracks:
         process_track(track)
 
     # this shouldn't necessary but we do depend on stuff in process_track
-    if len(GPX.tracks) == 0:
+    if len(gpx.tracks) == 0:
         process_track(None)
 
     for livetrack_session in LIVETRACK_SESSIONS:
@@ -675,8 +553,7 @@ if __name__ == '__main__':
     SUMMARIES_BY_DATE = dict()
     STRAVA_ACTIVITIES = []
     LIVETRACK_SESSIONS = []
-    DATE = ARGS.date
 
     UREG = pint.UnitRegistry()
 
-    main()
+    main(skip_strava=ARGS.skip_strava, gpx=GPX, date=ARGS.date)
