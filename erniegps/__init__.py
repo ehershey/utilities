@@ -483,6 +483,8 @@ def get_normalized_strava_start_end(strava_activity, track, track_start):
     return activity_start, activity_end
 
 
+# TODO: Don't use local timezone if no track. try harder to use from a waypoint or something
+#
 def get_normalized_livetrack_start_end(livetrack_session, track, track_start):
     """
     Do everything possible to get livetrack session start and end times with timezones
@@ -501,6 +503,7 @@ def get_normalized_livetrack_start_end(livetrack_session, track, track_start):
         session_start = dateutil.parser.parse(first_trackpoint['dateTime'])
         session_end = dateutil.parser.parse(last_trackpoint['dateTime'])
 
+    logging.debug(f"session_start.tzinfo: {session_start.tzinfo}")
     if session_start.tzinfo is None:
         if track is not None and track_start is not None and track_start.tzinfo is not None:
             logging.debug("copying tzinfo from track start")
@@ -510,6 +513,10 @@ def get_normalized_livetrack_start_end(livetrack_session, track, track_start):
             logging.debug("copying tzinfo from pytz.reference")
             session_start = session_start.replace(tzinfo=reference.LocalTimezone())
             session_end = session_end.replace(tzinfo=reference.LocalTimezone())
+    elif session_start.tzinfo == pytz.utc or session_start.tzinfo == dateutil.tz.tzutc():
+        logging.debug("converting tzinfo to pytz.reference")
+        session_start = session_start.astimezone(reference.LocalTimezone())
+        session_end = session_end.astimezone(reference.LocalTimezone())
     return session_start, session_end
 
 
@@ -561,9 +568,10 @@ def get_external_activities(skip_strava=False,
             if latest_end_date is None or date_arg_obj > latest_end_date:
                 latest_end_date = date_arg_obj
 
+        one_day = datetime.timedelta(days=1)
         if earliest_start_date is not None and latest_end_date is not None:
             start_date = earliest_start_date
-            end_date = latest_end_date + datetime.timedelta(days=1)
+            end_date = latest_end_date + one_day
 
             # Build up query for:
             # (start in range) OR (end in range)
@@ -616,13 +624,15 @@ def get_external_activities(skip_strava=False,
             #    current_activity.append(point)
             #
 
+            # go a day further back because livetrack start/end dates are funky
+            #
             query = {"$or": [
-                {"$and": [{"start_date_local": {"$gte": start_date}},
+                {"$and": [{"start_date_local": {"$gte": start_date - one_day}},
                           {"start_date_local": {"$lt": end_date}}]},
-                {"$and": [{"end_date_local": {"$gte": start_date}},
+                {"$and": [{"end_date_local": {"$gte": start_date - one_day}},
                           {"end_date_local": {"$lt": end_date}}]}
                 ]}
-            logging.debug("query: %s", erniegps.shellify(query))
+            logging.debug("strava query: %s", erniegps.shellify(query))
             cursor = activity_collection.find(query)
 
             for strava_activity in cursor:
@@ -640,7 +650,7 @@ def get_external_activities(skip_strava=False,
                 {"$and": [{"end": {"$gte": str(start_date)}},
                           {"end": {"$lt": str(end_date)}}]}
                 ]}
-            logging.debug("query: %s", json.dumps(query, default=erniegps.queryjsonhandler))
+            logging.debug("livetrack query: %s", query)
             cursor = session_collection.find(query)
 
             for livetrack_session in cursor:
