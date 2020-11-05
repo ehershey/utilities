@@ -2,14 +2,18 @@
 Utilities for gps data
 """
 
-import logging
-import math
-import dateutil.parser
-import ggps
-import m26
-import pytz
 import datetime
+import dateutil.parser
+import geopy.distance
+import ggps
+import gpxpy
 import json
+import logging
+import m26
+import math
+import pint
+import pytz
+from pytz import reference
 
 MAX_SPLIT_DEPTH = 30
 
@@ -314,6 +318,13 @@ def process_activity(activity):
     return activity
 
 
+def get_all_points(track):
+    points = []
+    for segment in track.segments:
+        points.extend(segment.points)
+    return points
+
+
 def get_first_point(track):
     for segment in track.segments:
         if len(segment.points) > 0:
@@ -398,3 +409,105 @@ class jsonclass(json.JSONEncoder):
     def __init__(self):
         ggps.GpxHandler.__init__(self)
         logging.debug("holy shit!")
+
+
+def get_distance(point1, point2):
+    """
+    return distance in miles as a float between two points of arbitrary types
+    points can be:
+        1) list: lat, lng
+        2) GPXTrackPoint
+
+    The first number is always the latitude and the second is the longitude.
+    https://www.thoughtco.com/difference-between-latitude-and-longitude-4070791
+
+    """
+    lat1 = None
+    lat2 = None
+    lon1 = None
+    lon2 = None
+    if type(point1) == gpxpy.gpx.GPXTrackPoint:
+        lat1 = point1.latitude
+        lon1 = point1.longitude
+    elif type(point1) == list:
+        lat1 = point1[0]
+        logging.debug("point[1]: %f", point1[1])
+        lon1 = point1[1]
+    else:
+        raise Error("Unsupported point type: ", type(point1))
+
+    if type(point2) == gpxpy.gpx.GPXTrackPoint:
+        lat2 = point2.latitude
+        lon2 = point2.longitude
+    elif type(point2) == list:
+        lat2 = point2[0]
+        lon2 = point2[1]
+    else:
+        raise Error("Unsupported point type: ", type(point2))
+
+    return geopy.distance.distance([lat1, lon1], [lat2, lon2]).miles
+
+
+def get_normalized_strava_start_end(strava_activity, track, track_start):
+    """
+    Do everything possible to get start and end time with timezones for a strava activity
+    """
+    activity_start = strava_activity['start_date_local']
+    try:
+        activity_end = strava_activity['end_date_local']
+    except KeyError:
+        if 'elapsed_time' in strava_activity:
+            activity_end = activity_start + \
+                    datetime.timedelta(seconds=strava_activity['elapsed_time'])
+            strava_activity['end_date_local'] = activity_end
+        else:
+            logging.error("Can't find end_date_local or elapsed_time in activity!")
+            logging.error(strava_activity)
+            raise Exception("Can't find end_date_local or elapsed_time in activity!")
+
+    if activity_start.tzinfo is None:
+        if(track is not None and track_start is not None and
+           track_start.tzinfo is not None and
+           'start_date' in strava_activity and 'end_date' in strava_activity):
+            logging.debug("copying tzinfo from UTC")
+            activity_start = strava_activity['start_date'].replace(tzinfo=pytz.utc)
+            activity_end = strava_activity['end_date'].replace(tzinfo=pytz.utc)
+        else:
+            logging.debug("copying tzinfo from pytz.reference")
+            activity_start = activity_start.replace(tzinfo=reference.LocalTimezone())
+            activity_end = activity_end.replace(tzinfo=reference.LocalTimezone())
+
+    return activity_start, activity_end
+
+
+def get_normalized_livetrack_start_end(livetrack_session, track, track_start):
+    """
+    Do everything possible to get livetrack session start and end times with timezones
+    """
+    if 'trackPoints' in livetrack_session:
+        trackpoints = livetrack_session['trackPoints']
+    else:
+        trackpoints = []
+    logging.info("livetrack trackpoint count: %d", len(trackpoints))
+    if len(trackpoints) == 0:
+        session_start = dateutil.parser.parse(livetrack_session['start'])
+        session_end = dateutil.parser.parse(livetrack_session['end'])
+    else:
+        first_trackpoint = trackpoints[0]
+        last_trackpoint = trackpoints[-1]
+        logging.debug("first_trackpoint: %s", first_trackpoint)
+        logging.debug("last_trackpoint: %s", last_trackpoint)
+
+        session_start = dateutil.parser.parse(first_trackpoint['dateTime'])
+        session_end = dateutil.parser.parse(last_trackpoint['dateTime'])
+
+    if session_start.tzinfo is None:
+        if track is not None and track_start is not None and track_start.tzinfo is not None:
+            logging.debug("copying tzinfo from track start")
+            session_start = session_start.replace(tzinfo=track_start.tzinfo)
+            session_end = session_end.replace(tzinfo=track_start.tzinfo)
+        else:
+            logging.debug("copying tzinfo from pytz.reference")
+            session_start = session_start.replace(tzinfo=reference.LocalTimezone())
+            session_end = session_end.replace(tzinfo=reference.LocalTimezone())
+    return session_start, session_end
