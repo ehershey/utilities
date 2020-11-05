@@ -5,6 +5,7 @@ Utilities for gps data
 import datetime
 import dateutil.parser
 import erniegps
+import erniegps.db
 import geopy.distance
 import ggps
 import gpxpy

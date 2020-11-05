@@ -27,7 +27,7 @@ import pytz
 import strava_to_db
 
 
-autoupdate_version = 312
+autoupdate_version = 314
 
 # limits for combining tracks
 #
@@ -246,6 +246,8 @@ def get_combined_tracks(gpx=None, gpx_file=None, skip_strava=False, skip_strava_
 
     if gpx is None and type(gpx_file) == str:
         gpx = gpxpy.parse(open(gpx_file))
+
+    global STRAVA_ACTIVITIES, LIVETRACK_SESSIONS
 
     STRAVA_ACTIVITIES, LIVETRACK_SESSIONS = erniegps.get_external_activities(
             skip_strava=skip_strava,

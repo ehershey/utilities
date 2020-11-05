@@ -9,10 +9,12 @@ To run:
 """
 
 import datetime
+import logging
 import os
 import pytz
 import m26
 import erniegps
+import gpxpy
 
 
 def test_zero_speed():
@@ -419,3 +421,21 @@ def test_advantage_split_slower_end():
 
         negative_split_depth = activity['negative_split_depth']
         assert negative_split_depth >= 2
+
+
+def test_basic_overlap():
+    """
+    Test basic strava and livetrack retrieval
+    """
+
+    gpx_file = '{0}/Dropbox/Misc/Arc Export/Export/GPX/Daily/2018-12-30.gpx'.format(
+            os.environ['HOME'])
+
+    logging.getLogger().setLevel(getattr(logging, "DEBUG"))
+    logging.debug("Debug logging enabled")
+
+    strava_activities, livetrack_sessions = erniegps.get_external_activities(
+            gpx=gpxpy.parse(open(gpx_file)))
+
+    assert len(strava_activities) == 2
+    assert len(livetrack_sessions) == 0

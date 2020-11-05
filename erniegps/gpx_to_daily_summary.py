@@ -45,7 +45,7 @@ from pytz import reference
 import pytz
 
 
-autoupdate_version = 121
+autoupdate_version = 122
 
 
 def get_summary_type_from_other_type(other_type):
@@ -352,6 +352,8 @@ def process_track(track):
 
 def main(skip_strava=False, gpx=None, date=None):
     """ run as a script """
+
+    global STRAVA_ACTIVITIES, LIVETRACK_SESSIONS
 
     # get all strava and livetrack activities that overlap track dates
     #
