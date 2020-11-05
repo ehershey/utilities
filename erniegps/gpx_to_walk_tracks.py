@@ -13,6 +13,7 @@ import json
 import logging
 import os
 import sys
+import geopy.distance
 import gpxpy
 import gpxpy.gpx
 import pint
@@ -21,12 +22,12 @@ from pymongo import MongoClient
 import erniegps.calories
 import erniegps
 import erniegps.db
-from pytz import reference
+import erniegps.private
 import pytz
 import strava_to_db
 
 
-autoupdate_version = 255
+autoupdate_version = 309
 
 # limits for combining tracks
 #
@@ -41,6 +42,7 @@ MAX_MPH_TO_ASSUME_WALKING = 5.5  # 2020-10-22 a lot of running in between walkin
 MIN_TRACK_DISTANCE_METERS = 30
 MIN_TRACK_DURATION_MINUTES = 1
 MIN_TRACK_GPS_POINTS = 21  # 2020-10-17 1:30am and others on same day
+MIN_TRACK_MILES_FROM_SKIP_CENTERS = .5
 
 AUTO_ACTIVITY_NAME = "Auto walk upload"
 
@@ -50,6 +52,8 @@ STRAVA_ACTIVITIES = []
 LIVETRACK_SESSIONS = []
 
 UREG = pint.UnitRegistry()
+
+SKIP_CENTERS = erniegps.private.get_skip_centers()
 
 
 def process_track(track):
@@ -71,7 +75,7 @@ def process_track(track):
             end_date = end_time.date()
         # Split into tracks that don't overlap with external activities from strava or livetrack
         #
-        # gather array of [start,end] tuples from exernal sources
+        # gather array of [start, end] tuples from exernal sources
         track_start = start_time
         track_end = end_time
 
@@ -82,28 +86,9 @@ def process_track(track):
         logging.debug("processing strava activity")
         logging.debug("strava_activity: %s", strava_activity)
 
-        activity_start = strava_activity['start_date_local']
-        try:
-            activity_end = strava_activity['end_date_local']
-        except KeyError:
-            if 'elapsed_time' in strava_activity:
-                activity_end = activity_start + \
-                        datetime.timedelta(seconds=strava_activity['elapsed_time'])
-                strava_activity['end_date_local'] = activity_end
-            else:
-                logging.error("Can't find end_date_local or elapsed_time in activity!")
-                logging.error(strava_activity)
-                exit()
-
-        if activity_start.tzinfo is None:
-            if track is not None and track_start is not None and track_start.tzinfo is not None:
-                logging.debug("copying tzinfo from UTC")
-                activity_start = strava_activity['start_date'].replace(tzinfo=pytz.utc)
-                activity_end = strava_activity['end_date'].replace(tzinfo=pytz.utc)
-            else:
-                logging.debug("copying tzinfo from pytz.reference")
-                activity_start = activity_start.replace(tzinfo=reference.LocalTimezone())
-                activity_end = activity_end.replace(tzinfo=reference.LocalTimezone())
+        (activity_start, activity_end) = erniegps.get_normalized_strava_start_end(strava_activity,
+                                                                                  track,
+                                                                                  track_start)
 
         logging.debug("activity_start: %s", activity_start)
         logging.debug("activity_end: %s", activity_end)
@@ -114,32 +99,10 @@ def process_track(track):
         logging.debug("")
         logging.debug("processing livetrack session")
         logging.debug("livetrack_session: %.80s", livetrack_session)
-        if 'trackPoints' in livetrack_session:
-            trackpoints = livetrack_session['trackPoints']
-        else:
-            trackpoints = []
-        logging.info("livetrack trackpoint count: %d", len(trackpoints))
-        if len(trackpoints) == 0:
-            session_start = dateutil.parser.parse(livetrack_session['start'])
-            session_end = dateutil.parser.parse(livetrack_session['end'])
-        else:
-            first_trackpoint = trackpoints[0]
-            last_trackpoint = trackpoints[-1]
-            logging.debug("first_trackpoint: %s", first_trackpoint)
-            logging.debug("last_trackpoint: %s", last_trackpoint)
 
-            session_start = dateutil.parser.parse(first_trackpoint['dateTime'])
-            session_end = dateutil.parser.parse(last_trackpoint['dateTime'])
-
-        if session_start.tzinfo is None:
-            if track is not None and track_start is not None and track_start.tzinfo is not None:
-                logging.debug("copying tzinfo from track start")
-                session_start = session_start.replace(tzinfo=track_start.tzinfo)
-                session_end = session_end.replace(tzinfo=track_start.tzinfo)
-            else:
-                logging.debug("copying tzinfo from pytz.reference")
-                session_start = session_start.replace(tzinfo=reference.LocalTimezone())
-                session_end = session_end.replace(tzinfo=reference.LocalTimezone())
+        session_start, session_end = erniegps.get_normalized_livetrack_start_end(livetrack_session,
+                                                                                 track,
+                                                                                 track_start)
 
         logging.debug("session_start: %s", session_start)
         logging.debug("session_end: %s", session_end)
@@ -276,7 +239,8 @@ def process_track(track):
 
 
 def get_combined_tracks(gpx=None, gpx_file=None, skip_strava=False, skip_strava_auto_walking=False,
-                        date=None):
+                        date=None,
+                        skip_skip_centers=False):
     # get all strava and livetrack activities that overlap track dates
     #
 
@@ -514,9 +478,11 @@ def get_combined_tracks(gpx=None, gpx_file=None, skip_strava=False, skip_strava_
     # MIN_TRACK_DISTANCE_METERS = 30
     # MIN_TRACK_DURATION_MINUTES = 1
     # MIN_TRACK_GPS_POINTS = 10
+    # MIN_TRACK_MILES_FROM_SKIP_CENTERS = .5
     logging.debug("MIN_TRACK_DISTANCE_METERS: %d", MIN_TRACK_DISTANCE_METERS)
     logging.debug("MIN_TRACK_DURATION_MINUTES: %d", MIN_TRACK_DURATION_MINUTES)
     logging.debug("MIN_TRACK_GPS_POINTS: %d", MIN_TRACK_GPS_POINTS)
+    logging.debug("MIN_TRACK_MILES_FROM_SKIP_CENTERS: %f", MIN_TRACK_MILES_FROM_SKIP_CENTERS)
 
     min_duration = datetime.timedelta(minutes=MIN_TRACK_DURATION_MINUTES)
 
@@ -524,28 +490,50 @@ def get_combined_tracks(gpx=None, gpx_file=None, skip_strava=False, skip_strava_
 
     new_new_new_tracks = []
     for track in new_new_tracks:
-        # skip if not big enough
+        # skip for various reasons
         #
         distance = track.get_moving_data().moving_distance
-        start_time = track.get_time_bounds().start_time
-        end_time = track.get_time_bounds().end_time
-        duration = end_time - start_time
-        point_count = track.get_points_no()
 
         logging.debug("distance: %d", distance)
         if distance < MIN_TRACK_DISTANCE_METERS:
             logging.debug("skipping due to distance")
             continue
 
+        start_time = track.get_time_bounds().start_time
+        end_time = track.get_time_bounds().end_time
+        duration = end_time - start_time
+
         logging.debug("duration: %s", duration)
         if duration < min_duration:
             logging.debug("skipping due to duration")
             continue
 
+        point_count = track.get_points_no()
+
         logging.debug("point_count: %d", point_count)
         if point_count < MIN_TRACK_GPS_POINTS:
             logging.debug("skipping due to point_count")
             continue
+
+        # if ALL points are within minimum distance from ANY skip center, skip the whole thing
+        checked_distance_count = 0
+        found_center_close_to_all_points = False
+        if not skip_skip_centers:
+            for center in SKIP_CENTERS:
+                has_points_outside_center = False
+                for point in erniegps.get_all_points(track):
+                    distance = erniegps.get_distance(point, center)
+                    checked_distance_count = checked_distance_count + 1
+                    if distance > MIN_TRACK_MILES_FROM_SKIP_CENTERS:
+                        has_points_outside_center = True
+                if not has_points_outside_center:
+                    found_center_close_to_all_points = True
+                    continue
+            if found_center_close_to_all_points:
+                logging.debug("skipping due to all points being within a skip center")
+                logging.debug(f"(checked {checked_distance_count} distances)")
+                continue
+
         new_new_new_tracks.append(track)
 
     new_new_track_length = len(new_new_new_tracks)
@@ -555,13 +543,14 @@ def get_combined_tracks(gpx=None, gpx_file=None, skip_strava=False, skip_strava_
 
 
 def init():
-    NEW_TRACKS = []
-    STRAVA_ACTIVITIES = []
-    LIVETRACK_SESSIONS = []
+    NEW_TRACKS.clear()
+    STRAVA_ACTIVITIES.clear()
+    LIVETRACK_SESSIONS.clear()
 
 
 def main(gpx_input=None, skip_strava=False, skip_strava_auto_walking=False,
-         date=None, skip_strava_upload=False):
+         date=None, skip_strava_upload=False,
+         skip_skip_centers=False):
 
     init()
     gpx = gpxpy.parse(gpx_input)
@@ -572,12 +561,15 @@ def main(gpx_input=None, skip_strava=False, skip_strava_auto_walking=False,
     combined_tracks = get_combined_tracks(gpx=gpx,
                                           skip_strava=skip_strava,
                                           skip_strava_auto_walking=skip_strava_auto_walking,
-                                          date=date)
+                                          date=date,
+                                          skip_skip_centers=skip_skip_centers)
 
     print(f"Tracks to upload: {len(combined_tracks)}")
     for track in combined_tracks:
+        distance_meters = track.get_moving_data().moving_distance * UREG.meters
+        distance_miles = distance_meters.to(UREG.miles).magnitude
         print("Track:")
-        print(f"{ erniegps.get_first_point(track) } -> ")
+        print(f"{ erniegps.get_first_point(track) } -> { distance_miles:.2f} miles")
         print(f"{ erniegps.get_last_point(track) }")
         gpx = gpxpy.gpx.GPX()
         gpx.simplify()
@@ -593,6 +585,10 @@ def main(gpx_input=None, skip_strava=False, skip_strava_auto_walking=False,
             activity = uploader.wait(timeout=30)
             print(f"URL:\nhttps://www.strava.com/activities/{activity.id}")
             # strava_to_db.update_db(activity_id = response.)
+            # This shouldn't really be necessary if web hooks are working right.
+            # But this can fail; the web hook can fail; they should be idempotent and safe enough
+            # to try both
+            #
             strava_to_db.update_db(lone_detailed_activity=activity)
 
 
@@ -603,6 +599,8 @@ if __name__ == '__main__':
     PARSER.add_argument('--date', help='Override date in gpx data (required format: YYYY-MM-DD)',
                         default=None)
     PARSER.add_argument('--skip-strava', help='Do not ignore overlapping Strava activities',
+                        default=False, action='store_true')
+    PARSER.add_argument('--skip-skip-centers', help='Do not ignore tracks within skip centers',
                         default=False, action='store_true')
     PARSER.add_argument('--skip-strava-auto-walking',
                         help="""
@@ -620,8 +618,6 @@ if __name__ == '__main__':
         logging.getLogger().setLevel(getattr(logging, "DEBUG"))
         logging.debug("Debug logging enabled")
 
-    CALORIES_PER_MILE_BY_ACTIVITY_TYPE = erniegps.calories.CALORIES_PER_MILE_BY_ACTIVITY_TYPE
-
     if args.filename:
         GPX_FILE = open(args.filename)
     else:
@@ -631,4 +627,5 @@ if __name__ == '__main__':
          skip_strava=args.skip_strava,
          skip_strava_auto_walking=args.skip_strava_auto_walking,
          date=args.date,
-         skip_strava_upload=args.skip_strava_upload)
+         skip_strava_upload=args.skip_strava_upload,
+         skip_skip_centers=args.skip_skip_centers)
