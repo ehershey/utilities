@@ -172,7 +172,7 @@ if __name__ == '__main__':
     if ARGS.for_date:
         for_date = dateutil.parser.parse(ARGS.for_date).replace(hour=12)
     else:
-        for_date = datetime.datetime.now()
+        for_date = datetime.datetime.now().replace(hour=12)
 
     if ARGS.debug:
         logging.getLogger().setLevel(getattr(logging, "DEBUG"))
