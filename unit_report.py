@@ -254,7 +254,7 @@ if __name__ == '__main__':
     PLACEHOLDER['units_average_7days'] = units_average_7days
     PLACEHOLDER['units_average_2days'] = units_average_2days
     PLACEHOLDER['now'] = time.ctime()
-    PLACEHOLDER['moves_csv_modified'] = last_data_timestamp
+    PLACEHOLDER['data_updated'] = last_data_timestamp
     PLACEHOLDER['units_average_current_year'] = units_average_current_year
 
     PLACEHOLDER['units_today_previous_year_diff'] = units_today_previous_year_diff

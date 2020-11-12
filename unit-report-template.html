@@ -226,7 +226,7 @@ table,tr,td,th {{
     </tr>
     <tr>
       <td>Data updated:</td>
-      <td>{moves_csv_modified} (<span id="data_age"></span>)</td>
+      <td>{data_updated} (<span id="data_age"></span>)</td>
     </tr>
     <tr>
       <td>New data checked:</td>
@@ -313,7 +313,7 @@ table,tr,td,th {{
 
     setInterval(function() {{
       document.getElementById("html_age").innerHTML = get_date_age("{now}"); // diffignore (ignore comparing against previous html)
-      document.getElementById("data_age").innerHTML = get_date_age("{moves_csv_modified}");
+      document.getElementById("data_age").innerHTML = get_date_age("{data_updated}");
       document.getElementById("data_check_age").innerHTML = get_date_age(data_checked_timestamp);
       if(!request_running) {{
       refresh_check_log('request not running');
