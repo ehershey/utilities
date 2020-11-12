@@ -2,7 +2,7 @@
 #
 # Add Race to calendar
 #
-# autoupdate_version = 76
+# autoupdate_version = 102
 #
 NYRR_TITLE_SELECTOR="h2.title"
 NYRR_DATE_SELECTOR="p.full-width span"
@@ -12,8 +12,11 @@ NYCRUNS_TITLE_SELECTOR2="h1._title"
 NYCRUNS_DATE_SELECTOR=".race-display-date"
 NYCRUNS_DATE_SELECTOR2="._date , ._subtitle"
 
-GENERIC_LOCATION_SELECTOR=".race-display-address"
-GENERIC_LOCATION_SELECTOR2='li:parent-of(h2:contains("Location")) div'
+GENERIC_LOCATION_SELECTOR='li:parent-of(h2:contains("Location")) div'
+GENERIC_LOCATION_SELECTORS="
+.race-display-address
+span.race-location
+"
 
 RNR_DATE_SELECTOR="h2:contains(\"General Info\") + p + p"
 RNR_TITLE_SELECTOR="h2:contains(\"General Info\") + p"
@@ -57,6 +60,29 @@ GENERIC_DATE_SELECTOR7="meta[property=og:description]"
 GENERIC_DATE_SELECTOR8="section.fullheader div.container div.message p"
 
 CACHE_TIMEOUT_SECONDS=2592000 # 30 days
+
+# skip tests if this version of script has been tested in the last 30 days
+#
+if which md5 >/dev/null 2>&1
+then
+  md5=md5
+elif which md5sum >/dev/null 2>&1
+then
+  md5=md5sum
+fi
+script_hash=$($md5 < "$BASH_SOURCE")
+test_success_timestamp_file="/tmp/test_success_timestamp_${script_hash}"
+if [ -e "$test_success_timestamp_file" ]
+then
+  test_success_timestamp=$(cat $test_success_timestamp_file)
+  now=$(date +%s)
+  test_success_age=$(expr $now - $test_success_timestamp)
+  if [ "$test_success_age" -lt 2592000 ]
+  then
+    SKIP_TESTS=1
+  fi
+fi
+
 
 if [ "$(basename "$0")" == "racetocal.sh" ]
 then
@@ -219,6 +245,14 @@ get_race_title() {
   #
   returned_title="$(echo -n "$returned_title" | gsed 's/[0-9][0-9]*th annual //i')"
 
+  # Remove extra bs - https://runsignup.com/Race/CO/HighlandsRanch/BackCountryHalfMarathon
+  #
+  returned_title="$(echo -n "$returned_title" | gsed 's/: Presented By.*//i')"
+
+  # Remove year from beginning of title - also https://runsignup.com/Race/CO/HighlandsRanch/BackCountryHalfMarathon
+  #
+  returned_title="$(echo -n "$returned_title" | gsed "s/^20[0-9][0-9]  *//")"
+
   echo "$returned_title"
 }
 
@@ -380,6 +414,7 @@ get_race_date() {
   returned_date="$(echo -n "$returned_date" | sed 's/ from / /'; )"
   returned_date="$(echo -n "$returned_date" | sed 's/ the / /'; )"
   returned_date="$(echo -n "$returned_date" | sed 's/ begins at / /'; )"
+  returned_date="$(echo -n "$returned_date" | sed 's/waves starting at //'; )"
   returned_date="$(echo -n "$returned_date" | sed 's/ to .*//'; )"
   returned_date="$(echo -n "$returned_date" | sed 's/\. .*//'; )"
 
@@ -392,14 +427,33 @@ get_race_date() {
   echo "$returned_date"
 }
 
+get_race_url() {
+  url="$1"
+  returned_url="$($CURL "$url" | $PUP .websiteitem attr{href})"
+
+  if [ ! "$returned_url" ]
+  then
+    returned_url="$url"
+  fi
+  echo "$returned_url"
+}
+
 get_race_location() {
   url="$1"
-  returned_location="$($CURL "$url" | $PUP "$GENERIC_LOCATION_SELECTOR" text{})"
+  #returned_location="$($CURL "$url" | $PUP "$GENERIC_LOCATION_SELECTOR" attr{content})"
+  returned_location="$($CURL "$url" | $PUP "$GENERIC_LOCATION_SELECTOR" text{} | grep . | head -1)"
 
-  if [ ! "$returned_location" ]
-  then
-    returned_location="$($CURL "$url" | $PUP "$GENERIC_LOCATION_SELECTOR2" text{} | grep . | head -1)"
-  fi
+  for location_selector in $GENERIC_LOCATION_SELECTORS
+  do
+    if [ ! "$returned_location" ]
+    then
+       returned_location="$($CURL "$url" | $PUP "$location_selector" attr{content})"
+    fi
+    if [ ! "$returned_location" ]
+    then
+       returned_location="$($CURL "$url" | $PUP "$location_selector" text{})"
+    fi
+  done
 
   # [ernie@eahimac4 ~]$ cache_Get 86400 'https://ultrasignup.com/register.aspx?did=79440' | grep start.: | grep -v \< | cut -f4 -d\"
   # February 6, 2021 07:30:00
@@ -413,7 +467,9 @@ get_race_location() {
   fi
 
 
-
+  # remove "Directions" text ala http://web.archive.org/web/20201026221754/https://runsignup.com/Race/CO/HighlandsRanch/BackCountryHalfMarathon
+  #
+  returned_location="$(echo -n "$returned_location" | grep -v Directions)"
 
   # Trim trailing whitespace
   #
@@ -430,7 +486,7 @@ get_race_location() {
 
 # Test get_race_title and get_race_date
 #
-# Arguments: <url> <expected title> <expected date> [<expected pattern>] [<expected location>]
+# Arguments: <url> <expected title> <expected date> [ <expected pattern> ] [ <expected location> ] [ <expected url> ]
 #
 test_url() {
   if [ "${SKIP_TESTS:-}" ]
@@ -444,10 +500,12 @@ test_url() {
   expected_date="$3"
   expected_location="${5:-}"
   pattern_comments="${4:-}"
+  expected_url="${6:-}"
 
   returned_title="$(get_race_title "$url_to_test")"
   returned_date="$(get_race_date "$url_to_test")"
   returned_location="$(get_race_location "$url_to_test")"
+  returned_url="$(get_race_url "$url_to_test")"
 
 
   if [ "$returned_title" != "$expected_title" ]
@@ -495,10 +553,30 @@ test_url() {
     exit 2
   fi
 
+
+  if [ "$expected_url" -a "$returned_url" != "$expected_url" ]
+  then
+    echo # after progress no-newline echos
+    echo "Test command failed! Got:"
+    echo ">$returned_url<"
+    echo "expected:"
+    echo ">$expected_url<"
+    echo "Test URL: $url_to_test"
+    if [ "$pattern_comments" ]
+      then
+        echo "Pattern comments (by URL so may not cover location matches): $pattern_comments"
+    fi
+    exit 2
+  fi
+
+
 }
 
 # Validate selectors and scraping logic
 #
+
+
+test_url 'http://web.archive.org/web/20201026221754/https://runsignup.com/Race/CO/HighlandsRanch/BackCountryHalfMarathon' 'Backcountry Wilderness Half Marathon' 'sat november 7 2020' '' 'Highlands Ranch, CO 80124 US'
 
 expected_title="NYRR Grete's Great Gallop 10K"
 expected_date="saturday, october 05 2019"
@@ -553,6 +631,7 @@ test_url "$url_to_test" "$expected_title" "$expected_date"
 #
 #test_url "$url_to_test" "$expected_title" "$expected_date"
 
+test_url "https://nycruns.com/race/nycruns-cocoa-classic-5k---10k" "NYCRUNS Winter Classic 5K" "sunday, december 6, 2020 8 am"
 
 expected_title="Run the River 5K"
 #expected_date="2015-10-24t08:30:00-04:00"
@@ -576,12 +655,17 @@ test_url https://web.archive.org/web/20190118081846/http://www.ridetomontauk.com
 
 test_url http://web.archive.org/web/20190816170055/https://nytri.org/events/rockaway-beach-tri-duathlon/ 'Rockaway Beach Tri/Duathlon' 'date: sunday, september 22, 2019'
 
-test_url http://web.archive.org/web/20190923170820/https://runsignup.com/Race/NY/Brooklyn/PPTCTurkeyTrot?remMeAttempt=  '2019 PPTC Turkey Trot' 'thu november 28 2019'
+test_url http://web.archive.org/web/20190923170820/https://runsignup.com/Race/NY/Brooklyn/PPTCTurkeyTrot?remMeAttempt=  'PPTC Turkey Trot' 'thu november 28 2019'
 
 
 test_url http://web.archive.org/web/20200219182317/https://www.nyrr.org/races/nyrrnewportfiesta5k 'NYRR Newport Fiesta 5K' 'may 2, 2020 5:00 pm' "location: 'li:parent-of(h2:contains(\"Location\")) div'" 'Jersey City'
 
-test_url 'http://web.archive.org/web/20201023174217/https://ultrasignup.com/register.aspx?did=79440' 'Angry Tortoise 25K/50K' 'february 6, 2021 07:30:00' '' 'Bryceville, FL'
+test_url 'http://web.archive.org/web/20201023174217/https://ultrasignup.com/register.aspx?did=79440' 'Angry Tortoise 25K/50K' 'february 6, 2021 07:30:00' '' 'Bryceville, FL' 'http://web.archive.org/web/20201023174217/http://www.floridastriders.com/angrytortoise'
+
+if [ ! "${SKIP_TESTS:-}" ]
+then
+    date +%s > "$test_success_timestamp_file"
+fi
 
 echo # after progress no-newline echos
 
@@ -615,6 +699,12 @@ then
     location="$arg_location"
   else
     location="$(get_race_location "$url")"
+  fi
+
+  returned_url="$(get_race_url "$url")"
+  if [ "$returned_url" != "$url" ]
+  then
+    url="$url  /  $returned_url"
   fi
 
 
