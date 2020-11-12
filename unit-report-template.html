@@ -56,59 +56,167 @@ table,tr,td,th {{
     </tr>
     <tr class="{today_class}">
       <td>Today:</td>
-      <td>{units_today}</td>
-      <td>{units_today_previous_year_diff}</td>
-      <td>{units_today_30days_diff}</td>
+      <td title="units_today">{units_today}</td>
+      <td title="units_today_previous_year_diff">{units_today_previous_year_diff}</td>
+      <td title="units_today_30days_diff">{units_today_30days_diff}</td>
     </tr>
     <tr class="{2days_class}">
       <td>Last 2 days:</td>
-      <td>{units_average_2days}</td>
-      <td>{units_average_2days_previous_year_diff}</td>
-      <td>{units_average_2days_30days_diff}</td>
+      <td title="units_average_2days">{units_average_2days}</td>
+      <td title="units_average_2days_previous_year_diff">{units_average_2days_previous_year_diff}</td>
+      <td title="units_average_2days_30days_diff">{units_average_2days_30days_diff}</td>
     </tr>
     <tr>
       <td>Yesterday:</td>
-      <td>{units_yesterday}</td>
-      <td>{units_yesterday_previous_year_diff}</td>
-      <td>{units_yesterday_30days_diff}</td>
+      <td title="units_yesterday">{units_yesterday}</td>
+      <td title="units_yesterday_previous_year_diff">{units_yesterday_previous_year_diff}</td>
+      <td title="units_yesterday_30days_diff">{units_yesterday_30days_diff}</td>
     </tr>
     <tr class="{alltime_class}">
       <td>Alltime Average:</td>
-      <td>{units_average}</td>
-      <td>{units_average_previous_year_diff}</td>
-      <td>{units_average_30days_diff}</td>
+      <td title="units_average">{units_average}</td>
+      <td title="units_average_previous_year_diff">{units_average_previous_year_diff}</td>
+      <td title="units_average_30days_diff">{units_average_30days_diff}</td>
     </tr>
     <tr>
       <td>{current_year} Average:</td>
-      <td>{units_average_current_year}</td>
-      <td>{units_average_current_year_previous_year_diff}</td>
-      <td>{units_average_current_year_30days_diff}</td>
+      <td title="units_average_current_year">{units_average_current_year}</td>
+      <td title="units_average_current_year_previous_year_diff">{units_average_current_year_previous_year_diff}</td>
+      <td title="units_average_current_year_30days_diff">{units_average_current_year_30days_diff}</td>
     </tr>
     <tr>
       <td>{previous_year} Average:</td>
-      <td>{units_average_previous_year}</td>
+      <td title="units_average_previous_year">{units_average_previous_year}</td>
       <td>&nbsp;</td>
-      <td>{units_average_previous_year_30days_diff}</td>
+      <td title="units_average_previous_year_30days_diff">{units_average_previous_year_30days_diff}</td>
     </tr>
     <tr>
       <td>30 Day Average:</td>
-      <td>{units_average_30days}</td>
-      <td>{units_average_30days_previous_year_diff}</td>
+      <td title="units_average_30days">{units_average_30days}</td>
+      <td title="units_average_30days_previous_year_diff">{units_average_30days_previous_year_diff}</td>
       <td>&nbsp;</td>
     </tr>
     <tr class="{7days_class}">
       <td>Last 7 day average:</td>
-      <td>{units_average_7days}</td>
-      <td>{units_average_7days_previous_year_diff}</td>
-      <td>{units_average_7days_30days_diff}</td>
+      <td title="units_average_7days">{units_average_7days}</td>
+      <td title="units_average_7days_previous_year_diff">{units_average_7days_previous_year_diff}</td>
+      <td title="units_average_7days_30days_diff">{units_average_7days_30days_diff}</td>
     </tr>
     <tr>
       <td>Today last year:</td>
-      <td>{units_today_last_year}</td>
-      <td>{units_today_last_year_previous_year_diff}</td>
-      <td>{units_today_last_year_30days_diff}</td>
+      <td title="units_today_last_year">{units_today_last_year}</td>
+      <td title="units_today_last_year_previous_year_diff">{units_today_last_year_previous_year_diff}</td>
+      <td title="units_today_last_year_30days_diff">{units_today_last_year_30days_diff}</td>
     </tr>
  </table><br>
+
+ <table summary="Detailed historical summary" cellpadding='0' cellspacing='0'>
+   <tr>
+     <th></th>
+     <th>
+       <span title="{date_today}">Today</span>
+     </th>
+     <th>
+       <span title="{date_yesterday}">Yesterday</span>
+     </th>
+     <th>
+       <span title="{date_two_days_ago}">{day_of_week_two_days_ago}</span>
+     </th>
+     <th>
+       <span title="{date_three_days_ago}">{day_of_week_three_days_ago}</span>
+     </th>
+     <th>
+       <span title="{date_four_days_ago}">{day_of_week_four_days_ago}</span>
+     </th>
+     <th>
+       <span title="{date_five_days_ago}">{day_of_week_five_days_ago}</span>
+     </th>
+     <th>
+       <span title="{date_six_days_ago}">{day_of_week_six_days_ago}</span>
+     </th>
+   </tr>
+   <tr>
+     <td>Total</td>
+     <td title="units_today">{units_today}</td>
+     <td title="units_yesterday">{units_yesterday}</td>
+     <td title="units_two_days_ago">{units_two_days_ago}</td>
+     <td title="units_three_days_ago">{units_three_days_ago}</td>
+     <td title="units_four_days_ago">{units_four_days_ago}</td>
+     <td title="units_five_days_ago">{units_five_days_ago}</td>
+     <td title="units_six_days_ago">{units_six_days_ago}</td>
+   </tr>
+   <tr>
+     <td>&nbsp;Running</td>
+     <td>&nbsp;{units_today_running}</td>
+     <td>&nbsp;{units_yesterday_running}</td>
+     <td>&nbsp;{units_two_days_ago_running}</td>
+     <td>&nbsp;{units_three_days_ago_running}</td>
+     <td>&nbsp;{units_four_days_ago_running}</td>
+     <td>&nbsp;{units_five_days_ago_running}</td>
+     <td>&nbsp;{units_six_days_ago_running}</td>
+   </tr>
+   <tr>
+     <td>&nbsp;Cycling</td>
+     <td>&nbsp;{units_today_cycling}</td>
+     <td>&nbsp;{units_yesterday_cycling}</td>
+     <td>&nbsp;{units_two_days_ago_cycling}</td>
+     <td>&nbsp;{units_three_days_ago_cycling}</td>
+     <td>&nbsp;{units_four_days_ago_cycling}</td>
+     <td>&nbsp;{units_five_days_ago_cycling}</td>
+     <td>&nbsp;{units_six_days_ago_cycling}</td>
+   </tr>
+   <tr>
+     <td>&nbsp;Walking</td>
+     <td>&nbsp;{units_today_walking}</td>
+     <td>&nbsp;{units_yesterday_walking}</td>
+     <td>&nbsp;{units_two_days_ago_walking}</td>
+     <td>&nbsp;{units_three_days_ago_walking}</td>
+     <td>&nbsp;{units_four_days_ago_walking}</td>
+     <td>&nbsp;{units_five_days_ago_walking}</td>
+     <td>&nbsp;{units_six_days_ago_walking}</td>
+   </tr>
+   <tr>
+     <td>&nbsp;</td>
+     <td>&nbsp;</td>
+     <td>&nbsp;</td>
+     <td>&nbsp;</td>
+     <td>&nbsp;</td>
+     <td>&nbsp;</td>
+     <td>&nbsp;</td>
+     <td>&nbsp;</td>
+   </tr>
+   <tr>
+     <td>&nbsp;Strava</td>
+     <td>&nbsp;{units_today_strava}</td>
+     <td>&nbsp;{units_yesterday_strava}</td>
+     <td>&nbsp;{units_two_days_ago_strava}</td>
+     <td>&nbsp;{units_three_days_ago_strava}</td>
+     <td>&nbsp;{units_four_days_ago_strava}</td>
+     <td>&nbsp;{units_five_days_ago_strava}</td>
+     <td>&nbsp;{units_six_days_ago_strava}</td>
+   </tr>
+   <tr>
+     <td>&nbsp;Livetrack</td>
+     <td>&nbsp;{units_today_livetrack}</td>
+     <td>&nbsp;{units_yesterday_livetrack}</td>
+     <td>&nbsp;{units_two_days_ago_livetrack}</td>
+     <td>&nbsp;{units_three_days_ago_livetrack}</td>
+     <td>&nbsp;{units_four_days_ago_livetrack}</td>
+     <td>&nbsp;{units_five_days_ago_livetrack}</td>
+     <td>&nbsp;{units_six_days_ago_livetrack}</td>
+   </tr>
+   <tr>
+     <td>&nbsp;Arc</td>
+     <td>&nbsp;{units_today_arc}</td>
+     <td>&nbsp;{units_yesterday_arc}</td>
+     <td>&nbsp;{units_two_days_ago_arc}</td>
+     <td>&nbsp;{units_three_days_ago_arc}</td>
+     <td>&nbsp;{units_four_days_ago_arc}</td>
+     <td>&nbsp;{units_five_days_ago_arc}</td>
+     <td>&nbsp;{units_six_days_ago_arc}</td>
+   </tr>
+ </table>
+
   <br>
   <table summary="Timestamp information" cellpadding='0'
   cellspacing='0'>
