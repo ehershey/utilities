@@ -2,7 +2,7 @@
 #
 # Add Race to calendar
 #
-# autoupdate_version = 102
+# autoupdate_version = 112
 #
 NYRR_TITLE_SELECTOR="h2.title"
 NYRR_DATE_SELECTOR="p.full-width span"
@@ -16,6 +16,7 @@ GENERIC_LOCATION_SELECTOR='li:parent-of(h2:contains("Location")) div'
 GENERIC_LOCATION_SELECTORS="
 .race-display-address
 span.race-location
+._address
 "
 
 RNR_DATE_SELECTOR="h2:contains(\"General Info\") + p + p"
@@ -390,7 +391,7 @@ get_race_date() {
   returned_date="$(echo -n "$returned_date" | sed 's/ 10k:*//g')"
   returned_date="$(echo -n "$returned_date" | sed 's/ half:*//g')"
   returned_date="$(echo -n "$returned_date" | sed 's/ 5 miler.*//g')"
-  returned_date="$(echo -n "$returned_date" | sed 's/ - [0-9][0-9]*:[0-9][0-9] [ap]m//g')"
+  returned_date="$(echo -n "$returned_date" | sed 's/ - [0-9][0-9]*:*[0-9]* [ap]m//g')"
   returned_date="$(echo -n "$returned_date" | sed 's/[ 	][ 	]*/ /g'; )"
   returned_date="$(echo -n "$returned_date" | sed 's/;.*//g')"
   returned_date="$(echo -n "$returned_date" | sed 's/ *|.*//g')"
@@ -474,6 +475,12 @@ get_race_location() {
   # Trim trailing whitespace
   #
   returned_location="$(echo -n "$returned_location" | sed 's/[ 	]*$//' )"
+
+  # Convert whitespace to spaces
+  #
+  returned_location="$(echo -n "$returned_location" | tr \\n \ )"
+  returned_location="$(echo -n "$returned_location" | sed 's/[	 ][ 	]*/ /g' )"
+
 
   # Grab only last line
   #
@@ -576,7 +583,9 @@ test_url() {
 #
 
 
-test_url 'http://web.archive.org/web/20201026221754/https://runsignup.com/Race/CO/HighlandsRanch/BackCountryHalfMarathon' 'Backcountry Wilderness Half Marathon' 'sat november 7 2020' '' 'Highlands Ranch, CO 80124 US'
+test_url https://nycruns.com/race/nycruns-winter-classic-4-miler 'NYCRUNS Winter Classic 4 Miler' 'sunday, january 10, 2021' '' 'Central Park 72nd Street New York, NY'
+
+test_url 'https://nycruns.com/race/central-park-half--marathon' 'NYCRUNS Central Park Half Marathon' 'sunday, february 28, 2021 7 am'
 
 expected_title="NYRR Grete's Great Gallop 10K"
 expected_date="saturday, october 05 2019"
