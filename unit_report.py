@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.7
+#!/usr/bin/env python3
 """
 Output calorie report based on location/motion data in database
 Requires MONGODB_URI environment variable
@@ -170,7 +170,7 @@ if __name__ == '__main__':
 
     ARGS = PARSER.parse_args()
     if ARGS.for_date:
-        for_date = dateutil.PARSER.parse(ARGS.for_date).replace(hour=12)
+        for_date = dateutil.parser.parse(ARGS.for_date).replace(hour=12)
     else:
         for_date = datetime.datetime.now()
 
