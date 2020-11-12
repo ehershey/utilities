@@ -23,10 +23,10 @@ DB = "ernie_org"
 def log(function):
     """ convert function into one with debug logging of invocations and return values """
     def decorator(*args, **kwargs):
-        logging.debug("{function}(..) start", function=function.__name__)
+        logging.debug("{function}(..) start".format(function=function.__name__))
         value = function(*args, **kwargs)
-        logging.debug("{function}(..) returning: {returnvalue}", function=function.__name__,
-                      returnvalue=value)
+        logging.debug("{function}(..) returning: {returnvalue}".format(
+            function=function.__name__, returnvalue=value))
         return value
     return decorator
 
@@ -408,6 +408,28 @@ if __name__ == '__main__':
     PLACEHOLDER['units_six_days_ago_strava'] = \
         get_units_average(summary_collection, for_date - timedelta(days=7),
                           for_date - timedelta(days=6), entry_source="Strava")
+
+    PLACEHOLDER['units_today_livetrack'] = \
+        get_units_average(summary_collection, for_date - timedelta(days=1), for_date,
+                          entry_source="Livetrack")
+    PLACEHOLDER['units_yesterday_livetrack'] = \
+        get_units_average(summary_collection, for_date - timedelta(days=2),
+                          for_date - timedelta(days=1), entry_source="Livetrack")
+    PLACEHOLDER['units_two_days_ago_livetrack'] = \
+        get_units_average(summary_collection, for_date - timedelta(days=3),
+                          for_date - timedelta(days=2), entry_source="Livetrack")
+    PLACEHOLDER['units_three_days_ago_livetrack'] = \
+        get_units_average(summary_collection, for_date - timedelta(days=4),
+                          for_date - timedelta(days=3), entry_source="Livetrack")
+    PLACEHOLDER['units_four_days_ago_livetrack'] = \
+        get_units_average(summary_collection, for_date - timedelta(days=5),
+                          for_date - timedelta(days=4), entry_source="Livetrack")
+    PLACEHOLDER['units_five_days_ago_livetrack'] = \
+        get_units_average(summary_collection, for_date - timedelta(days=6),
+                          for_date - timedelta(days=5), entry_source="Livetrack")
+    PLACEHOLDER['units_six_days_ago_livetrack'] = \
+        get_units_average(summary_collection, for_date - timedelta(days=7),
+                          for_date - timedelta(days=6), entry_source="Livetrack")
 
     PLACEHOLDER['units_today_arc'] = \
         get_units_average(summary_collection, for_date - timedelta(days=1), for_date,
