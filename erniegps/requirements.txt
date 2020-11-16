@@ -7,4 +7,6 @@ pytz
 gpxpy
 py-dateutil
 pint
-bson==0.5.6
+#bson==0.5.6
+stravalib
+geopy==2.0.0

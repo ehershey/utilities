@@ -27,7 +27,7 @@ import pytz
 import strava_to_db
 
 
-autoupdate_version = 314
+autoupdate_version = 325
 
 # limits for combining tracks
 #
@@ -84,7 +84,7 @@ def process_track(track):
     for strava_activity in STRAVA_ACTIVITIES:
         logging.debug("")
         logging.debug("processing strava activity")
-        logging.debug("strava_activity: %s", strava_activity)
+        logging.debug(f"strava_activity: {str(strava_activity)[:80]}")
 
         (activity_start, activity_end) = erniegps.get_normalized_strava_start_end(strava_activity,
                                                                                   track,
@@ -98,7 +98,7 @@ def process_track(track):
     for livetrack_session in LIVETRACK_SESSIONS:
         logging.debug("")
         logging.debug("processing livetrack session")
-        logging.debug("livetrack_session: %.80s", livetrack_session)
+        logging.debug(f"livetrack_session: {str(livetrack_session)[:80]}")
 
         session_start, session_end = erniegps.get_normalized_livetrack_start_end(livetrack_session,
                                                                                  track,
