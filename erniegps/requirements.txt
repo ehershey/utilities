@@ -10,3 +10,4 @@ pint
 #bson==0.5.6
 stravalib
 geopy==2.0.0
+timezonefinder[numba]

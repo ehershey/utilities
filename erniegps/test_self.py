@@ -431,8 +431,8 @@ def test_basic_overlap():
     gpx_file = '{0}/Dropbox/Misc/Arc Export/Export/GPX/Daily/2018-12-30.gpx'.format(
             os.environ['HOME'])
 
-    logging.getLogger().setLevel(getattr(logging, "DEBUG"))
-    logging.debug("Debug logging enabled")
+    # logging.getLogger().setLevel(getattr(logging, "DEBUG"))
+    # logging.debug("Debug logging enabled")
 
     strava_activities, livetrack_sessions = erniegps.get_external_activities(
             gpx=gpxpy.parse(open(gpx_file)))
