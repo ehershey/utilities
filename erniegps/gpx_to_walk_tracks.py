@@ -27,7 +27,7 @@ import pytz
 import strava_to_db
 
 
-autoupdate_version = 347
+autoupdate_version = 348
 
 # limits for combining tracks
 #
@@ -37,7 +37,7 @@ MAX_DISTANCE_METERS_BETWEEN_COMBINED_TRACKS = 110  # 2020-10-24 split walking un
 # MAX_MPH_TO_ASSUME_WALKING = 4  # 2017-10-31 (subway ride ~10mph?)
 # MAX_MPH_TO_ASSUME_WALKING = 5.5  # 2020-10-22 a lot of running in between walking
 # 2020-11-21 more running in between walking - 5.5 leads to 5 activities
-MAX_MPH_TO_ASSUME_WALKING = 5.8
+MAX_MPH_TO_ASSUME_WALKING = 5.85
 
 
 # limits to include tracks in the end at all
