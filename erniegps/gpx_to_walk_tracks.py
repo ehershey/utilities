@@ -27,7 +27,7 @@ import pytz
 import strava_to_db
 
 
-autoupdate_version = 325
+autoupdate_version = 347
 
 # limits for combining tracks
 #
@@ -35,7 +35,9 @@ MAX_EMPTY_MINUTES_BETWEEN_COMBINED_TRACKS = 30
 # MAX_DISTANCE_METERS_BETWEEN_COMBINED_TRACKS = 50
 MAX_DISTANCE_METERS_BETWEEN_COMBINED_TRACKS = 110  # 2020-10-24 split walking unnecessarily in two
 # MAX_MPH_TO_ASSUME_WALKING = 4  # 2017-10-31 (subway ride ~10mph?)
-MAX_MPH_TO_ASSUME_WALKING = 5.5  # 2020-10-22 a lot of running in between walking
+# MAX_MPH_TO_ASSUME_WALKING = 5.5  # 2020-10-22 a lot of running in between walking
+# 2020-11-21 more running in between walking - 5.5 leads to 5 activities
+MAX_MPH_TO_ASSUME_WALKING = 5.8
 
 
 # limits to include tracks in the end at all
@@ -62,9 +64,7 @@ def process_track(track):
     logging.debug("")
     logging.debug("processing new track")
     if track is not None:
-        distance = track.get_moving_data().moving_distance
-        logging.debug("distance: %f", distance)
-        logging.debug("get_points_no(): %f", track.get_points_no())
+        distance = erniegps.get_track_distance(track)
 
         time = track.get_moving_data().moving_time
         start_time = track.get_time_bounds().start_time
@@ -78,6 +78,13 @@ def process_track(track):
         # gather array of [start, end] tuples from exernal sources
         track_start = start_time
         track_end = end_time
+        logging.debug("start_time: %s", start_time)
+        logging.debug("end_time: %s", end_time)
+        logging.debug("distance: %s", distance)
+        logging.debug("track.type: %s", track.type)
+        logging.debug("get_points_no(): %f", track.get_points_no())
+    else:
+        logging.debug("track: None")
 
     external_activities = []
 
@@ -241,11 +248,24 @@ def process_track(track):
 def get_combined_tracks(gpx=None, gpx_file=None, skip_strava=False, skip_strava_auto_walking=False,
                         date=None,
                         skip_skip_centers=False):
-    # get all strava and livetrack activities that overlap track dates
-    #
+    """
+    Return auto walking tracks that should be saved.
+    * By default, tracks are trimmed to not overlap any strava
+      activities (in DB) (override with skip_strava_*).
+    * By default if a track is only within MIN_TRACK_MILES_FROM_SKIP_CENTERS
+      miles of a point in SKIP_CENTERS (home, office, etc). It will be
+      skipped (override with skip_skip_centers=true)
+    * gpx can be a result from gpxpy.parse()
+    * If it's absent, gpx_file is the path to a gpx file to load
+    * All strava activities can be skipped
+    * Strava activities from this function specifically can be skipped
+    """
 
-    if gpx is None and type(gpx_file) == str:
-        gpx = gpxpy.parse(open(gpx_file))
+    if gpx is None:
+        # gpx_file can be filehandle or path
+        if type(gpx_file) == str:
+            gpx_file = open(gpx_file)
+        gpx = gpxpy.parse(gpx_file)
 
     global STRAVA_ACTIVITIES, LIVETRACK_SESSIONS
 
@@ -288,7 +308,7 @@ def get_combined_tracks(gpx=None, gpx_file=None, skip_strava=False, skip_strava_
         this_track_type = this_track.type
         this_track_start_time = this_track.get_time_bounds().start_time
         this_track_end_time = this_track.get_time_bounds().end_time
-        this_track_distance = this_track.get_moving_data().moving_distance
+        this_track_distance = erniegps.get_track_distance(this_track)
         this_track_moving_time = this_track.get_moving_data().moving_time
         logging.debug("this_track_type: %s", this_track_type)
         logging.debug("this_track_start_time: %s", this_track_start_time)
@@ -318,7 +338,7 @@ def get_combined_tracks(gpx=None, gpx_file=None, skip_strava=False, skip_strava_
         most_recent_track_type = most_recent_track.type
         most_recent_track_start_time = most_recent_track.get_time_bounds().start_time
         most_recent_track_end_time = most_recent_track.get_time_bounds().end_time
-        most_recent_track_distance = most_recent_track.get_moving_data().moving_distance
+        most_recent_track_distance = erniegps.get_track_distance(most_recent_track)
         logging.debug("most_recent_track_type: %s", most_recent_track_type)
         logging.debug("most_recent_track_start_time: %s", most_recent_track_start_time)
         logging.debug("most_recent_track_end_time: %s", most_recent_track_end_time)
@@ -374,7 +394,7 @@ def get_combined_tracks(gpx=None, gpx_file=None, skip_strava=False, skip_strava_
     for track in new_new_tracks:
         # skip for various reasons
         #
-        distance = track.get_moving_data().moving_distance
+        distance = erniegps.get_track_distance(track)
 
         logging.debug("distance: %d", distance)
         if distance < MIN_TRACK_DISTANCE_METERS:
@@ -435,12 +455,9 @@ def main(gpx_input=None, skip_strava=False, skip_strava_auto_walking=False,
          skip_skip_centers=False):
 
     init()
-    gpx = gpxpy.parse(gpx_input)
-
-    logging.debug("read input")
 
     """ run as a script """
-    combined_tracks = get_combined_tracks(gpx=gpx,
+    combined_tracks = get_combined_tracks(gpx_file=gpx_input,
                                           skip_strava=skip_strava,
                                           skip_strava_auto_walking=skip_strava_auto_walking,
                                           date=date,
@@ -448,7 +465,7 @@ def main(gpx_input=None, skip_strava=False, skip_strava_auto_walking=False,
 
     print(f"Tracks to upload: {len(combined_tracks)}")
     for track in combined_tracks:
-        distance_meters = track.get_moving_data().moving_distance * UREG.meters
+        distance_meters = erniegps.get_track_distance(track) * UREG.meters
         distance_miles = distance_meters.to(UREG.miles).magnitude
         print("Track:")
         print(f"{ erniegps.get_first_point(track) } -> { distance_miles:.2f} miles")

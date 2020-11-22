@@ -45,7 +45,14 @@ from pytz import reference
 import pytz
 
 
-autoupdate_version = 127
+autoupdate_version = 167
+
+SUMMARIES_BY_DATE = dict()
+STRAVA_ACTIVITIES = []
+LIVETRACK_SESSIONS = []
+UREG = pint.UnitRegistry()
+
+CALORIES_PER_MILE_BY_ACTIVITY_TYPE = erniegps.calories.CALORIES_PER_MILE_BY_ACTIVITY_TYPE
 
 
 def get_summary_type_from_other_type(other_type):
@@ -104,12 +111,12 @@ def compute_activity_calories(activity_type, duration_secs, distance_meters):
         activity_type=activity_type))
 
 
-def new_summary(start_time, entry_source):
+def new_summary(summary_time, entry_source):
     """ return empty summary object """
     return dict({
         "entry_source": entry_source,
-        "Date": start_time.replace(hour=0, minute=0, second=0),
-        "Verbose Date": start_time.strftime("%Y-%m-%d"),
+        "Date": summary_time.replace(hour=0, minute=0, second=0),
+        "Verbose Date": summary_time.strftime("%Y-%m-%d"),
         "GPS Points": 0,
         "Calories": 0,
         "Time": 0,
@@ -119,14 +126,14 @@ def new_summary(start_time, entry_source):
         })
 
 
-def process_track(track):
+def process_track(track, entry_source=None):
     """ Take gpxpy track object and read summary data from it """
     logging.debug("")
     logging.debug("")
     logging.debug("processing new track")
     track_start = None
     if track is not None:
-        distance = track.get_moving_data().moving_distance
+        distance = erniegps.get_track_distance(track)
         logging.debug("distance: %f", distance)
         logging.debug("get_points_no(): %f", track.get_points_no())
 
@@ -139,7 +146,7 @@ def process_track(track):
             end_date = end_time.date()
         # Split into tracks that don't overlap with external activities from strava or livetrack
         #
-        # gather array of [start,end] tuples from exernal sources
+        # gather array of [start, end] tuples from exernal sources
         track_start = start_time
         track_end = end_time
 
@@ -261,8 +268,8 @@ def process_track(track):
                 for index_to_delete in reversed(sorted(indexes_to_delete)):
                     del segment.points[index_to_delete]
 
-            process_track(track)
-            process_track(end_track)
+            process_track(track, entry_source)
+            process_track(end_track, entry_source)
             return None
         elif activity_start < track_start <= activity_end < track_end:
             logging.debug("case 3: Shrinking track")
@@ -274,7 +281,7 @@ def process_track(track):
 
                 for index_to_delete in reversed(sorted(indexes_to_delete)):
                     del segment.points[index_to_delete]
-            process_track(track)
+            process_track(track, entry_source)
             return None
         elif track_start <= activity_start < track_end <= activity_end:
             logging.debug("case 4: Shrinking track")
@@ -286,7 +293,7 @@ def process_track(track):
 
                 for index_to_delete in reversed(sorted(indexes_to_delete)):
                     del segment.points[index_to_delete]
-            process_track(track)
+            process_track(track, entry_source)
             return None
         else:
             logging.debug("case 5: continuing")
@@ -312,14 +319,15 @@ def process_track(track):
                     indexes_to_delete.append(index)
             for index_to_delete in reversed(sorted(indexes_to_delete)):
                 del segment.points[index_to_delete]
-        process_track(track)
-        process_track(new_dates_track)
+        process_track(track, entry_source)
+        process_track(new_dates_track, entry_source)
         return None
     elif start_date in SUMMARIES_BY_DATE:
         summary = SUMMARIES_BY_DATE[start_date]
     else:
-        summary = new_summary(start_time, ARGS.entry_source)
+        summary = new_summary(start_time, entry_source)
         SUMMARIES_BY_DATE[start_date] = summary
+        summary['create_location'] = 1
 
     tracktype = track.type
     if not tracktype:
@@ -337,7 +345,7 @@ def process_track(track):
         summary["calories_by_type"][key] = 0
     summary["calories_by_type"][key] += calories
     logging.debug("calories: %d", calories)
-    summary["calories_by_entry_source"][ARGS.entry_source] += calories
+    summary["calories_by_entry_source"][entry_source] += calories
     time_key = tracktype.capitalize() + " Seconds"
     if time_key not in summary:
         summary[time_key] = time
@@ -350,8 +358,21 @@ def process_track(track):
     summary["GPS Points"] += track.get_points_no()
 
 
-def main(skip_strava=False, gpx=None, date=None):
-    """ run as a script """
+def get_summary(**kwargs):
+    kwargs['allow_multiple'] = False
+    return get_summaries(**kwargs)[0]
+
+
+def get_summaries(gpx_file=None, gpx=None,
+                  date=None,
+                  allow_multiple=False,
+                  skip_strava=False, entry_source=None):
+
+    if gpx is None:
+        # gpx_file can be filehandle or path
+        if type(gpx_file) == str:
+            gpx_file = open(gpx_file)
+        gpx = gpxpy.parse(gpx_file)
 
     global STRAVA_ACTIVITIES, LIVETRACK_SESSIONS
 
@@ -368,11 +389,25 @@ def main(skip_strava=False, gpx=None, date=None):
     # uses LIVETRACK_SESSIONS and STRAVA_ACTIVITIES
     #
     for track in gpx.tracks:
-        process_track(track)
+        process_track(track, entry_source)
 
     # this shouldn't necessary but we do depend on stuff in process_track
     if len(gpx.tracks) == 0:
-        process_track(None)
+        process_track(None, entry_source)
+
+    # make extra sure we have a summary for any dates in the file, even
+    # if they're only on waypoints, and for passed in date
+    extra_date_times = [waypoint.time for waypoint in gpx.waypoints]
+    if date is not None:
+        extra_date_times.append(dateutil.parser.parse(date))
+
+    for time_obj in extra_date_times:
+        time_obj = time_obj.replace(hour=0, minute=0, second=0)
+        date_obj = time_obj.date()
+        if date_obj not in SUMMARIES_BY_DATE:
+            summary = new_summary(time_obj, entry_source)
+            SUMMARIES_BY_DATE[date_obj] = summary
+            summary['create_location'] = 2
 
     for livetrack_session in LIVETRACK_SESSIONS:
         # logging.debug("livetrack_session: %s", livetrack_session)
@@ -447,16 +482,15 @@ def main(skip_strava=False, gpx=None, date=None):
     logging.debug("summaries: {summaries}".format(summaries=summaries))
     logging.debug("filtering summaries")
 
-    if ARGS.date:
-        summaries = (summary for summary in summaries if summary['Verbose Date'] == ARGS.date)
+    if date:
+        summaries = (summary for summary in summaries if summary['Verbose Date'] == date)
 
     # Unless multiples are explicitly allowed, only print the summary with the most points
     #
-    if not ARGS.allow_multiple:
+    if not allow_multiple:
         summaries = sorted(summaries, key=lambda summary: summary["GPS Points"], reverse=True)[0:1]
 
-    for summary in summaries:
-        print(json.dumps(summary, default=json_util.default))
+    return summaries
 
 
 def process_non_gpx_data(start_date, end_date, start_time, entry_source, activity_type,
@@ -475,8 +509,9 @@ def process_non_gpx_data(start_date, end_date, start_time, entry_source, activit
     elif end_date in SUMMARIES_BY_DATE:
         summary = SUMMARIES_BY_DATE[end_date]
     else:
-        summary = new_summary(start_time, ARGS.entry_source)
+        summary = new_summary(start_time, entry_source)
         SUMMARIES_BY_DATE[start_date] = summary
+        summary['create_location'] = 3
 
     if 'calories_by_entry_source' not in summary:
         summary['calories_by_entry_source'] = {}
@@ -518,6 +553,12 @@ def process_non_gpx_data(start_date, end_date, start_time, entry_source, activit
     summary["GPS Points"] += num_gps_points
 
 
+def init():
+    SUMMARIES_BY_DATE.clear()
+    STRAVA_ACTIVITIES.clear()
+    LIVETRACK_SESSIONS.clear()
+
+
 if __name__ == '__main__':
     PARSER = argparse.ArgumentParser(description='gpx to daily summary')
     PARSER.add_argument('--entry-source', help='Entry Source for db entries', default="None")
@@ -541,21 +582,18 @@ if __name__ == '__main__':
     if not ARGS.entry_source:
         logging.warning('No entry source defined. Using "None"')
 
-    CALORIES_PER_MILE_BY_ACTIVITY_TYPE = erniegps.calories.CALORIES_PER_MILE_BY_ACTIVITY_TYPE
-
     if ARGS.filename:
-        GPX_FILE = open(ARGS.filename)
+        gpx_file = open(ARGS.filename)
     else:
-        GPX_FILE = sys.stdin
-
-    GPX = gpxpy.parse(GPX_FILE)
+        gpx_file = sys.stdin
 
     logging.debug("read input")
+    init()
 
-    SUMMARIES_BY_DATE = dict()
-    STRAVA_ACTIVITIES = []
-    LIVETRACK_SESSIONS = []
-
-    UREG = pint.UnitRegistry()
-
-    main(skip_strava=ARGS.skip_strava, gpx=GPX, date=ARGS.date)
+    summaries = get_summaries(gpx_file=gpx_file,
+                              date=ARGS.date,
+                              allow_multiple=ARGS.allow_multiple,
+                              skip_strava=ARGS.skip_strava,
+                              entry_source=ARGS.entry_source)
+    for summary in summaries:
+        print(json.dumps(summary, default=json_util.default))

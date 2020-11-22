@@ -16,7 +16,10 @@ import math
 import pint
 from pymongo import MongoClient
 import pytz
-from pytz import reference
+from pytz import reference, timezone
+from timezonefinder import TimezoneFinder
+
+tf = TimezoneFinder()
 
 MAX_SPLIT_DEPTH = 30
 
@@ -329,12 +332,16 @@ def get_all_points(track):
 
 
 def get_first_point(track):
+    if track is None:
+        return None
     for segment in track.segments:
         if len(segment.points) > 0:
             return segment.points[0]
 
 
 def get_last_point(track):
+    if track is None:
+        return None
     for segment in reversed(track.segments):
         if len(segment.points) > 0:
             return segment.points[-1]
@@ -456,6 +463,8 @@ def get_normalized_strava_start_end(strava_activity, track, track_start):
     Do everything possible to get start and end time with timezones for a strava activity
     """
     activity_start = strava_activity['start_date_local']
+    logging.debug(f"activity_start: {activity_start}")
+    logging.debug(f"activity_start.tzinfo: {activity_start.tzinfo}")
     try:
         activity_end = strava_activity['end_date_local']
     except KeyError:
@@ -468,18 +477,36 @@ def get_normalized_strava_start_end(strava_activity, track, track_start):
             logging.error(strava_activity)
             raise Exception("Can't find end_date_local or elapsed_time in activity!")
 
+    logging.debug(f"activity_end: {activity_end}")
+    logging.debug(f"activity_end.tzinfo: {activity_end.tzinfo}")
+
     if activity_start.tzinfo is None:
-        if(track is not None and track_start is not None and
-           track_start.tzinfo is not None and
-           'start_date' in strava_activity and 'end_date' in strava_activity):
-            logging.debug("copying tzinfo from UTC")
-            activity_start = strava_activity['start_date'].replace(tzinfo=pytz.utc)
-            activity_end = strava_activity['end_date'].replace(tzinfo=pytz.utc)
+        first_point = erniegps.get_first_point(track)
+        # use tz-aware dates from strava if possible
+        if 'start_date' in strava_activity and 'end_date' in strava_activity:
+            logging.debug("setting tzinfo to UTC on non-local strava dates")
+            activity_start = pytz.utc.localize(strava_activity['start_date'])
+            activity_end = pytz.utc.localize(strava_activity['end_date'])
+        elif first_point:
+            logging.debug("setting tzinfo based on lat/long of first point in track")
+            timezone_name = tf.timezone_at(lng=first_point.longitude, lat=first_point.latitude)
+            tz = timezone(timezone_name)
+            activity_start = tz.localize(activity_start)
+            activity_end = tz.localize(activity_end)
+        elif track is not None and track_start is not None and track_start.tzinfo is not None:
+            logging.debug("copying tzinfo from track start")
+            activity_start = track_start.tzinfo.localize(activity_start)
+            activity_end = track_start.tzinfo.localize(activity_end)
         else:
             logging.debug("copying tzinfo from pytz.reference")
-            activity_start = activity_start.replace(tzinfo=reference.LocalTimezone())
-            activity_end = activity_end.replace(tzinfo=reference.LocalTimezone())
+            activity_start = reference.LocalTimezone().localize(activity_start)
+            activity_end = reference.LocalTimezone().localize(activity_end)
 
+    logging.debug(f"returning normalized start/end")
+    logging.debug(f"activity_start: {activity_start}")
+    logging.debug(f"activity_start.tzinfo: {activity_start.tzinfo}")
+    logging.debug(f"activity_end: {activity_end}")
+    logging.debug(f"activity_end.tzinfo: {activity_end.tzinfo}")
     return activity_start, activity_end
 
 
@@ -503,7 +530,10 @@ def get_normalized_livetrack_start_end(livetrack_session, track, track_start):
         session_start = dateutil.parser.parse(first_trackpoint['dateTime'])
         session_end = dateutil.parser.parse(last_trackpoint['dateTime'])
 
+    logging.debug(f"session_start: {session_start}")
     logging.debug(f"session_start.tzinfo: {session_start.tzinfo}")
+    logging.debug(f"session_end: {session_end}")
+    logging.debug(f"session_end.tzinfo: {session_end.tzinfo}")
     if session_start.tzinfo is None:
         if track is not None and track_start is not None and track_start.tzinfo is not None:
             logging.debug("copying tzinfo from track start")
@@ -517,6 +547,11 @@ def get_normalized_livetrack_start_end(livetrack_session, track, track_start):
         logging.debug("converting tzinfo to pytz.reference")
         session_start = session_start.astimezone(reference.LocalTimezone())
         session_end = session_end.astimezone(reference.LocalTimezone())
+    logging.debug(f"returning normalized start/end")
+    logging.debug(f"session_start: {session_start}")
+    logging.debug(f"session_start.tzinfo: {session_start.tzinfo}")
+    logging.debug(f"session_end: {session_end}")
+    logging.debug(f"session_end.tzinfo: {session_end.tzinfo}")
     return session_start, session_end
 
 
@@ -525,6 +560,9 @@ def get_external_activities(skip_strava=False,
                             date=None,
                             skip_strava_auto_walking=False,
                             auto_walking_pattern=None):
+    """
+    get all strava and livetrack activities that overlap gpx track dates
+    """
     STRAVA_ACTIVITIES = []
     LIVETRACK_SESSIONS = []
 
@@ -636,9 +674,14 @@ def get_external_activities(skip_strava=False,
             cursor = activity_collection.find(query)
 
             for strava_activity in cursor:
+                start_date_local = strava_activity['start_date_local']
+                logging.debug(f"start_date_local: {start_date_local}")
+                logging.debug(f"start_date_local.tzinfo: {start_date_local.tzinfo}")
                 if strava_activity['strava_id'] not in seen_strava_activity_ids:
                     seen_strava_activity_ids[strava_activity['strava_id']] = True
-                    if skip_strava_auto_walking and strava_activity['name'] == auto_walking_pattern:
+                    if 'name' in strava_activity and \
+                       skip_strava_auto_walking and \
+                       strava_activity['name'] == auto_walking_pattern:
                         logging.debug("skipping auto walking track")
                         logging.debug("strava_activity: %s", strava_activity)
                         continue
@@ -660,3 +703,8 @@ def get_external_activities(skip_strava=False,
                     LIVETRACK_SESSIONS.append(livetrack_session)
                     seen_livetrack_session_ids[livetrack_session['sessionId']] = True
     return STRAVA_ACTIVITIES, LIVETRACK_SESSIONS
+
+
+def get_track_distance(track):
+    """Return number of meters representing moving distance of the given track"""
+    return track.get_moving_data().moving_distance
