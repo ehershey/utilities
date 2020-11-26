@@ -559,7 +559,7 @@ def get_external_activities(skip_strava=False,
                             gpx=None,
                             date=None,
                             skip_strava_auto_walking=False,
-                            auto_walking_pattern=None):
+                            auto_walking_patterns=[]):
     """
     get all strava and livetrack activities that overlap gpx track dates
     """
@@ -679,13 +679,19 @@ def get_external_activities(skip_strava=False,
                 logging.debug(f"start_date_local.tzinfo: {start_date_local.tzinfo}")
                 if strava_activity['strava_id'] not in seen_strava_activity_ids:
                     seen_strava_activity_ids[strava_activity['strava_id']] = True
-                    if 'name' in strava_activity and \
-                       skip_strava_auto_walking and \
-                       strava_activity['name'] == auto_walking_pattern:
-                        logging.debug("skipping auto walking track")
-                        logging.debug("strava_activity: %s", strava_activity)
-                        continue
-                    STRAVA_ACTIVITIES.append(strava_activity)
+                    skip_this_one = False
+                    for auto_walking_pattern in auto_walking_patterns:
+                        if skip_strava_auto_walking and \
+                           (('name' in strava_activity and
+                            strava_activity['name'] == auto_walking_pattern) or
+                            ('external_id' in strava_activity and
+                                f"{auto_walking_pattern}-" in strava_activity['external_id'])):
+                            skip_this_one = True
+                            logging.debug("skipping auto walking track")
+                            logging.debug("strava_activity: %s", strava_activity)
+                            continue
+                    if not skip_this_one:
+                        STRAVA_ACTIVITIES.append(strava_activity)
 
             query = {"$or": [
                 {"$and": [{"start": {"$gte": str(start_date)}},

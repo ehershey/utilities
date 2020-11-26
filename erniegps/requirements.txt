@@ -11,3 +11,4 @@ pint
 stravalib
 geopy==2.0.0
 timezonefinder[numba]
+uuid

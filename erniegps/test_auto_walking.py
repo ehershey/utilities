@@ -116,3 +116,14 @@ def test_no_subway():
     assert(len(tracks)) == 2
     assert 3000 < erniegps.get_track_distance(tracks[0]) < 4000
     assert 10000 < erniegps.get_track_distance(tracks[1]) < 15000
+
+
+def test_not_too_short():
+    """
+    Don't log a 200 foot walk
+    """
+    gpx_file = base_dir + '2020-11-22.gpx'
+    gpx_to_walk_tracks.init()
+    tracks = gpx_to_walk_tracks.get_combined_tracks(gpx_file=gpx_file,
+                                                    skip_strava_auto_walking=True)
+    assert len(tracks) == 1

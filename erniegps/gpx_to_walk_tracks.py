@@ -25,9 +25,10 @@ import erniegps.db
 import erniegps.private
 import pytz
 import strava_to_db
+import uuid
 
 
-autoupdate_version = 348
+autoupdate_version = 355
 
 # limits for combining tracks
 #
@@ -41,12 +42,13 @@ MAX_MPH_TO_ASSUME_WALKING = 5.85
 
 
 # limits to include tracks in the end at all
-MIN_TRACK_DISTANCE_METERS = 30
+MIN_TRACK_DISTANCE_METERS = 70  # 2020-11-21 tiny little 62 meter track on bedford
 MIN_TRACK_DURATION_MINUTES = 1
 MIN_TRACK_GPS_POINTS = 21  # 2020-10-17 1:30am and others on same day
 MIN_TRACK_MILES_FROM_SKIP_CENTERS = .5
 
 AUTO_ACTIVITY_NAME = "Auto walk upload"
+AUTO_ACTIVITY_EXTERNAL_ID_PREFIX = "AWU"
 
 
 NEW_TRACKS = []
@@ -274,7 +276,7 @@ def get_combined_tracks(gpx=None, gpx_file=None, skip_strava=False, skip_strava_
             gpx=gpx,
             date=date,
             skip_strava_auto_walking=skip_strava_auto_walking,
-            auto_walking_pattern=AUTO_ACTIVITY_NAME)
+            auto_walking_patterns=[AUTO_ACTIVITY_NAME, AUTO_ACTIVITY_EXTERNAL_ID_PREFIX])
 
     logging.info("Overlapping strava activity count: %d", len(STRAVA_ACTIVITIES))
     logging.info("Overlapping livetrack session count: %d", len(LIVETRACK_SESSIONS))
@@ -477,8 +479,10 @@ def main(gpx_input=None, skip_strava=False, skip_strava_auto_walking=False,
 
         if not skip_strava_upload:
             print("uploading to strava")
+            new_uuid = uuid.uuid1()
+            external_id = f"{AUTO_ACTIVITY_EXTERNAL_ID_PREFIX}-{new_uuid}"
             uploader = strava_to_db.upload_activity(gpx_xml=gpx.to_xml(),
-                                                    name=AUTO_ACTIVITY_NAME,
+                                                    external_id=external_id,
                                                     activity_type="walk")
             print("waiting for upload")
             activity = uploader.wait(timeout=30)
