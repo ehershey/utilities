@@ -127,3 +127,32 @@ def test_not_too_short():
     tracks = gpx_to_walk_tracks.get_combined_tracks(gpx_file=gpx_file,
                                                     skip_strava_auto_walking=True)
     assert len(tracks) == 1
+
+
+def fresh_auto_tracks(track_date):
+    """
+    Given a date string, return all auto walking tracks that would be created,
+    ignoring any existing auto walking tracks (not ignoring other Strava
+    activities)
+    """
+    gpx_file = f"{base_dir}{track_date}.gpx"
+    gpx_to_walk_tracks.init()
+    return gpx_to_walk_tracks.get_combined_tracks(gpx_file=gpx_file,
+                                                  skip_strava_auto_walking=True)
+
+
+def test_no_long_drive():
+    """
+    165 mile drive through new jersey somehow registered as a long walk
+    """
+    for track in fresh_auto_tracks('2020-10-03'):
+        assert erniegps.get_track_distance(track) < 10000
+
+
+def test_not_walking_to_newark():
+    """
+    Old absurd walking tracks from old version of code was 15 miles to Newark airport
+    and 6 miles from home to midtown. This makes sure neither are walking tracks
+    """
+    for track in fresh_auto_tracks('2019-10-07'):
+        assert erniegps.get_track_distance(track) < 2000
