@@ -45,7 +45,7 @@ from pytz import reference
 import pytz
 
 
-autoupdate_version = 167
+autoupdate_version = 168
 
 SUMMARIES_BY_DATE = dict()
 STRAVA_ACTIVITIES = []
@@ -84,7 +84,7 @@ def get_summary_type_from_other_type(other_type):
     elif other_type == "Elliptical":
         summary_type = "elliptical"
     else:
-        raise Exception("Unrecognized activity type: {type}".format(type=type))
+        raise Exception("Unrecognized activity type: {type}".format(type=other_type))
     return summary_type
 
 
