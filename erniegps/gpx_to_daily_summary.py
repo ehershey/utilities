@@ -45,7 +45,7 @@ from pytz import reference
 import pytz
 
 
-autoupdate_version = 168
+autoupdate_version = 169
 
 SUMMARIES_BY_DATE = dict()
 STRAVA_ACTIVITIES = []
@@ -59,32 +59,20 @@ def get_summary_type_from_other_type(other_type):
     """ return type for DB based on type from Strava """
     if other_type == "Ride":
         summary_type = "cycling"
-    elif other_type == "CYCLING":
-        summary_type = "cycling"
     elif other_type == "Run":
-        summary_type = "running"
-    elif other_type == "RUNNING":
         summary_type = "running"
     elif other_type == "Walk":
         summary_type = "walking"
-    elif other_type == "hiking":
-        summary_type = "hiking"
-    elif other_type == "HIKING":
-        summary_type = "hiking"
     elif other_type == "Hike":
         summary_type = "hiking"
     elif other_type == "Workout":
         summary_type = "gym"
     elif other_type == "WeightTraining":
         summary_type = "gym"
-    elif other_type == "Rowing":
-        summary_type = "rowing"
     elif other_type == "Swim":
         summary_type = "swimming"
-    elif other_type == "Elliptical":
-        summary_type = "elliptical"
     else:
-        raise Exception("Unrecognized activity type: {type}".format(type=other_type))
+        summary_type = other_type.lower()
     return summary_type
 
 
