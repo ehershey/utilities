@@ -14,10 +14,13 @@ import logging
 import m26
 import math
 import pint
+import polyline
 from pymongo import MongoClient
 import pytz
 from pytz import reference, timezone
 from timezonefinder import TimezoneFinder
+
+autoupdate_version = 36
 
 tf = TimezoneFinder()
 
@@ -281,6 +284,7 @@ def process_strava_activity(activity):
     simple_activity["calories"] = activity.calories
     simple_activity["name"] = activity.name
     simple_activity["type"] = activity.type
+    simple_activity["map_polyline"] = activity.map.polyline
     simple_activity["distance"] = activity.distance.num
     simple_activity["distance_unit"] = activity.distance.unit.specifier
     simple_activity["start_date"] = activity.start_date
@@ -289,6 +293,18 @@ def process_strava_activity(activity):
     simple_activity["end_date_local"] = activity.start_date_local + activity.elapsed_time
     simple_activity["moving_time"] = activity.moving_time.seconds
     simple_activity["elapsed_time"] = activity.elapsed_time.seconds
+
+    # get min/max lat/lng from polyline
+
+    # This should return [(40.63179, -8.65708), (40.62855, -8.65693)] in (lat, lon) order.
+    coords = polyline.decode(simple_activity["map_polyline"])
+
+    lats = [latlng[0] for latlng in coords]
+    lons = [latlng[1] for latlng in coords]
+    simple_activity['min_lat'] = min(lats)
+    simple_activity['min_lon'] = min(lons)
+    simple_activity['max_lat'] = max(lats)
+    simple_activity['max_lon'] = max(lons)
 
     return simple_activity
 
@@ -580,24 +596,26 @@ def get_external_activities(skip_strava=False,
 
         earliest_start_date = None
         latest_end_date = None
-        for track in gpx.tracks:
-            start_time = track.get_time_bounds().start_time
-            end_time = track.get_time_bounds().end_time
-            if start_time is None:
-                continue
-            start_date = datetime.datetime.combine(start_time.date(), datetime.datetime.min.time())
-            end_date = datetime.datetime.combine(end_time.date(), datetime.datetime.min.time())
-            if earliest_start_date is None or start_date < earliest_start_date:
-                earliest_start_date = start_date
-            if latest_end_date is None or end_date > latest_end_date:
-                latest_end_date = end_date
-        for waypoint in gpx.waypoints:
-            waypoint_timestamp_date = datetime.datetime.combine(waypoint.time,
-                                                                datetime.datetime.min.time())
-            if earliest_start_date is None or waypoint_timestamp_date < earliest_start_date:
-                earliest_start_date = waypoint_timestamp_date
-            if latest_end_date is None or waypoint_timestamp_date > latest_end_date:
-                latest_end_date = waypoint_timestamp_date
+        if gpx:
+            for track in gpx.tracks:
+                start_time = track.get_time_bounds().start_time
+                end_time = track.get_time_bounds().end_time
+                if start_time is None:
+                    continue
+                start_date = datetime.datetime.combine(start_time.date(),
+                                                       datetime.datetime.min.time())
+                end_date = datetime.datetime.combine(end_time.date(), datetime.datetime.min.time())
+                if earliest_start_date is None or start_date < earliest_start_date:
+                    earliest_start_date = start_date
+                if latest_end_date is None or end_date > latest_end_date:
+                    latest_end_date = end_date
+            for waypoint in gpx.waypoints:
+                waypoint_timestamp_date = datetime.datetime.combine(waypoint.time,
+                                                                    datetime.datetime.min.time())
+                if earliest_start_date is None or waypoint_timestamp_date < earliest_start_date:
+                    earliest_start_date = waypoint_timestamp_date
+                if latest_end_date is None or waypoint_timestamp_date > latest_end_date:
+                    latest_end_date = waypoint_timestamp_date
         if date:
             date_arg_obj = datetime.datetime.strptime(date, '%Y-%m-%d')
 
