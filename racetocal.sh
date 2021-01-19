@@ -2,7 +2,7 @@
 #
 # Add Race to calendar
 #
-# autoupdate_version = 112
+# autoupdate_version = 136
 #
 NYRR_TITLE_SELECTOR="h2.title"
 NYRR_DATE_SELECTOR="p.full-width span"
@@ -30,12 +30,13 @@ ACTIVE_DATE_SELECTOR='meta[itemprop=startDate]'
 
 TRANSALT_DATE_SELECTOR='time'
 
-GENERIC_TITLE_SELECTOR="meta[property=og:title]"
-GENERIC_TITLE_SELECTOR2="title"
-
-GENERIC_TITLE_SELECTORS="
+GENERIC_TITLE_SELECTORS='
+div\ div\ div.sqs-block-content\ h1
+meta[property=og:title]
+title
 p.Style22
-"
+'
+
 GENERIC_DATE_SELECTORS="
 .event-date
 .race-date
@@ -154,51 +155,53 @@ get_race_title() {
   echo -n .>&2
   url="$1"
   returned_title="$($CURL "$url" | $PUP "$NYRR_TITLE_SELECTOR" text{})"
+  returned_title_pattern="$NYRR_TITLE_SELECTOR text{}"
   if [ ! "$returned_title" ]
   then
     returned_title="$($CURL "$url" | $PUP "$NYCRUNS_TITLE_SELECTOR" text{})"
+    returned_title_pattern="$NYCRUNS_TITLE_SELECTOR text{}"
   fi
 
   if [ ! "$returned_title" ]
   then
     returned_title="$($CURL "$url" | $PUP "$NYCRUNS_TITLE_SELECTOR2" text{})"
+    returned_title_pattern="$NYCRUNS_TITLE_SELECTOR2 text{}"
   fi
 
   if [ ! "$returned_title" ]
   then
     returned_title="$($CURL "$url" | $PUP "$RNR_TITLE_SELECTOR" text{})"
+    returned_title_pattern="$RNR_TITLE_SELECTOR text{}"
   fi
 
   if [ ! "$returned_title" ]
   then
     returned_title="$($CURL "$url" | $PUP "$EVENTBRITE_TITLE_SELECTOR" text{})"
+    returned_title_pattern="$EVENTBRITE_TITLE_SELECTOR text{}"
   fi
 
-  if [ ! "$returned_title" ]
-  then
-    returned_title="$($CURL "$url" | $PUP "$GENERIC_TITLE_SELECTOR" attr{content})"
-  fi
-
-  if [ ! "$returned_title" ]
-  then
-    returned_title="$($CURL "$url" | $PUP "$GENERIC_TITLE_SELECTOR2" text{})"
-  fi
-
-  for title_selector in $GENERIC_TITLE_SELECTORS
+  while read title_selector
   do
+    if [ ! "$title_selector" ]
+    then
+      continue
+    fi
     if [ ! "$returned_title" ]
     then
        returned_title="$($CURL "$url" | $PUP "$title_selector" attr{content})"
+       returned_title_pattern="$title_selector attr{content}"
     fi
     if [ ! "$returned_title" ]
     then
        returned_title="$($CURL "$url" | $PUP "$title_selector" text{})"
+       returned_title_pattern="$title_selector text{}"
     fi
     if [ ! "$returned_title" ]
     then
       returned_title="$($CURL "$url" | $PUP "$title_selector" attr{data-event-title} | head -1)" # loch ness marathon
+      returned_title_pattern="$title_selector attr{data-event-title} | head -1"
     fi
-  done
+  done <<< "$GENERIC_TITLE_SELECTORS"
 
 
   # Discard pipe and text afterwards
@@ -212,15 +215,21 @@ get_race_title() {
 
   # Discard "- ATRA" for trailrunner.com
   #
-  returned_title="$(echo -n "$returned_title" | sed 's/ — ATRA$//' )"
+  returned_title="$(echo -n "$returned_title" | gsed 's/ â ATRA$//' )"
 
-  # Remove leading "Home" text (â€“ from archive.org)
+  # Discard "â.*" and stuff from nycruns.com
   #
-  returned_title="$(echo -n "$returned_title" | sed 's/Home [â€“–-]* //')"
+  returned_title="$(echo -n "$returned_title" | gsed 's/ *â.*NYCRUNS$//' )"
+  returned_title="$(echo -n "$returned_title" | gsed 's/  ¿ NYCRUNS$//' )"
+  returned_title="$(echo -n "$returned_title" | gsed 's/ – NYCRUNS$//' )"
 
-  # Discard arrow char and following text ("Â" from archive.org)
+  # Remove leading "Home" text (Ã¢â¬â from archive.org)
   #
-  returned_title="$(echo -n "$returned_title" | sed 's/ *[Â»].*//' )"
+  returned_title="$(echo -n "$returned_title" | sed 's/Home [Ã¢â¬ââ-]* //')"
+
+  # Discard arrow char and following text ("Ã" from archive.org)
+  #
+  returned_title="$(echo -n "$returned_title" | sed 's/ *[ÃÂ»].*//' )"
 
   # Discard dash and following text
   #
@@ -274,6 +283,12 @@ get_race_date() {
     # has_external_ticketing_properties is from https://www.eventbrite.com/e/run-the-river-5k-registration-45356619871?bbemailid=9327519&bblinkid=110100196&bbejrid=712167945
   fi
 
+  # [ernie@eahimac4 utilities[master*]]$ cache_get 86400 https://pptc.org/50-miler | grep -i 'race day is' | sed 's/.*Race day is \([^.]*\)\..*$/\1/'
+
+  if [ ! "$returned_date" ]
+  then
+    returned_date="$($CURL "$url" | grep -i 'race day is' | sed 's/.*Race day is \([^.]*\)\..*$/\1/' )" # pptc.org
+  fi
 
 
   for date_selector in $GENERIC_DATE_SELECTORS
@@ -409,7 +424,7 @@ get_race_date() {
 
   # includes weird whitespace chars - should replace with named character class
   #
-  returned_date="$(echo -n "$returned_date" | sed 's/[ 	  ]*$//'; )"
+  returned_date="$(echo -n "$returned_date" | sed 's/[ 	Â  ]*$//'; )"
   returned_date="$(echo -n "$returned_date" | sed 's/ for both.*$//'; )"
   returned_date="$(echo -n "$returned_date" | sed 's/ for the.*$//'; )"
   returned_date="$(echo -n "$returned_date" | sed 's/ from / /'; )"
@@ -509,6 +524,9 @@ test_url() {
   pattern_comments="${4:-}"
   expected_url="${6:-}"
 
+  # not working
+  returned_title_pattern=""
+
   returned_title="$(get_race_title "$url_to_test")"
   returned_date="$(get_race_date "$url_to_test")"
   returned_location="$(get_race_location "$url_to_test")"
@@ -524,9 +542,14 @@ test_url() {
     echo ">$expected_title<"
     echo "Test URL: $url_to_test"
     if [ "$pattern_comments" ]
-      then
+    then
         echo "Pattern comments (by URL so may not cover title matches): $pattern_comments"
     fi
+    if [ "$returned_title_pattern" ]
+    then
+        echo "Matching pattern: $returned_title_pattern"
+    fi
+
     exit 2
   fi
 
@@ -640,7 +663,7 @@ test_url "$url_to_test" "$expected_title" "$expected_date"
 #
 #test_url "$url_to_test" "$expected_title" "$expected_date"
 
-test_url "https://nycruns.com/race/nycruns-cocoa-classic-5k---10k" "NYCRUNS Winter Classic 5K" "sunday, december 6, 2020 8 am"
+test_url "https://web.archive.org/web/20201029082159/https://nycruns.com/race/nycruns-cocoa-classic-5k---10k" "NYCRUNS Cocoa Classic 5K" "sunday, december 6, 2020 7 am"
 
 expected_title="Run the River 5K"
 #expected_date="2015-10-24t08:30:00-04:00"
