@@ -18,6 +18,39 @@ import gpx_to_daily_summary
 base_dir = '{0}/Dropbox/Misc/Arc Export/Export/GPX/Daily/'.format(os.environ['HOME'])
 
 
+def test_string_in_track():
+    """
+    Make sure normalization works with date string in DB (old way)
+    """
+
+    session = {"trackPoints": [{"dateTime": "2021-02-03 01:28:35"}]}
+    track = {}
+    track_start = datetime.datetime(2021, 2, 3, 1, 28, 35)
+
+    normalized_start, normalized_end = \
+        erniegps.get_normalized_livetrack_start_end(session, track, track_start)
+
+    assert normalized_start.tzinfo is not None
+    assert normalized_end.tzinfo is not None
+
+
+def test_date_in_track():
+    """
+    Make sure normalization works with date object in DB now that we're using real go types
+    in receiver code
+    """
+
+    session = {"trackPoints": [{"dateTime": datetime.datetime(2021, 2, 3, 1, 28, 35)}]}
+    track = {}
+    track_start = datetime.datetime(2021, 2, 3, 1, 28, 35)
+
+    normalized_start, normalized_end = \
+        erniegps.get_normalized_livetrack_start_end(session, track, track_start)
+
+    assert normalized_start.tzinfo is not None
+    assert normalized_end.tzinfo is not None
+
+
 def test_timezone_crossing():
     """
     Test putting a livetrack from late yesterday in EST in the right date
