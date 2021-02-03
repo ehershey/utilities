@@ -20,7 +20,7 @@ import pytz
 from pytz import reference, timezone
 from timezonefinder import TimezoneFinder
 
-autoupdate_version = 36
+autoupdate_version = 41
 
 tf = TimezoneFinder()
 
@@ -543,8 +543,17 @@ def get_normalized_livetrack_start_end(livetrack_session, track, track_start):
         logging.debug("first_trackpoint: %s", first_trackpoint)
         logging.debug("last_trackpoint: %s", last_trackpoint)
 
-        session_start = dateutil.parser.parse(first_trackpoint['dateTime'])
-        session_end = dateutil.parser.parse(last_trackpoint['dateTime'])
+        first_datetime = first_trackpoint['dateTime']
+        if type(first_datetime) == datetime.datetime:
+            session_start = first_datetime
+        else:
+            session_start = dateutil.parser.parse(first_datetime)
+
+        last_datetime = last_trackpoint['dateTime']
+        if type(last_datetime) == datetime.datetime:
+            session_end = last_datetime
+        else:
+            session_end = dateutil.parser.parse(last_datetime)
 
     logging.debug(f"session_start: {session_start}")
     logging.debug(f"session_start.tzinfo: {session_start.tzinfo}")
@@ -703,6 +712,7 @@ def get_external_activities(skip_strava=False,
                            (('name' in strava_activity and
                             strava_activity['name'] == auto_walking_pattern) or
                             ('external_id' in strava_activity and
+                                strava_activity['external_id'] is not None and
                                 f"{auto_walking_pattern}-" in strava_activity['external_id'])):
                             skip_this_one = True
                             logging.debug("skipping auto walking track")
