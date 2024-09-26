@@ -7,7 +7,7 @@
 # 3. Formulate URL to join wifi network
 # 4. Output URL encoded as ansi QR code
 #
-# autoupdate_version = 14
+# autoupdate_version = 15
 #
 set -o pipefail
 set -o errexit
@@ -18,19 +18,8 @@ then
   brew install qrencode
 fi
 
-INTERFACES="en0 en1"
+network="$(system_profiler SPAirPortDataType | awk '/Current Network/ {getline;$1=$1;print $0 | "tr -d ':'";exit}')"
 
-for INTERFACE in $INTERFACES
-do
-  if networksetup -getairportnetwork "$INTERFACE" >/dev/null 2>&1
-  then
-        network=$(networksetup -getairportnetwork "$INTERFACE" | cut -f2- -d: | sed 's/^ *//')
-        if [ "$network" ]
-        then
-          break
-        fi
-  fi
-done
 echo "Network appears to be: $network"
 password="$(security find-generic-password -wa "$network")"
 echo "Password appears to be: $password"
