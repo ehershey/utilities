@@ -38,3 +38,4 @@ dash_config.py
 myfitnesspal_auth.py
 payload-key_id.txt
 payload-secret.txt
+**/.DS_Store
